@@ -8,7 +8,8 @@
     "require": {
         "php": ">=5.3.3",
         "zendframework/zendframework": "2.2.*",
-        "phly/phly-restfully": "2.2.0"
+        "phly/phly-restfully": "2.2.0",
+        "ivan-novakov/php-perun-api": "dev-master"
     },
     "require-dev": {
         "phpunit/PHPUnit": "3.7.*"

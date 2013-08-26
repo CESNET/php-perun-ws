@@ -82,6 +82,48 @@ return array(
                     'get'
                 ),
                 'route_name' => 'users'
+            ),
+            
+            'PerunWs\UserGroupsController' => array(
+                'identifier' => 'UserGroups',
+                'listener' => 'PerunWs\UserGroupsListener',
+                'resource_identifiers' => array(
+                    'UserGroupsResource'
+                ),
+                'collection_http_options' => array(
+                    'get'
+                ),
+                'collection_name' => 'groups',
+                'page_size' => 10,
+                'resource_http_options' => array(
+                    'get'
+                ),
+                'route_name' => 'users/user-groups'
+            )
+        )
+    ),
+    
+    'perun_api' => array(
+        
+        'client' => array(
+            'url' => 'https://perun.example.org/api/'
+        ),
+        
+        'http_client' => array(
+            'adapter' => 'Zend\Http\Client\Adapter\Curl',
+            'useragent' => 'Perun Client',
+            'curloptions' => array(
+                CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_SSL_VERIFYHOST => 2,
+                CURLOPT_CAINFO => '/etc/ssl/certs/ca-bundle.pem'
+            )
+        ),
+        
+        'authenticator' => array(
+            'class' => 'InoPerunApi\Client\Authenticator\ClientCertificate',
+            'options' => array(
+                'key_file' => '/etc/ssl/private/key.pem',
+                'crt_file' => '/etc/ssl/certs/crt.pem'
             )
         )
     )
