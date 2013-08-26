@@ -11,8 +11,12 @@ return array(
                 'type' => 'Segment',
                 'options' => array(
                     'route' => '/users[/:id]',
-                    'controller' => 'PerunWs\UserController'
+                    // 'controller' => 'PerunWs\UserController',
+                    'defaults' => array(
+                        'controller' => 'PerunWs\UserController'
+                    )
                 ),
+                
                 'may_terminate' => true,
                 'child_routes' => array(
                     
@@ -23,7 +27,9 @@ return array(
                         'type' => 'Literal',
                         'options' => array(
                             'route' => '/groups',
-                            'controller' => 'PerunWs\UserGroupsController'
+                            'defaults' => array(
+                                'controller' => 'PerunWs\UserGroupsController'
+                            )
                         )
                     )
                 )
@@ -55,6 +61,28 @@ return array(
                 )
             )
         )
+    ),
+    
+    'phlyrestfully' => array(
         
+        'resources' => array(
+            
+            'PerunWs\UserController' => array(
+                'identifier' => 'Users',
+                'listener' => 'PerunWs\UserListener',
+                'resource_identifiers' => array(
+                    'UserResource'
+                ),
+                'collection_http_options' => array(
+                    'get'
+                ),
+                'collection_name' => 'users',
+                'page_size' => 10,
+                'resource_http_options' => array(
+                    'get'
+                ),
+                'route_name' => 'users'
+            )
+        )
     )
 );
