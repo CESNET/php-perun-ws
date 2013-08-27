@@ -5,23 +5,23 @@
 ### GET /users
 
 Get all users (from VO)
-* membersManager/getRichMembersWithAttributes vo=123
+* membersManager/getRichMembersWithAttributes vo=<VO ID> --> RichMember
 
 Find users with search
-* membersManager/findRichMembersWithAttributesInVo vo=123, searchString=foo
+* membersManager/findRichMembersWithAttributesInVo vo=<VO ID>, searchString=<string> --> RichMember
 
 ### GET /users/{id}
 
 Get single user by ID
-* usersManager/getRichUserWithAttributes user=123
+* usersManager/getRichUserWithAttributes user=<user ID> --> RichUser
 
 ### GET /users/{id}/groups
 
-Get user's groups
-* groupsManager/getAllMemberGroups id=<member ID>
-
 Get member ID from user ID:
-* membersManager/getMemberByUser id=<user ID>
+* membersManager/getMemberByUser vo=<VO ID>, user=<user ID> --> Member
+
+Get user's groups
+* groupsManager/getAllMemberGroups id=<member ID> --> Group
 
 
 ## Group resource
@@ -29,28 +29,44 @@ Get member ID from user ID:
 ### GET /groups
 
 Get all groups (in VO)
-* groupsManager/getGroups (getAllGroups ?) vo=123
+* groupsManager/getGroups (getAllGroups ?) vo=<VO ID> --> Group
 
 ### GET /groups/{id}
 
 Get specific group
-* groupsManager/getGroupById id=<group ID>
+* groupsManager/getGroupById id=<group ID> --> Group
 
 ### POST /groups
 
 Create a new group
-* groupsManager/createGroup vo=123, group=<new group entity>
+* groupsManager/createGroup vo=<VO ID>, group=<new group entity>
 
 ### PUT /groups/{id}
-* groupsManager/updateGroup vo=123, group=<group entity>
+* groupsManager/updateGroup vo=<VO ID>, group=<group entity>
 
 ### DELETE /groups/{id}
 
 Delete a group
-* groupsManager/deleteGroup vo=123, group=<group entity>, forceDelete=<bool>
+* groupsManager/deleteGroup vo=<VO ID>, group=<group entity>, forceDelete=<bool>
 
 ### GET /groups/{id}/users
 
 Get all members of a group:
-* groupsManager/getGroupMembers (getGroupRichMembers) id=<group ID>
+* groupsManager/getGroupMembers (getGroupRichMembers) id=<group ID> --> Member (RichMember)
+
+### PUT /groups/{group_id}/users/{user_id}
+
+Get member ID from user ID:
+* membersManager/getMemberByUser vo=<VO ID>, user=<user ID> --> Member
+
+Add the user to the group
+* groupsManager/addMember group=<group ID>, member=<member ID>
+
+### DELETE /groups/{group_id}/users/{user_id}
+
+Get member ID from user ID:
+* membersManager/getMemberByUser vo=<VO ID>, user=<user ID> --> Member
+
+Remove the user from the group
+* groupsManager/removeMember group=<group ID>, member=<member ID>
 
