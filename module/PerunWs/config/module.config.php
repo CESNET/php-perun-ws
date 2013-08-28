@@ -11,7 +11,6 @@ return array(
                 'type' => 'Segment',
                 'options' => array(
                     'route' => '/users[/:id]',
-                    // 'controller' => 'PerunWs\UserController',
                     'defaults' => array(
                         'controller' => 'PerunWs\UserController'
                     )
@@ -99,6 +98,21 @@ return array(
                     'get'
                 ),
                 'route_name' => 'users/user-groups'
+            )
+        ),
+        
+        'metadata_map' => array(
+            'InoPerunApi\Entity\RichUser' => array(
+                'hydrator' => 'PerunWs\User\Hydrator',
+                'route' => 'users'
+            ),
+            
+            'InoPerunApi\Entity\RichMember' => array(
+                'hydrator' => 'PerunWs\Member\Hydrator'
+            ),
+            
+            'InoPerunApi\Entity\Collection\Collection' => array(
+                'is_collection' => true
             )
         )
     ),

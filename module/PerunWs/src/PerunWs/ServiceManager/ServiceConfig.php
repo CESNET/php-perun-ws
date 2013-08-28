@@ -5,16 +5,31 @@ namespace PerunWs\ServiceManager;
 use Zend\ServiceManager\Config;
 use PerunWs\User;
 use InoPerunApi\Client\ClientFactory;
-use InoPerunApi\Manager\GenericManager;
+use InoPerunApi\Manager\Factory\GenericFactory;
+use PerunWs\Hydrator\DefaultHydrator;
+use Zend\ServiceManager\ServiceManager;
 
 
 class ServiceConfig extends Config
 {
 
 
+    public function getInvokables()
+    {
+        return array(
+            'PPerunWs\DefaultHydrator' => 'PerunWs\Hydrator\DefaultHydrator'
+        );
+    }
+
+
     public function getFactories()
     {
         return array(
+            
+            'PerunWs\DefaultHydrator' => function ($services)
+            {
+                return new DefaultHydrator();
+            },
             
             'PerunWs\Client' => function ($services)
             {
@@ -31,30 +46,29 @@ class ServiceConfig extends Config
                 return $client;
             },
             
-            'PerunWs\UserManager' => function ($services)
+            'PerunWs\EntityManagerFactory' => function ($services)
             {
                 $client = $services->get('PerunWs\Client');
-                $userManager = new GenericManager($client);
-                $userManager->setManagerName('usersManager');
-                
-                return $userManager;
+                $factory = new GenericFactory($client);
+                return $factory;
             },
             
-            'PerunWs\UserStorage' => function ($services)
+            'PerunWs\UserService' => function ($services)
             {
-                $manager = $services->get('PerunWs\UserManager');
-                $storage = new User\Storage($manager);
-                return $storage;
+                $entityManagerFactory = $services->get('PerunWs\EntityManagerFactory');
+                
+                $service = new User\Service\Service();
+                $service->setEntityManagerFactory($entityManagerFactory);
+                return $service;
             },
             
             'PerunWs\UserListener' => function ($services)
             {
-                return new User\Listener($services->get('PerunWs\UserStorage'));
+                return new User\Listener($services->get('PerunWs\UserService'));
             },
             
-            'PerunWs\UserGroupsListener' => function ($services) {
-                
-            }
+            'PerunWs\UserGroupsListener' => function ($services)
+            {}
         );
     }
 }

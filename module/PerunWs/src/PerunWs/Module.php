@@ -62,7 +62,7 @@ class Module implements AutoloaderProviderInterface, ControllerProviderInterface
                 // $sm = $event->getApplication()->getServiceManager();
                 // $service = $sm->get('Application\Service\ErrorHandling');
                 _dump(sprintf("EXCEPTION [%s]: %s", get_class($exception), $exception->getMessage()));
-                _dump($exception->getTraceAsString());
+                _dump("$exception");
             }
         });
     }
