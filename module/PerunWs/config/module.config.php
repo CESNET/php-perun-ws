@@ -10,7 +10,7 @@ return array(
             'users' => array(
                 'type' => 'Segment',
                 'options' => array(
-                    'route' => '/users[/:id]',
+                    'route' => '/users[/:user_id]',
                     'defaults' => array(
                         'controller' => 'PerunWs\UserController'
                     )
@@ -32,8 +32,7 @@ return array(
                         )
                     )
                 )
-            )
-            ,
+            ),
             
             /*
              * /groups/{group_id}
@@ -42,7 +41,9 @@ return array(
                 'type' => 'Segment',
                 'options' => array(
                     'route' => '/groups[/:group_id]',
-                    'controller' => 'PerunWs\GroupController'
+                    'defaults' => array(
+                        'controller' => 'PerunWs\GroupController'
+                    )
                 ),
                 'may_terminate' => true,
                 
@@ -54,7 +55,9 @@ return array(
                         'type' => 'Segment',
                         'options' => array(
                             'route' => '/users[/:user_id]',
-                            'controller' => 'PerunWs\GroupUsersController'
+                            'defaults' => array(
+                                'controller' => 'PerunWs\GroupUsersController'
+                            )
                         )
                     )
                 )
@@ -68,6 +71,7 @@ return array(
             
             'PerunWs\UserController' => array(
                 'identifier' => 'Users',
+                'identifier_name' => 'user_id',
                 'listener' => 'PerunWs\UserListener',
                 'resource_identifiers' => array(
                     'UserResource'
@@ -98,6 +102,45 @@ return array(
                     'get'
                 ),
                 'route_name' => 'users/user-groups'
+            ),
+            
+            'PerunWs\GroupController' => array(
+                'identifier' => 'Groups',
+                'identifier_name' => 'group_id',
+                'listener' => 'PerunWs\GroupsListener',
+                'resource_identifiers' => array(
+                    'GroupsResource'
+                ),
+                'collection_http_options' => array(
+                    'get',
+                    'post'
+                ),
+                'collection_name' => 'groups',
+                'page_size' => 10,
+                'resource_http_options' => array(
+                    'get',
+                    'patch',
+                    'delete'
+                ),
+                'route_name' => 'groups'
+            ),
+            
+            'PerunWs\GroupUsersController' => array(
+                'identifier' => 'GroupUsers',
+                'listener' => 'PerunWs\GroupUsersListener',
+                'resource_identifiers' => array(
+                    'GroupUsersResource'
+                ),
+                'collection_http_options' => array(
+                    'put',
+                    'delete'
+                ),
+                'collection_name' => 'users',
+                'page_size' => 10,
+                'resource_http_options' => array(
+                    'get'
+                ),
+                'route_name' => 'groups/group-users'
             )
         ),
         
@@ -113,6 +156,11 @@ return array(
             
             'InoPerunApi\Entity\Collection\Collection' => array(
                 'is_collection' => true
+            ),
+            
+            'InoPerunApi\Entity\Group' => array(
+                'hydrator' => 'PerunWs\Group\Hydrator',
+                'route' => 'groups'
             )
         )
     ),

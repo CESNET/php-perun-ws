@@ -15,7 +15,7 @@ class Listener extends AbstractListenerAggregate
 {
 
     /**
-     * @var Storage
+     * @var Service
      */
     protected $service;
 

@@ -4,22 +4,15 @@ namespace PerunWs\ServiceManager;
 
 use Zend\ServiceManager\Config;
 use PerunWs\User;
+use PerunWs\Group;
+use PerunWs\Hydrator\DefaultHydrator;
 use InoPerunApi\Client\ClientFactory;
 use InoPerunApi\Manager\Factory\GenericFactory;
-use PerunWs\Hydrator\DefaultHydrator;
 use Zend\ServiceManager\ServiceManager;
 
 
 class ServiceConfig extends Config
 {
-
-
-    public function getInvokables()
-    {
-        return array(
-            'PPerunWs\DefaultHydrator' => 'PerunWs\Hydrator\DefaultHydrator'
-        );
-    }
 
 
     public function getFactories()
@@ -62,12 +55,31 @@ class ServiceConfig extends Config
                 return $service;
             },
             
+            'PerunWs\GroupService' => function ($services)
+            {
+                $entityManagerFactory = $services->get('PerunWs\EntityManagerFactory');
+                
+                $service = new Group\Service\Service();
+                $service->setEntityManagerFactory($entityManagerFactory);
+                return $service;
+            },
+            
             'PerunWs\UserListener' => function ($services)
             {
                 return new User\Listener($services->get('PerunWs\UserService'));
             },
             
             'PerunWs\UserGroupsListener' => function ($services)
+            {
+                return new User\UserGroupsListener();
+            },
+            
+            'PerunWs\GroupsListener' => function ($services)
+            {
+                return new Group\Listener($services->get('PerunWs\GroupService'));
+            },
+            
+            'PerunWs\GroupUsersListener' => function ($services)
             {}
         );
     }
