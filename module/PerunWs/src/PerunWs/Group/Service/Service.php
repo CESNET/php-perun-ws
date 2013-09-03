@@ -90,23 +90,40 @@ class Service extends AbstractService implements ServiceInterface
 
     public function create($data)
     {
-        $group = new Group(array(
-            Group::PROP_NAME => $data->name
-        ));
+        $group = new Group(
+            array(
+                Group::PROP_NAME => $data->name,
+                'description' => $data->description
+            ));
         
-        $this->getGroupsManager()->createGroup(array(
-            'vo' => 421,
-            'group' => $group
+        $newGroup = $this->getGroupsManager()->createGroup(
+            array(
+                'vo' => 421,
+                'group' => $group
+            ));
+        _dump($newGroup);
+        
+        return $newGroup;
+    }
+
+
+    public function patch($id, $data)
+    {
+        $data['id'] = $id;
+        $group = $this->getGroupsManager()->updateGroup(array(
+            'group' => $data
         ));
         
         return $group;
     }
 
 
-    public function patch($id, $data)
-    {}
-
-
     public function delete($id)
-    {}
+    {
+        $this->getGroupsManager()->deleteGroup(array(
+            'group' => $id
+        ));
+        
+        return true;
+    }
 }

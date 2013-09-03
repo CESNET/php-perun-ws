@@ -3,7 +3,8 @@ return array(
     'perun_api' => array(
         
         'client' => array(
-            'url' => 'https://perun.example.org/api/'
+            'url' => 'https://perun.example.org/api/',
+            'default_change_state' => true
         ),
         
         'http_client' => array(

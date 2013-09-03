@@ -47,7 +47,7 @@ Create a new group
 ### DELETE /groups/{id}
 
 Delete a group
-* groupsManager/deleteGroup vo=<VO ID>, group=<group entity>, forceDelete=<bool>
+* groupsManager/deleteGroup group=<group entity>, forceDelete=<bool>
 
 ### GET /groups/{id}/users
 

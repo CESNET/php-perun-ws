@@ -154,13 +154,17 @@ return array(
                 'hydrator' => 'PerunWs\Member\Hydrator'
             ),
             
-            'InoPerunApi\Entity\Collection\Collection' => array(
+            'InoPerunApi\Entity\Collection\RichUserCollection' => array(
                 'is_collection' => true
             ),
             
             'InoPerunApi\Entity\Group' => array(
                 'hydrator' => 'PerunWs\Group\Hydrator',
                 'route' => 'groups'
+            ),
+            
+            'InoPerunApi\Entity\Collection\GroupCollection' => array(
+                'is_collection' => true
             )
         )
     ),
@@ -168,7 +172,8 @@ return array(
     'perun_api' => array(
         
         'client' => array(
-            'url' => 'https://perun.example.org/api/'
+            'url' => 'https://perun.example.org/api/',
+            'default_change_state' => true
         ),
         
         'http_client' => array(

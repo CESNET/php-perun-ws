@@ -63,30 +63,32 @@ class Listener extends AbstractListenerAggregate
     {
         $groups = $this->service->fetchAll();
         
-        // temp
-        $data = array();
-        foreach ($groups as $group) {
-            $data[] = $group->getProperties();
-        }
-        
-        return $data;
+        return $groups;
     }
 
 
     public function onCreate(ResourceEvent $e)
     {
         $data = $e->getParam('data');
-        $this->service->create($data);
+        $newGroup = $this->service->create($data);
         
-        return null;
-        return array();
+        return $newGroup;
     }
 
 
     public function onPatch(ResourceEvent $e)
-    {}
+    {
+        $id = $e->getParam('id');
+        $data = $e->getParam('data');
+        
+        $group = $this->service->patch($id, $data);
+        return $group;
+    }
 
 
     public function onDelete(ResourceEvent $e)
-    {}
+    {
+        $id = $e->getParam('id');
+        return $this->service->delete($id);
+    }
 }
