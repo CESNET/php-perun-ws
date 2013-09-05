@@ -41,7 +41,7 @@ Get specific group
 Create a new group
 * groupsManager/createGroup vo=<VO ID>, group=<new group entity>
 
-### PUT /groups/{id}
+### PUT/PATCH /groups/{id}
 * groupsManager/updateGroup vo=<VO ID>, group=<group entity>
 
 ### DELETE /groups/{id}

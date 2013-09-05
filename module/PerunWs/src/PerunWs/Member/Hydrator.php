@@ -33,7 +33,7 @@ class Hydrator implements HydratorInterface
 
     public function extract($member)
     {
-        _dump($member->getRichUser());
+        //_dump($member->getRichUser());
         if (! $member instanceof Member) {
             throw new UnsupportedObjectException(get_class($member));
         }

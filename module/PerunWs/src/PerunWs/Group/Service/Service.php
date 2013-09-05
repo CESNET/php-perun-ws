@@ -90,17 +90,15 @@ class Service extends AbstractService implements ServiceInterface
 
     public function create($data)
     {
-        $group = new Group(
-            array(
-                Group::PROP_NAME => $data->name,
-                'description' => $data->description
-            ));
+        $group = new Group(array(
+            Group::PROP_NAME => $data->name,
+            'description' => $data->description
+        ));
         
-        $newGroup = $this->getGroupsManager()->createGroup(
-            array(
-                'vo' => 421,
-                'group' => $group
-            ));
+        $newGroup = $this->getGroupsManager()->createGroup(array(
+            'vo' => 421,
+            'group' => $group
+        ));
         _dump($newGroup);
         
         return $newGroup;
@@ -126,4 +124,28 @@ class Service extends AbstractService implements ServiceInterface
         
         return true;
     }
+
+
+    public function fetchMembers($id)
+    {
+        $members = $this->getGroupsManager()->getGroupRichMembers(array(
+            'group' => $id
+        ));
+        
+        $_members = new \InoPerunApi\Entity\Collection\RichUserCollection(array(
+            new \InoPerunApi\Entity\RichUser(array(
+                'id' => 123
+            ))
+        ));
+        
+        return $members;
+    }
+
+
+    public function addMember($groupId, $userId)
+    {}
+
+
+    public function removeMember($groupId, $userId)
+    {}
 }

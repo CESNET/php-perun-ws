@@ -70,7 +70,7 @@ return array(
         'resources' => array(
             
             'PerunWs\UserController' => array(
-                'identifier' => 'Users',
+                //'identifier' => 'Users',
                 'identifier_name' => 'user_id',
                 'listener' => 'PerunWs\UserListener',
                 'resource_identifiers' => array(
@@ -88,7 +88,7 @@ return array(
             ),
             
             'PerunWs\UserGroupsController' => array(
-                'identifier' => 'UserGroups',
+                //'identifier' => 'UserGroups',
                 'listener' => 'PerunWs\UserGroupsListener',
                 'resource_identifiers' => array(
                     'UserGroupsResource'
@@ -105,7 +105,7 @@ return array(
             ),
             
             'PerunWs\GroupController' => array(
-                'identifier' => 'Groups',
+                //'identifier' => 'Groups',
                 'identifier_name' => 'group_id',
                 'listener' => 'PerunWs\GroupsListener',
                 'resource_identifiers' => array(
@@ -126,19 +126,20 @@ return array(
             ),
             
             'PerunWs\GroupUsersController' => array(
-                'identifier' => 'GroupUsers',
+                //'identifier' => 'GroupUsers',
+                'identifier_name' => 'user_id',
                 'listener' => 'PerunWs\GroupUsersListener',
                 'resource_identifiers' => array(
                     'GroupUsersResource'
                 ),
                 'collection_http_options' => array(
-                    'put',
-                    'delete'
+                    'get'
                 ),
                 'collection_name' => 'users',
                 'page_size' => 10,
                 'resource_http_options' => array(
-                    'get'
+                    'put',
+                    'delete'
                 ),
                 'route_name' => 'groups/group-users'
             )
@@ -151,11 +152,18 @@ return array(
             ),
             
             'InoPerunApi\Entity\RichMember' => array(
-                'hydrator' => 'PerunWs\Member\Hydrator'
+                'hydrator' => 'PerunWs\Member\Hydrator',
+                'route' => 'users'
             ),
             
             'InoPerunApi\Entity\Collection\RichUserCollection' => array(
-                'is_collection' => true
+                'is_collection' => true,
+                'route' => 'users'
+            ),
+            
+            'InoPerunApi\Entity\Collection\RichMemberCollection' => array(
+                'is_collection' => true,
+                'route' => 'users'
             ),
             
             'InoPerunApi\Entity\Group' => array(

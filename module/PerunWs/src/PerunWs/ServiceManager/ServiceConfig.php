@@ -80,7 +80,9 @@ class ServiceConfig extends Config
             },
             
             'PerunWs\GroupUsersListener' => function ($services)
-            {}
+            {
+                return new Group\User\Listener($services->get('PerunWs\GroupService'));
+            }
         );
     }
 }

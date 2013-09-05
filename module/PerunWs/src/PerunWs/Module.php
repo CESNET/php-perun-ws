@@ -48,8 +48,15 @@ class Module implements AutoloaderProviderInterface, ControllerProviderInterface
 
     public function onBootstrap(EventInterface $e)
     {
-        $eventManager = $e->getApplication()->getEventManager();
-        $eventManager->attach('dispatch.error', function ($event)
+        $target = $e->getTarget();
+        $events = $target->getEventManager();
+        $sharedEvents = $events->getSharedManager();
+
+        $rcl = new Listener\ResourceControllerListener();
+        $rcl->attachShared($sharedEvents);
+        
+        $events = $e->getApplication()->getEventManager();
+        $events->attach('dispatch.error', function ($event)
         {
             $error = $event->getError();
             if ($error) {
