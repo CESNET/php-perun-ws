@@ -31,12 +31,18 @@ class ResourceControllerListener extends AbstractSharedListenerAggregate
 
     public function onGetListPost(EventInterface $e)
     {
+        $count = 0;
+        $total = 0;
+        
         /* @var $halCollection \PhlyRestfully\HalCollection */
         $halCollection = $e->getParam('collection');
-        /* @var $collection \InoPerunApi\Entity\Collection\Collection */
         $collection = $halCollection->collection;
         
-        $total = $count = $collection->count();
+        if ($collection instanceof \InoPerunApi\Entity\Collection\Collection) {
+            /* @var $collection \InoPerunApi\Entity\Collection\Collection */
+            $total = $count = $collection->count();
+        }
+        
         $halCollection->setAttributes(array(
             'count' => $count,
             'total' => $total
