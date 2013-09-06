@@ -21,7 +21,7 @@ class DispatchListener extends AbstractListenerAggregate
         $this->listeners[] = $events->attach('dispatch.error', array(
             $this,
             'onDispatchError'
-        ), - 1000);
+        ), 1000);
     }
 
 
@@ -39,6 +39,7 @@ class DispatchListener extends AbstractListenerAggregate
     public function onDispatchError(MvcEvent $e)
     {
         // FIXME - move to separate class
+        $e->stopPropagation(true);
         
         /* @var $response \Zend\Http\PhpEnvironment\Response */
         $response = $e->getResponse();
@@ -49,10 +50,13 @@ class DispatchListener extends AbstractListenerAggregate
             _dump('DISPATCH ERROR: ' . $error);
         }
         
-        $exception = $e->getResult()->exception;
-        if ($exception) {
-            _dump(sprintf("EXCEPTION [%s]: %s", get_class($exception), $exception->getMessage()));
-            _dump("$exception");
+        $result = $e->getResult();
+        if ($result) {
+            $exception = $result->exception;
+            if ($exception) {
+                _dump(sprintf("EXCEPTION [%s]: %s", get_class($exception), $exception->getMessage()));
+                _dump("$exception");
+            }
         }
         
         $response->setStatusCode(500);
