@@ -17,14 +17,46 @@ class DispatchListener extends AbstractListenerAggregate
             $this,
             'onDispatch'
         ), 1000);
+        
+        $this->listeners[] = $events->attach('dispatch.error', array(
+            $this,
+            'onDispatchError'
+        ), - 1000);
     }
 
 
     public function onDispatch(MvcEvent $e)
     {
+        _dump('DISPATCH');
+        
         /* @var $response \Zend\Http\PhpEnvironment\Response */
         $response = $e->getResponse();
         
         // authenticate
+    }
+
+
+    public function onDispatchError(MvcEvent $e)
+    {
+        // FIXME - move to separate class
+        
+        /* @var $response \Zend\Http\PhpEnvironment\Response */
+        $response = $e->getResponse();
+        
+        $error = $e->getError();
+        
+        if ($error) {
+            _dump('DISPATCH ERROR: ' . $error);
+        }
+        
+        $exception = $e->getResult()->exception;
+        if ($exception) {
+            _dump(sprintf("EXCEPTION [%s]: %s", get_class($exception), $exception->getMessage()));
+            _dump("$exception");
+        }
+        
+        $response->setStatusCode(500);
+        
+        return $response;
     }
 }

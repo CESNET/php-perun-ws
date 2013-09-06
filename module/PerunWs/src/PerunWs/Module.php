@@ -63,12 +63,12 @@ class Module implements AutoloaderProviderInterface, ControllerProviderInterface
         $rcl = $services->get('PerunWs\ResourceControllerListener');
         $rcl->attachShared($sharedEvents);
         
+        /*
         $events->attach('dispatch.error', function ($event)
         {
             $error = $event->getError();
             if ($error) {
                 _dump('ERROR: ' . $error);
-                $event->setError(false);
             }
             
             $exception = $event->getResult()->exception;
@@ -79,5 +79,6 @@ class Module implements AutoloaderProviderInterface, ControllerProviderInterface
                 _dump("$exception");
             }
         });
+        */
     }
 }
