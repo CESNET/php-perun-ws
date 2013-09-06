@@ -21,7 +21,7 @@ Get member ID from user ID:
 * membersManager/getMemberByUser vo=<VO ID>, user=<user ID> --> Member
 
 Get user's groups
-* groupsManager/getAllMemberGroups id=<member ID> --> Group
+* groupsManager/getAllMemberGroups member=<member ID> --> Group
 
 
 ## Group resource

@@ -8,6 +8,9 @@ use PerunWs\Hydrator\Exception\UnsupportedObjectException;
 use InoPerunApi\Entity\Member;
 
 
+/**
+ * Member hydrator.
+ */
 class Hydrator implements HydratorInterface
 {
 
@@ -18,6 +21,9 @@ class Hydrator implements HydratorInterface
     protected $userHydrator;
 
 
+    /**
+     * @return \PerunWs\User\Hydrator
+     */
     public function getUserHydrator()
     {
         if (! $this->userHydrator instanceof User\Hydrator) {
@@ -27,22 +33,34 @@ class Hydrator implements HydratorInterface
     }
 
 
+    /**
+     * {@inheritdoc}
+     * @see \Zend\Stdlib\Hydrator\HydratorInterface::hydrate()
+     */
     public function hydrate(array $data, $member)
     {}
 
 
+    /**
+     * {@inheritdoc}
+     * @see \Zend\Stdlib\Hydrator\HydratorInterface::extract()
+     */
     public function extract($member)
     {
-        //_dump($member->getRichUser());
+        // _dump($member->getRichUser());
         if (! $member instanceof Member) {
             throw new UnsupportedObjectException(get_class($member));
         }
         
         $user = $member->getUser();
-        $userAttributes = $member->getUserAttributes();
-
-        $user->setUserAttributes($userAttributes);
-        $data = $this->getUserHydrator()->extract($user);
+        $data = array();
+        
+        if ($user) {
+            $userAttributes = $member->getUserAttributes();
+            
+            $user->setUserAttributes($userAttributes);
+            $data = $this->getUserHydrator()->extract($user);
+        }
         
         $data += array(
             self::FIELD_MEMBER_ID => $member->getId(),

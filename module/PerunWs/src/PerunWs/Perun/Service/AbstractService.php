@@ -4,6 +4,7 @@ namespace PerunWs\Perun\Service;
 
 use InoPerunApi\Manager\Factory\FactoryInterface;
 use PerunWs\Exception\MissingDependencyException;
+use Zend\Stdlib\Parameters;
 
 
 abstract class AbstractService
@@ -14,6 +15,22 @@ abstract class AbstractService
      * @var FactoryInterface
      */
     protected $entityManagerFactory;
+
+    /**
+     * @var Parameters
+     */
+    protected $parameters;
+
+
+    /**
+     * Constructor.
+     * 
+     * @param Parameters $parameters
+     */
+    public function __construct(Parameters $parameters)
+    {
+        $this->parameters = $parameters;
+    }
 
 
     /**
@@ -46,5 +63,22 @@ abstract class AbstractService
     public function createManager($managerName)
     {
         return $this->getEntityManagerFactory()->createManager($managerName);
+    }
+
+
+    /**
+     * Returns the ID of the default VO.
+     * 
+     * @throws MissingParameterException
+     * @return integer
+     */
+    public function getVoId()
+    {
+        $voId = intval($this->parameters->get('vo_id'));
+        if (! $voId) {
+            throw new MissingParameterException('vo_id');
+        }
+        
+        return $voId;
     }
 }

@@ -6,6 +6,9 @@ use PerunWs\Perun\Service\AbstractService;
 use InoPerunApi\Manager\GenericManager;
 
 
+/**
+ * Implementation of the user service interface.
+ */
 class Service extends AbstractService implements ServiceInterface
 {
 
@@ -72,10 +75,8 @@ class Service extends AbstractService implements ServiceInterface
     {
         $this->membersManager = $membersManager;
     }
-    
-    // ?
-    // protected $groupsManager;
-    
+
+
     /**
      * {@inheritdoc}
      * @see \PerunWs\User\Service\ServiceInterface::fetch()
@@ -96,6 +97,7 @@ class Service extends AbstractService implements ServiceInterface
      */
     public function fetchAll(array $params = array())
     {
+        $params['vo'] = $this->getVoId();
         if (isset($params['searchString'])) {
             $users = $this->getMembersManager()->findRichMembersWithAttributesInVo($params);
         } else {

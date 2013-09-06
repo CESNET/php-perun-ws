@@ -70,7 +70,6 @@ return array(
         'resources' => array(
             
             'PerunWs\UserController' => array(
-                //'identifier' => 'Users',
                 'identifier_name' => 'user_id',
                 'listener' => 'PerunWs\UserListener',
                 'resource_identifiers' => array(
@@ -88,8 +87,8 @@ return array(
             ),
             
             'PerunWs\UserGroupsController' => array(
-                //'identifier' => 'UserGroups',
                 'listener' => 'PerunWs\UserGroupsListener',
+                'identifier_name' => 'group_id',
                 'resource_identifiers' => array(
                     'UserGroupsResource'
                 ),
@@ -105,7 +104,6 @@ return array(
             ),
             
             'PerunWs\GroupController' => array(
-                //'identifier' => 'Groups',
                 'identifier_name' => 'group_id',
                 'listener' => 'PerunWs\GroupsListener',
                 'resource_identifiers' => array(
@@ -126,7 +124,6 @@ return array(
             ),
             
             'PerunWs\GroupUsersController' => array(
-                //'identifier' => 'GroupUsers',
                 'identifier_name' => 'user_id',
                 'listener' => 'PerunWs\GroupUsersListener',
                 'resource_identifiers' => array(
@@ -151,6 +148,11 @@ return array(
                 'route' => 'users'
             ),
             
+            'InoPerunApi\Entity\Member' => array(
+                'hydrator' => 'PerunWs\Member\Hydrator',
+                'route' => 'users'
+            ),
+            
             'InoPerunApi\Entity\RichMember' => array(
                 'hydrator' => 'PerunWs\Member\Hydrator',
                 'route' => 'users'
@@ -172,33 +174,41 @@ return array(
             ),
             
             'InoPerunApi\Entity\Collection\GroupCollection' => array(
-                'is_collection' => true
+                'is_collection' => true,
+                'route' => 'groups'
             )
         )
     ),
     
-    'perun_api' => array(
+    'perun_ws' => array(
         
-        'client' => array(
-            'url' => 'https://perun.example.org/api/',
-            'default_change_state' => true
+        'perun_service' => array(
+            'vo_id' => 123
         ),
         
-        'http_client' => array(
-            'adapter' => 'Zend\Http\Client\Adapter\Curl',
-            'useragent' => 'Perun Client',
-            'curloptions' => array(
-                CURLOPT_SSL_VERIFYPEER => true,
-                CURLOPT_SSL_VERIFYHOST => 2,
-                CURLOPT_CAINFO => '/etc/ssl/certs/ca-bundle.pem'
-            )
-        ),
-        
-        'authenticator' => array(
-            'class' => 'InoPerunApi\Client\Authenticator\ClientCertificate',
-            'options' => array(
-                'key_file' => '/etc/ssl/private/key.pem',
-                'crt_file' => '/etc/ssl/certs/crt.pem'
+        'perun_api' => array(
+            
+            'client' => array(
+                'url' => 'https://perun.example.org/api/',
+                'default_change_state' => true
+            ),
+            
+            'http_client' => array(
+                'adapter' => 'Zend\Http\Client\Adapter\Curl',
+                'useragent' => 'Perun Client',
+                'curloptions' => array(
+                    CURLOPT_SSL_VERIFYPEER => true,
+                    CURLOPT_SSL_VERIFYHOST => 2,
+                    CURLOPT_CAINFO => '/etc/ssl/certs/ca-bundle.pem'
+                )
+            ),
+            
+            'authenticator' => array(
+                'class' => 'InoPerunApi\Client\Authenticator\ClientCertificate',
+                'options' => array(
+                    'key_file' => '/etc/ssl/private/key.pem',
+                    'crt_file' => '/etc/ssl/certs/crt.pem'
+                )
             )
         )
     )

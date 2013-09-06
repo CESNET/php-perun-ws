@@ -5,8 +5,12 @@ namespace PerunWs\Group\Service;
 use PerunWs\Perun\Service\AbstractService;
 use InoPerunApi\Manager\GenericManager;
 use InoPerunApi\Entity\Group;
+use PerunWs\Perun\Service\Exception\MissingParameterException;
 
 
+/**
+ * Implementation of the group service interface.
+ */
 class Service extends AbstractService implements ServiceInterface
 {
 
@@ -67,10 +71,14 @@ class Service extends AbstractService implements ServiceInterface
     }
 
 
+    /**
+     * {@inheritdoc}
+     * @see \PerunWs\Group\Service\ServiceInterface::fetchAll()
+     */
     public function fetchAll()
     {
         $params = array(
-            'vo' => 421
+            'vo' => $this->getVoId()
         );
         $groups = $this->getGroupsManager()->getGroups($params);
         
@@ -78,6 +86,10 @@ class Service extends AbstractService implements ServiceInterface
     }
 
 
+    /**
+     * {@inheritdoc}
+     * @see \PerunWs\Group\Service\ServiceInterface::fetch()
+     */
     public function fetch($id)
     {
         $group = $this->getGroupsManager()->getGroupById(array(
@@ -88,6 +100,10 @@ class Service extends AbstractService implements ServiceInterface
     }
 
 
+    /**
+     * {@inheritdoc}
+     * @see \PerunWs\Group\Service\ServiceInterface::create()
+     */
     public function create($data)
     {
         $group = new Group(array(
@@ -96,15 +112,19 @@ class Service extends AbstractService implements ServiceInterface
         ));
         
         $newGroup = $this->getGroupsManager()->createGroup(array(
-            'vo' => 421,
+            'vo' => $this->getVoId(),
             'group' => $group
         ));
-        _dump($newGroup);
+        // _dump($newGroup);
         
         return $newGroup;
     }
 
 
+    /**
+     * {@inheritdoc}
+     * @see \PerunWs\Group\Service\ServiceInterface::patch()
+     */
     public function patch($id, $data)
     {
         $data['id'] = $id;
@@ -116,6 +136,10 @@ class Service extends AbstractService implements ServiceInterface
     }
 
 
+    /**
+     * {@inheritdoc}
+     * @see \PerunWs\Group\Service\ServiceInterface::delete()
+     */
     public function delete($id)
     {
         $this->getGroupsManager()->deleteGroup(array(
@@ -126,26 +150,88 @@ class Service extends AbstractService implements ServiceInterface
     }
 
 
+    /**
+     * {@inheritdoc}
+     * @see \PerunWs\Group\Service\ServiceInterface::fetchMembers()
+     */
     public function fetchMembers($id)
     {
         $members = $this->getGroupsManager()->getGroupRichMembers(array(
             'group' => $id
         ));
         
-        $_members = new \InoPerunApi\Entity\Collection\RichUserCollection(array(
-            new \InoPerunApi\Entity\RichUser(array(
-                'id' => 123
-            ))
-        ));
-        
         return $members;
     }
 
 
-    public function addMember($groupId, $userId)
-    {}
+    /**
+     * {@inheritdoc}
+     * @see \PerunWs\Group\Service\ServiceInterface::fetchUserGroups()
+     */
+    public function fetchUserGroups($userId)
+    {
+        $member = $this->getMemberByUser($userId);
+        $groups = $this->getGroupsManager()->getAllMemberGroups(array(
+            'member' => $member->getId()
+        ));
+        
+        return $groups;
+    }
 
 
-    public function removeMember($groupId, $userId)
-    {}
+    /**
+     * {@inheritdoc}
+     * @see \PerunWs\Group\Service\ServiceInterface::addUserToGroup()
+     */
+    public function addUserToGroup($userId, $groupId)
+    {
+        $member = $this->getMemberByUser($userId);
+        $this->getGroupsManager()->addMember(array(
+            'group' => $groupId,
+            'member' => $member->getId()
+        ));
+        
+        return $member;
+    }
+
+
+    /**
+     * {@inheritdoc}
+     * @see \PerunWs\Group\Service\ServiceInterface::removeUserFromGroup()
+     */
+    public function removeUserFromGroup($userId, $groupId)
+    {
+        $member = $this->getMemberByUser($userId);
+        $this->getGroupsManager()->removeMember(array(
+            'group' => $groupId,
+            'member' => $member->getId()
+        ));
+        
+        return true;
+    }
+
+
+    /**
+     * Retrieves the user's corresponding "member" entity.
+     * 
+     * @param integer $userId
+     * @return \InoPerunApi\Entity\Member|null
+     */
+    public function getMemberByUser($userId)
+    {
+        $member = null;
+        
+        try {
+            $member = $this->getMembersManager()->getMemberByUser(array(
+                'vo' => $this->getVoId(),
+                'user' => $userId
+            ));
+        } catch (\Exception $e) {}
+        
+        if (null === $member) {
+            throw new Exception\MemberRetrievalException(sprintf("Cannot retrieve member for user ID:%d and VO ID:%d", $userId, $this->getVoId()));
+        }
+        
+        return $member;
+    }
 }

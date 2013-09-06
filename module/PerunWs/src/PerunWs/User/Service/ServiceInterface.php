@@ -2,10 +2,10 @@
 
 namespace PerunWs\User\Service;
 
-use InoPerunApi\Entity\Collection\Collection;
-use InoPerunApi\Entity\User;
 
-
+/**
+ * Service interface for manipulating users.
+ */
 interface ServiceInterface
 {
 
@@ -14,7 +14,7 @@ interface ServiceInterface
      * Returns all records.
      * 
      * @param array $params
-     * @return Collection
+     * @return \InoPerunApi\Entity\Collection\UserCollection
      */
     public function fetchAll(array $params = array());
 
@@ -23,7 +23,7 @@ interface ServiceInterface
      * Returns a single user.
      * 
      * @param integer $id
-     * @return User
+     * @return \InoPerunApi\Entity\User
      */
     public function fetch($id);
 }

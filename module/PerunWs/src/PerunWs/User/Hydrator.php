@@ -8,6 +8,9 @@ use PerunWs\Hydrator\Exception\UnsupportedObjectException;
 use InoPerunApi\Entity\Collection\Collection;
 
 
+/**
+ * User hydrator.
+ */
 class Hydrator implements HydratorInterface
 {
 
@@ -21,19 +24,38 @@ class Hydrator implements HydratorInterface
 
     const FIELD_MAIL = 'mail';
 
+    const FIELD_PHONE = 'phone';
+
     const FIELD_DISPLAY_NAME = 'display_name';
 
+    const FIELD_LANGUAGE = 'language';
+
+    /**
+     * Maps Perun attribute names to local array field names.
+     * 
+     * @var array
+     */
     protected $attributeMap = array(
         'organization' => self::FIELD_ORGANIZATION,
         'preferredMail' => self::FIELD_MAIL,
-        'displayName' => self::FIELD_DISPLAY_NAME
+        'displayName' => self::FIELD_DISPLAY_NAME,
+        'phone' => self::FIELD_PHONE,
+        'preferredLanguage' => self::FIELD_LANGUAGE
     );
 
 
+    /**
+     * {@inheritdoc}
+     * @see \Zend\Stdlib\Hydrator\HydratorInterface::hydrate()
+     */
     public function hydrate(array $data, $user)
     {}
 
 
+    /**
+     * {@inheritdoc}
+     * @see \Zend\Stdlib\Hydrator\HydratorInterface::extract()
+     */
     public function extract($user)
     {
         if (! $user instanceof User) {
@@ -48,7 +70,7 @@ class Hydrator implements HydratorInterface
         
         /* @var $attributes \InoPerunApi\Entity\Collection\Collection */
         $attributes = $user->getUserAttributes();
-
+        
         if ($attributes instanceof Collection) {
             foreach ($attributes as $attribute) {
                 /* @var $attribute \InoPerunApi\Entity\Attribute */

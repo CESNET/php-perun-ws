@@ -50,6 +50,7 @@ interface ServiceInterface
      * Deletes the group.
      * 
      * @param integer $id
+     * @return boolean
      */
     public function delete($id);
 
@@ -64,19 +65,28 @@ interface ServiceInterface
 
 
     /**
-     * Adds the user as a member of the group.
+     * Returns the list of user's groups.
      * 
-     * @param integer $groupId
      * @param integer $userId
+     * @return \InoPerunApi\Entity\Collection\GroupCollection
      */
-    public function addMember($groupId, $userId);
+    public function fetchUserGroups($userId);
+
+
+    /**
+     * Adds the user to the group.
+     * 
+     * @param integer $userId
+     * @param integer $groupId
+     */
+    public function addUserToGroup($userId, $groupId);
 
 
     /**
      * Removes the user from the group.
      * 
-     * @param integer $groupId
      * @param integer $userId
+     * @param integer $groupId
      */
-    public function removeMember($groupId, $userId);
+    public function removeUserFromGroup($userId, $groupId);
 }

@@ -8,6 +8,9 @@ use PhlyRestfully\ResourceEvent;
 use PerunWs\Group\Service\ServiceInterface;
 
 
+/**
+ * Group resource listener.
+ */
 class Listener extends AbstractListenerAggregate
 {
 
@@ -17,12 +20,21 @@ class Listener extends AbstractListenerAggregate
     protected $service;
 
 
+    /**
+     * Constructor.
+     * 
+     * @param ServiceInterface $service
+     */
     public function __construct(ServiceInterface $service)
     {
         $this->service = $service;
     }
 
 
+    /**
+     * {@inheritdoc}
+     * @see \Zend\EventManager\ListenerAggregateInterface::attach()
+     */
     public function attach(EventManagerInterface $events)
     {
         $this->listeners[] = $events->attach('fetch', array(
@@ -48,6 +60,13 @@ class Listener extends AbstractListenerAggregate
     }
 
 
+    /**
+     * Returns a single group.
+     * 
+     * @param ResourceEvent $e
+     * @throws DomainException
+     * @return \InoPerunApi\Entity\Group
+     */
     public function onFetch(ResourceEvent $e)
     {
         $id = $e->getParam('id');
@@ -59,6 +78,12 @@ class Listener extends AbstractListenerAggregate
     }
 
 
+    /**
+     * Returns all groups.
+     * 
+     * @param ResourceEvent $e
+     * @return \InoPerunApi\Entity\Collection\GroupCollection
+     */
     public function onFetchAll(ResourceEvent $e)
     {
         $groups = $this->service->fetchAll();
@@ -67,6 +92,12 @@ class Listener extends AbstractListenerAggregate
     }
 
 
+    /**
+     * Creates a new group.
+     * 
+     * @param ResourceEvent $e
+     * @return \InoPerunApi\Entity\Group
+     */
     public function onCreate(ResourceEvent $e)
     {
         $data = $e->getParam('data');
@@ -76,6 +107,12 @@ class Listener extends AbstractListenerAggregate
     }
 
 
+    /**
+     * Updates an existing group.
+     * 
+     * @param ResourceEvent $e
+     * @return \InoPerunApi\Entity\Group
+     */
     public function onPatch(ResourceEvent $e)
     {
         $id = $e->getParam('id');
@@ -86,6 +123,12 @@ class Listener extends AbstractListenerAggregate
     }
 
 
+    /**
+     * Deletes a group.
+     * 
+     * @param ResourceEvent $e
+     * @return boolean
+     */
     public function onDelete(ResourceEvent $e)
     {
         $id = $e->getParam('id');

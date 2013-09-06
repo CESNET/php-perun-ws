@@ -11,6 +11,9 @@ use InoPerunApi\Entity\Collection\Collection;
 use PhlyRestfully\HalCollection;
 
 
+/**
+ * User resource listener.
+ */
 class Listener extends AbstractListenerAggregate
 {
 
@@ -20,12 +23,21 @@ class Listener extends AbstractListenerAggregate
     protected $service;
 
 
+    /**
+     * Constructor.
+     * 
+     * @param Service $service
+     */
     public function __construct(Service $service)
     {
         $this->service = $service;
     }
 
 
+    /**
+     * {@inheritdoc}
+     * @see \Zend\EventManager\ListenerAggregateInterface::attach()
+     */
     public function attach(EventManagerInterface $events)
     {
         $this->listeners[] = $events->attach('fetch', array(
@@ -39,6 +51,13 @@ class Listener extends AbstractListenerAggregate
     }
 
 
+    /**
+     * Returns a single user by ID.
+     * 
+     * @param ResourceEvent $e
+     * @throws DomainException
+     * @return \InoPerunApi\Entity\User
+     */
     public function onFetch(ResourceEvent $e)
     {
         $id = $e->getParam('id');
@@ -46,39 +65,28 @@ class Listener extends AbstractListenerAggregate
         if (! $user) {
             throw new DomainException('User not found', 404);
         }
+        
         return $user;
     }
 
 
+    /**
+     * Returns all users, optionally filtered by a search string.
+     * 
+     * @param ResourceEvent $e
+     * @return \InoPerunApi\Entity\Collection\UserCollection
+     */
     public function onFetchAll(ResourceEvent $e)
     {
-        $params = array(
-            'vo' => 421
-        );
+        $params = array();
+        
         $search = $e->getQueryParam('search');
         if (preg_match('/^\w+$/', $search)) {
             $params['searchString'] = $search;
         }
         
         $users = $this->service->fetchAll($params);
+        
         return $users;
-        $data = array();
-        $hydrator = new Hydrator();
-        if ($users instanceof Collection) {
-            foreach ($users as $user) {
-                $data[] = $hydrator->extract($user->getUser());
-            }
-        }
-        
-        $collection = new HalCollection($data);
-        $collection->setAttributes(array(
-            'count' => 2
-        ));
-        /*
-
-        */
-        _dump($collection);
-        
-        return $collection;
     }
 }
