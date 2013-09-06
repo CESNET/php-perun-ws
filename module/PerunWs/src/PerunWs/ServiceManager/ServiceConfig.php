@@ -2,14 +2,15 @@
 
 namespace PerunWs\ServiceManager;
 
+use Zend\ServiceManager\ServiceManager;
+use Zend\Stdlib\Parameters;
 use Zend\ServiceManager\Config;
+use InoPerunApi\Client\ClientFactory;
+use InoPerunApi\Manager\Factory\GenericFactory;
 use PerunWs\User;
 use PerunWs\Group;
 use PerunWs\Hydrator\DefaultHydrator;
-use InoPerunApi\Client\ClientFactory;
-use InoPerunApi\Manager\Factory\GenericFactory;
-use Zend\ServiceManager\ServiceManager;
-use Zend\Stdlib\Parameters;
+use PerunWs\Listener;
 
 
 class ServiceConfig extends Config
@@ -122,6 +123,16 @@ class ServiceConfig extends Config
                 }
                 
                 return new Parameters($config['perun_ws']['perun_service']);
+            },
+            
+            'PerunWs\ResourceControllerListener' => function ($services)
+            {
+                return new Listener\ResourceControllerListener();
+            },
+            
+            'PerunWs\DispatchListener' => function ($services)
+            {
+                return new Listener\DispatchListener();
             }
         );
     }

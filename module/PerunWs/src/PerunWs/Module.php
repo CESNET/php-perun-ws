@@ -48,14 +48,21 @@ class Module implements AutoloaderProviderInterface, ControllerProviderInterface
 
     public function onBootstrap(EventInterface $e)
     {
+        /* @var $e \Zend\Mvc\MvcEvent */
         $target = $e->getTarget();
+        
+        /* @var $events \Zend\EventManager\EventManager */
         $events = $target->getEventManager();
         $sharedEvents = $events->getSharedManager();
-
-        $rcl = new Listener\ResourceControllerListener();
+        
+        /* @var $services \Zend\ServiceManager\ServiceManager */
+        $services = $e->getApplication()->getServiceManager();
+        
+        $events->attachAggregate($services->get('PerunWs\DispatchListener'));
+        
+        $rcl = $services->get('PerunWs\ResourceControllerListener');
         $rcl->attachShared($sharedEvents);
         
-        $events = $e->getApplication()->getEventManager();
         $events->attach('dispatch.error', function ($event)
         {
             $error = $event->getError();
