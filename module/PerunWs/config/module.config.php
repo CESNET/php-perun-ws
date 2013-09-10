@@ -182,6 +182,13 @@ return array(
     
     'perun_ws' => array(
         
+        'authentication' => array(
+            'adapter' => 'PerunWs\Authentication\Adapter\Simple',
+            'options' => array(
+                'auth_file_path' => '/path/to/file'
+            )
+        ),
+        
         'perun_service' => array(
             'vo_id' => 123
         ),

@@ -76,7 +76,7 @@ abstract class AbstractService
     {
         $voId = intval($this->parameters->get('vo_id'));
         if (! $voId) {
-            throw new MissingParameterException('vo_id');
+            throw new Exception\MissingParameterException('vo_id');
         }
         
         return $voId;

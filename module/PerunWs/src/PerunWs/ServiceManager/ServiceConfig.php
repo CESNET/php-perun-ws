@@ -2,7 +2,6 @@
 
 namespace PerunWs\ServiceManager;
 
-use Zend\ServiceManager\ServiceManager;
 use Zend\Stdlib\Parameters;
 use Zend\ServiceManager\Config;
 use InoPerunApi\Client\ClientFactory;
@@ -11,6 +10,7 @@ use PerunWs\User;
 use PerunWs\Group;
 use PerunWs\Hydrator\DefaultHydrator;
 use PerunWs\Listener;
+use PerunWs\Exception\UndefinedClassException;
 
 
 class ServiceConfig extends Config
@@ -130,9 +130,33 @@ class ServiceConfig extends Config
                 return new Listener\ResourceControllerListener();
             },
             
+            'PerunWs\AuthenticationAdapter' => function ($services)
+            {
+                $config = $services->get('Config');
+                if (! isset($config['perun_ws']['authentication']['adapter'])) {
+                    throw new Exception\MissingConfigException('perun_ws/authentication/adapter');
+                }
+                
+                $adapterClass = $config['perun_ws']['authentication']['adapter'];
+                if (! class_exists($adapterClass)) {
+                    throw new UndefinedClassException($adapterClass);
+                }
+                
+                $options = array();
+                if (isset($config['perun_ws']['authentication']['options'])) {
+                    $options = $config['perun_ws']['authentication']['options'];
+                }
+                
+                $adapter = new $adapterClass($options);
+                return $adapter;
+            },
+            
             'PerunWs\DispatchListener' => function ($services)
             {
-                return new Listener\DispatchListener();
+                $listener = new Listener\DispatchListener();
+                $listener->setAuthenticationAdapter($services->get('PerunWs\AuthenticationAdapter'));
+                
+                return $listener;
             }
         );
     }

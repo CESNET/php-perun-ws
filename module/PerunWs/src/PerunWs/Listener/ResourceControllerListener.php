@@ -2,9 +2,6 @@
 
 namespace PerunWs\Listener;
 
-use Zend\EventManager\AbstractListenerAggregate;
-use Zend\EventManager\EventManagerInterface;
-use Zend\EventManager\SharedListenerAggregateInterface;
 use Zend\EventManager\SharedEventManagerInterface;
 use Zend\EventManager\EventInterface;
 
