@@ -125,11 +125,6 @@ class ServiceConfig extends Config
                 return new Parameters($config['perun_ws']['perun_service']);
             },
             
-            'PerunWs\ResourceControllerListener' => function ($services)
-            {
-                return new Listener\ResourceControllerListener();
-            },
-            
             'PerunWs\AuthenticationAdapter' => function ($services)
             {
                 $config = $services->get('Config');
@@ -157,6 +152,16 @@ class ServiceConfig extends Config
                 $listener->setAuthenticationAdapter($services->get('PerunWs\AuthenticationAdapter'));
                 
                 return $listener;
+            },
+            
+            'PerunWs\ResourceControllerListener' => function ($services)
+            {
+                return new Listener\ResourceControllerListener();
+            },
+            
+            'PerunWs\LogListener' => function ($services)
+            {
+                return new Listener\LogListener();
             }
         );
     }

@@ -7,8 +7,6 @@ use Zend\EventManager\EventManagerInterface;
 use PhlyRestfully\ResourceEvent;
 use PhlyRestfully\Exception\DomainException;
 use PerunWs\User\Service\Service;
-use InoPerunApi\Entity\Collection\Collection;
-use PhlyRestfully\HalCollection;
 
 
 /**

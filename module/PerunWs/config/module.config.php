@@ -182,6 +182,8 @@ return array(
     
     'perun_ws' => array(
         
+        'logger' => array(),
+        
         'authentication' => array(
             'adapter' => 'PerunWs\Authentication\Adapter\Simple',
             'options' => array(

@@ -8,15 +8,22 @@ use Zend\Mvc\MvcEvent;
 use PerunWs\Authentication;
 use PerunWs\Exception\MissingDependencyException;
 use PhlyRestfully\ApiProblem;
+use Zend\Mvc\Application;
+use Zend\EventManager\EventManagerAwareInterface;
 
 
-class DispatchListener extends AbstractListenerAggregate
+class DispatchListener extends AbstractListenerAggregate implements EventManagerAwareInterface
 {
 
     /**
      * @var Authentication\Adapter\AdapterInterface
      */
     protected $authenticationAdapter;
+
+    /**
+     * @var EventManagerInterface
+     */
+    protected $events;
 
 
     /**
@@ -38,6 +45,28 @@ class DispatchListener extends AbstractListenerAggregate
 
 
     /**
+     * @param EventManagerInterface $events
+     */
+    public function setEventManager(EventManagerInterface $events)
+    {
+        $events->setIdentifiers(array(
+            __CLASS__,
+            get_class($this)
+        ));
+        $this->events = $events;
+    }
+
+
+    /**
+     * @return EventManagerInterface
+     */
+    public function getEventManager()
+    {
+        return $this->events;
+    }
+
+
+    /**
      * {@inheritdoc}
      * @see \Zend\EventManager\ListenerAggregateInterface::attach()
      */
@@ -48,15 +77,22 @@ class DispatchListener extends AbstractListenerAggregate
             'onDispatch'
         ), 1000);
         
+        $this->listeners[] = $events->attach('dispatch', array(
+            $this,
+            'onPostDispatch'
+        ), - 1000);
+        
         $this->listeners[] = $events->attach('dispatch.error', array(
             $this,
             'onDispatchError'
-        ), 1000);
+        ), - 1000);
     }
 
 
     public function onDispatch(MvcEvent $event)
     {
+        // $event->setParam('clientId', 'foobar');
+        // return;
         /* @var $request \Zend\Http\PhpEnvironment\Request */
         $request = $event->getRequest();
         
@@ -68,38 +104,65 @@ class DispatchListener extends AbstractListenerAggregate
             throw new MissingDependencyException('authentication adapter');
         }
         
+        $authException = null;
+        $statusCode = null;
+        
         try {
             $clientInfo = $authenticationAdapter->authenticate($request);
         } catch (Authentication\Exception\AuthenticationException $e) {
-            _dump('auth exception');
-            _dump("$e");
-            $event->stopPropagation(true);
-            $response->setStatusCode(401);
-            return $response;
+            $authException = $e;
+            $statusCode = 401;
         } catch (\Exception $e) {
-            _dump("$e");
+            $authException = $e;
+            $statusCode = 500;
+        }
+        
+        if ($authException) {
+            $this->getEventManager()->trigger('auth.error', $this, array(
+                'mvcEvent' => $event,
+                'exception' => $authException
+            ));
+            
             $event->stopPropagation(true);
-            $response->setStatusCode(500);
+            $response->setStatusCode($statusCode);
             return $response;
         }
+        
+        $event->setParam('clientId', $clientInfo->getClientId());
     }
 
 
-    public function onDispatchError(MvcEvent $e)
+    public function onPostDispatch(MvcEvent $event)
     {
+        $this->getEventManager()->trigger('dispatch.post', $this, array(
+            'mvcEvent' => $event
+        ));
+    }
+
+
+    public function onDispatchError(MvcEvent $event)
+    {
+        $statusCode = 500;
+        
         // FIXME - move to separate class
-        $e->stopPropagation(true);
+        $event->stopPropagation(true);
         
         /* @var $response \Zend\Http\PhpEnvironment\Response */
-        $response = $e->getResponse();
+        $response = $event->getResponse();
         
-        $error = $e->getError();
-        
-        if ($error) {
-            _dump('DISPATCH ERROR: ' . $error);
+        $error = $event->getError();
+        if ($error === Application::ERROR_ROUTER_NO_MATCH) {
+            $statusCode = 404;
         }
         
-        $result = $e->getResult();
+        /*
+        if ($error) {
+        _dump('DISPATCH ERROR: ' . $error);
+        }
+        */
+        
+        /*
+        $result = $event->getResult();
         if ($result) {
             $exception = $result->exception;
             if ($exception) {
@@ -107,8 +170,13 @@ class DispatchListener extends AbstractListenerAggregate
                 _dump("$exception");
             }
         }
+        */
         
-        $response->setStatusCode(500);
+        $this->getEventManager()->trigger('dispatch.error', $this, array(
+            'mvcEvent' => $event
+        ));
+        
+        $response->setStatusCode($statusCode);
         
         return $response;
     }
