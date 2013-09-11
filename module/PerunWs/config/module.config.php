@@ -187,7 +187,7 @@ return array(
                 'stream' => array(
                     'name' => 'stream',
                     'options' => array(
-                        'stream' => '/data/var/log/devel/php-perun-ws/perun.log',
+                        'stream' => '/data/var/log/perun.log',
                         
                         'filters' => array(
                             

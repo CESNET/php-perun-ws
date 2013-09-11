@@ -1,2 +1,10 @@
 <?php
-return array();
+
+return array(
+
+    // 'some client label' => array(
+    //    'id' => 'some_client_id',
+    //    'secret' => 'some_client_secret'
+    // )
+
+);
