@@ -126,9 +126,14 @@ class Service extends AbstractService implements ServiceInterface
      */
     public function patch($id, $data)
     {
-        $data['id'] = $id;
+        $groupData = array(
+            'id' => $id,
+            'name' => $data->name,
+            'description' => $data->description
+        );
+        
         $group = $this->getGroupsManager()->updateGroup(array(
-            'group' => $data
+            'group' => $groupData
         ));
         
         return $group;
