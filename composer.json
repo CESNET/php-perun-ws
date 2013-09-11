@@ -7,7 +7,19 @@
     ],
     "require": {
         "php": ">=5.3.3",
-        "zendframework/zendframework": "2.2.*",
+        
+        "zendframework/zend-loader": ">=2.2.0",
+        "zendframework/zend-stdlib": ">=2.2.0",
+        "zendframework/zend-eventmanager": ">=2.2.0",
+        "zendframework/zend-servicemanager": ">=2.2.0",
+        "zendframework/zend-modulemanager": ">=2.2.0",
+        "zendframework/zend-log": ">=2.2.0",
+        "zendframework/zend-mvc": ">=2.2.0",
+        "zendframework/zend-config": ">=2.2.0",
+        
+        "zendframework/zend-form": ">=2.2.0",
+        "zendframework/zend-serializer": ">=2.2.0",
+        
         "phly/phly-restfully": "2.2.0",
         "ivan-novakov/php-perun-api": "dev-master"
     },
