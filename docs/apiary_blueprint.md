@@ -1,0 +1,290 @@
+HOST: https://shongo-auth.cesnet.cz/perun-ng/
+
+--- Shongo Perun Web Service ---
+
+---
+
+## Authorization
+
+The web service can be used by registered clients only. Upon registration the client receives a secret. The client then must provide this secret in every request. The secret needs to be passed in the "Authorization" HTTP request header.
+
+    GET /users HTTP/1.1
+    Accept: application/json
+    Authorization: dca51ae20ef3039012a4e1e606439780
+
+## Error reporting
+
+In case of an error response (status codes 4xx, 5xx), the body of the response will contain 
+details about the error according to the [API Problem specification](http://tools.ietf.org/html/draft-nottingham-http-problem-04)
+with the following properties ([source](https://phlyrestfully.readthedocs.org/en/latest/problems.html)):
+
+* __describedBy__ - a URL to a document describing the error condition (required)
+* __title__ a brief title for the error condition (required)
+* __httpStatus__ - the HTTP status code for the current request (optional)
+* __detail__ error details specific to this request (optional)
+* __supportId__ a URL to the specific problem occurrence (e.g., to a log message) (optional)
+
+Example:
+
+    HTTP/1.1 500 Internal Error
+    Content-Type: application/api-problem+json
+
+    {
+        "describedBy": "http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html",
+        "detail": "Status failed validation",
+        "httpStatus": 500,
+        "title": "Internal Server Error"
+    }
+
+---
+
+
+
+--
+User Resources
+--
+
+List all users.
+
+Query parameters:
+
+* __search__ (optional) - a search (sub) string to filter the results
+
+GET /users{?search}
+< 200
+< Content-Type: application/json
+{
+    "count": 2,
+    "total": 12,
+    "_embedded": {
+        "users": [{
+            "id": 1,
+            "first_name": "Ivan",
+            "last_name": "Novakov",
+            "display_name": "Ivan Novakov",
+            "organization": "CESNET z.s.p.o.",
+            "mail": "ivan.novakov@cesnet.cz",
+            "language": "en",
+            "member_id": 123,
+            "member_status": "VALID",
+            "_links": {
+                "self": {
+                    "href": "/users/1"
+                }
+            }
+        }, {
+            "id": 2,
+            "first_name": "Franta",
+            "last_name": "Vomáčka",
+            "display_name": "Franta Vomáčka",
+            "mail": "franta@email.cz",
+            "_links": {
+                "self": {
+                    "href": "/users/2"
+                }
+            }
+        }]
+    },
+    "_links": {
+        "self": {
+            "href": "/users"
+        }
+    }
+}
+
+Get a single user
+GET /users/{id}
+< 200
+< Content-Type: application/json
+{
+    "id": 1,
+    "first_name": "Ivan",
+    "last_name": "Novakov",
+    "display_name": "Ivan Novakov",
+    "email": "ivan.novakov@cesnet.cz",
+    "phone": "+420 111 222 333",
+    "organization": "CESNET",
+    "language": "en",
+    "_links": {
+        "self": {
+            "href": "/users/1
+        }
+    }
+}
+
+Get user's groups
+GET /users/{id}/groups
+< 200
+< Content-Type: application/json
+{
+    "count": 2,
+    "total": 5,
+    "_embedded": {
+        "groups": [{
+            "id": 10,
+            "name": "first group",
+            "description": "The First Group",
+            "parent_group_id": null
+            "_links": {
+                "self": {
+                    "href": "/groups/10"
+                }
+            }
+        }, {
+            "id": 11,
+            "name": "second group",
+            "description": "The Second Group",
+            "parent_group_id": 4
+            "_links": {
+                "self": {
+                    "href": "/groups/11"
+                }
+            }
+        }]
+    }
+}
+
+-- Group Resources --
+
+List all groups
+GET /groups
+< 200
+< Content-Type: application/json
+{
+    "count": 2,
+    "total": 20,
+    "_embedded": {
+        "groups": [{
+            "id": 1,
+            "name": "some group",
+            "description": "Some group's description",
+            "parent_group_id": null,
+            "_links": {
+                "self": {
+                    "href": "/groups/1"
+                }
+            }
+        }, {
+            "id": 2,
+            "name": "another group",
+            "description": "Another group's description",
+            "parent_group_id": null,
+            "_links": {
+                "self": {
+                    "href": "/groups/2"
+                }
+            }
+        }]
+    },
+    "_links": {
+        "self": {
+            "href": "/groups"
+        }
+    }
+}
+
+Get a single group
+GET /groups/{id}
+< 200
+< Content-Type: application/json
+{
+    "id": 4,
+    "name": "test group",
+    "description": "Group for testing",
+    "parent_group_id": null,
+    "_links": {
+        "self": {
+            "href": "/groups/4"
+        }
+    }
+}
+
+Create a group
+POST /groups
+> Content-Type: application/json
+{
+    "name": "new group",
+    "description": "New Group description"
+}
+< 201
+< Content-Type: application/json
+{
+    "id": 21,
+    "name": "new group",
+    "description": "New Group description",
+    "parent_group_id": null,
+    "_links": {
+        "self": {
+            "href": "/groups/21"
+        }
+    }
+}
+
+Modify a group
+
+__( ! ) Currently throws an error - Perun integration problem.__
+PUT /groups/{id}
+> Content-Type: application/json
+{
+    "name": "New group name",
+    "description": "New group description"
+}
+< 200
+< Content-Type: application/json
+{
+    "id": 4,
+    "name": "New group name",
+    "description": "New group description",
+    "_links": {
+        "self": {
+            "href": "/groups/4"
+        }
+    }
+}
+
+Delete a group
+DELETE /groups/{id}
+< 204
+
+
+List users in a group
+GET /groups/{id}/users
+< 200
+< Content-Type: application/json
+{
+    "count": 1,
+    "total": 1,
+    "_embedded": {
+        "users": [{
+            "id": 1,
+            "first_name": "Ivan",
+            "last_name": "Novakov",
+            "member_id": 123,
+            "member_status": "VALID",
+            "_links": {
+                "self": {
+                    "href": "/users/1"
+                }
+            }
+        }]
+    },
+    "_links": {
+        "self": {
+            "href": "/groups/5/users"
+        }
+    }
+}
+
+Add a user to the group
+PUT /groups/{group_id}/users/{user_id}
+< 200
+< Content-Type: application/json
+{
+    "user_id": 4,
+    "group_id": 12,
+}
+
+
+Remove a user from the group
+DELETE /groups/{group_id}/users/{user_id}
+< 204
