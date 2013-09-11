@@ -182,7 +182,40 @@ return array(
     
     'perun_ws' => array(
         
-        'logger' => array(),
+        'logger' => array(
+            'writers' => array(
+                'stream' => array(
+                    'name' => 'stream',
+                    'options' => array(
+                        'stream' => '/data/var/log/devel/php-perun-ws/perun.log',
+                        
+                        'filters' => array(
+                            
+                            array(
+                                'name' => 'priority',
+                                'options' => array(
+                                    'priority' => 7
+                                )
+                            ),
+                            
+                            array(
+                                'name' => 'suppress',
+                                'options' => array(
+                                    'suppress' => false
+                                )
+                            )
+                        ),
+                        
+                        'formatter' => array(
+                            'name' => 'simple',
+                            'options' => array(
+                                'dateTimeFormat' => 'Y-m-d H:i:s'
+                            )
+                        )
+                    )
+                )
+            )
+        ),
         
         'authentication' => array(
             'adapter' => 'PerunWs\Authentication\Adapter\Simple',

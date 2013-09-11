@@ -11,6 +11,7 @@ use PerunWs\Group;
 use PerunWs\Hydrator\DefaultHydrator;
 use PerunWs\Listener;
 use PerunWs\Exception\UndefinedClassException;
+use Zend\Log\Logger;
 
 
 class ServiceConfig extends Config
@@ -20,6 +21,18 @@ class ServiceConfig extends Config
     public function getFactories()
     {
         return array(
+            
+            'PerunWs\Logger' => function ($services)
+            {
+                $config = $services->get('Config');
+                if (! isset($config['perun_ws']['logger']) || ! is_array($config['perun_ws']['logger'])) {
+                    throw new Exception\MissingConfigException('perun_ws/logger');
+                }
+                
+                $logger = new Logger($config['perun_ws']['logger']);
+                $logger->addProcessor('requestId');
+                return $logger;
+            },
             
             'PerunWs\DefaultHydrator' => function ($services)
             {
@@ -161,7 +174,7 @@ class ServiceConfig extends Config
             
             'PerunWs\LogListener' => function ($services)
             {
-                return new Listener\LogListener();
+                return new Listener\LogListener($services->get('PerunWs\Logger'));
             }
         );
     }

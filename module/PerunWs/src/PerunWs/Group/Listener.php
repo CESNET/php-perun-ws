@@ -5,6 +5,7 @@ namespace PerunWs\Group;
 use Zend\EventManager\AbstractListenerAggregate;
 use Zend\EventManager\EventManagerInterface;
 use PhlyRestfully\ResourceEvent;
+use PhlyRestfully\Exception\DomainException;
 use PerunWs\Group\Service\ServiceInterface;
 
 
@@ -72,7 +73,7 @@ class Listener extends AbstractListenerAggregate
         $id = $e->getParam('id');
         $group = $this->service->fetch($id);
         if (! $group) {
-            throw new DomainException('Group not found', 404);
+            throw new DomainException(sprintf("Group ID:%d not found", $id), 404);
         }
         return $group;
     }

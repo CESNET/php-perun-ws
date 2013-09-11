@@ -2,14 +2,13 @@
 
 namespace PerunWs\Listener;
 
+use Zend\Mvc\Application;
 use Zend\EventManager\AbstractListenerAggregate;
 use Zend\EventManager\EventManagerInterface;
+use Zend\EventManager\EventManagerAwareInterface;
 use Zend\Mvc\MvcEvent;
 use PerunWs\Authentication;
 use PerunWs\Exception\MissingDependencyException;
-use PhlyRestfully\ApiProblem;
-use Zend\Mvc\Application;
-use Zend\EventManager\EventManagerAwareInterface;
 
 
 class DispatchListener extends AbstractListenerAggregate implements EventManagerAwareInterface
@@ -89,10 +88,13 @@ class DispatchListener extends AbstractListenerAggregate implements EventManager
     }
 
 
+    /**
+     * @param MvcEvent $event
+     * @throws MissingDependencyException
+     * @return \Zend\Http\PhpEnvironment\Response|void
+     */
     public function onDispatch(MvcEvent $event)
     {
-        // $event->setParam('clientId', 'foobar');
-        // return;
         /* @var $request \Zend\Http\PhpEnvironment\Request */
         $request = $event->getRequest();
         
@@ -132,6 +134,9 @@ class DispatchListener extends AbstractListenerAggregate implements EventManager
     }
 
 
+    /**
+     * @param MvcEvent $event
+     */
     public function onPostDispatch(MvcEvent $event)
     {
         $this->getEventManager()->trigger('dispatch.post', $this, array(
@@ -140,11 +145,14 @@ class DispatchListener extends AbstractListenerAggregate implements EventManager
     }
 
 
+    /**
+     * @param MvcEvent $event
+     * @return \Zend\Http\PhpEnvironment\Response
+     */
     public function onDispatchError(MvcEvent $event)
     {
         $statusCode = 500;
         
-        // FIXME - move to separate class
         $event->stopPropagation(true);
         
         /* @var $response \Zend\Http\PhpEnvironment\Response */
@@ -154,23 +162,6 @@ class DispatchListener extends AbstractListenerAggregate implements EventManager
         if ($error === Application::ERROR_ROUTER_NO_MATCH) {
             $statusCode = 404;
         }
-        
-        /*
-        if ($error) {
-        _dump('DISPATCH ERROR: ' . $error);
-        }
-        */
-        
-        /*
-        $result = $event->getResult();
-        if ($result) {
-            $exception = $result->exception;
-            if ($exception) {
-                _dump(sprintf("EXCEPTION [%s]: %s", get_class($exception), $exception->getMessage()));
-                _dump("$exception");
-            }
-        }
-        */
         
         $this->getEventManager()->trigger('dispatch.error', $this, array(
             'mvcEvent' => $event

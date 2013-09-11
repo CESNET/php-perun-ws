@@ -5,7 +5,6 @@ namespace PerunWs\Group\Service;
 use PerunWs\Perun\Service\AbstractService;
 use InoPerunApi\Manager\GenericManager;
 use InoPerunApi\Entity\Group;
-use PerunWs\Perun\Service\Exception\MissingParameterException;
 
 
 /**
