@@ -191,14 +191,14 @@ return array(
                         
                         'filters' => array(
                             
-                            array(
+                            'priority' => array(
                                 'name' => 'priority',
                                 'options' => array(
                                     'priority' => 7
                                 )
                             ),
                             
-                            array(
+                            'suppress' => array(
                                 'name' => 'suppress',
                                 'options' => array(
                                     'suppress' => false
