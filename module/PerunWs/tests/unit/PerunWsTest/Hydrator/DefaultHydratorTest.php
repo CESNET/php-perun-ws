@@ -24,4 +24,19 @@ class DefaultHydratorTest extends \PHPUnit_Framework_TestCase
         $object = new \stdClass();
         $this->hydrator->extract($object);
     }
+
+
+    public function testExtractWithGenericEntity()
+    {
+        $props = array(
+            'foo' => 'bar'
+        );
+        
+        $object = $this->getMock('InoPerunApi\Entity\GenericEntity');
+        $object->expects($this->once())
+            ->method('getProperties')
+            ->will($this->returnValue($props));
+        
+        $this->assertSame($props, $this->hydrator->extract($object));
+    }
 }

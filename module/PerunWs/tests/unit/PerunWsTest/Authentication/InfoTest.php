@@ -9,7 +9,7 @@ class InfoTest extends \PHPUnit_Framework_TestCase
 {
 
 
-    public function testSetClientName()
+    public function testSetClientId()
     {
         $info = new Info('foo');
         $this->assertSame('foo', $info->getClientId());

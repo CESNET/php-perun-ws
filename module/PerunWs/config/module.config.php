@@ -232,7 +232,7 @@ return array(
         
         'perun_service' => array(
             'vo_id' => 123,
-            'principalNamesAttributeName' => 'urn:perun:user:attribute-def:virt:eduPersonPrincipalNames'
+            'principal_names_attribute_name' => 'urn:perun:user:attribute-def:virt:eduPersonPrincipalNames'
         ),
         
         'perun_api' => array(

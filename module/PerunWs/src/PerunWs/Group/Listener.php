@@ -2,6 +2,7 @@
 
 namespace PerunWs\Group;
 
+use PhlyRestfully\Exception\InvalidArgumentException;
 use Zend\EventManager\AbstractListenerAggregate;
 use Zend\EventManager\EventManagerInterface;
 use PhlyRestfully\ResourceEvent;
@@ -28,7 +29,25 @@ class Listener extends AbstractListenerAggregate
      */
     public function __construct(ServiceInterface $service)
     {
+        $this->setService($service);
+    }
+
+
+    /**
+     * @param ServiceInterface $service
+     */
+    public function setService(ServiceInterface $service)
+    {
         $this->service = $service;
+    }
+
+
+    /**
+     * @return ServiceInterface
+     */
+    public function getService()
+    {
+        return $this->service;
     }
 
 
@@ -71,6 +90,10 @@ class Listener extends AbstractListenerAggregate
     public function onFetch(ResourceEvent $e)
     {
         $id = $e->getParam('id');
+        if (! $id) {
+            throw new InvalidArgumentException('Missing the "id" parameter', 400);
+        }
+        
         $group = $this->service->fetch($id);
         if (! $group) {
             throw new DomainException(sprintf("Group ID:%d not found", $id), 404);

@@ -28,6 +28,24 @@ class Listener extends AbstractListenerAggregate
      */
     public function __construct(ServiceInterface $service)
     {
+        $this->setService($service);
+    }
+
+
+    /**
+     * @return ServiceInterface
+     */
+    public function getService()
+    {
+        return $this->service;
+    }
+
+
+    /**
+     * @param ServiceInterface $service
+     */
+    public function setService($service)
+    {
         $this->service = $service;
     }
 
@@ -73,17 +91,20 @@ class Listener extends AbstractListenerAggregate
      * Adds a user to the group.
      * 
      * @param ResourceEvent $e
+     * @return HalResource
      */
     public function onUpdate(ResourceEvent $e)
     {
         $groupId = $e->getRouteParam('group_id');
         $userId = $e->getRouteParam('user_id');
+        
         $member = $this->service->addUserToGroup($userId, $groupId);
         
-        $resource = new HalResource(array(
-            'user_id' => $userId,
-            'group_id' => $groupId
-        ), $userId);
+        $resource = new HalResource(
+            array(
+                'user_id' => $userId,
+                'group_id' => $groupId
+            ), $userId);
         
         return $resource;
     }
@@ -93,11 +114,13 @@ class Listener extends AbstractListenerAggregate
      * Removes a user from the group.
      * 
      * @param ResourceEvent $e
+     * @return boolean
      */
     public function onDelete(ResourceEvent $e)
     {
         $groupId = $e->getRouteParam('group_id');
         $userId = $e->getRouteParam('user_id');
+        
         return $this->service->removeUserFromGroup($userId, $groupId);
     }
 }

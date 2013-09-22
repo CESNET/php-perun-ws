@@ -91,9 +91,9 @@ abstract class AbstractService
      */
     public function getPrincipalNamesAttributeName()
     {
-        $attributeName = $this->parameters->get('principalNamesAttributeName');
+        $attributeName = $this->parameters->get('principal_names_attribute_name');
         if (! $attributeName) {
-            throw new Exception\MissingParameterException('principalNamesAttributeName');
+            throw new Exception\MissingParameterException('principal_names_attribute_name');
         }
         
         return $attributeName;

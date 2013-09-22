@@ -2,6 +2,8 @@
 
 namespace PerunWs\Group;
 
+use PerunWs\Hydrator\Exception\UnsupportedObjectException;
+use InoPerunApi\Entity\Group;
 use Zend\Stdlib\Hydrator\HydratorInterface;
 
 
@@ -26,8 +28,11 @@ class Hydrator implements HydratorInterface
      */
     public function extract($group)
     {
+        if (! $group instanceof Group) {
+            throw new UnsupportedObjectException(get_class($group));
+        }
+        
         /* @var $group \InoPerunApi\Entity\Group */
-        $data = $group->getProperties();
         
         $data = array(
             'id' => $group->getId(),

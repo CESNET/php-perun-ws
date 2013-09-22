@@ -64,6 +64,17 @@ class AbstractServiceTest extends \PHPUnit_Framework_TestCase
         ));
         $this->assertSame($voId, $service->getVoId());
     }
+
+
+    public function testGetPrincipalNamesAttributeName()
+    {
+        $attrName = 'ePPN';
+        
+        $service = $this->getServiceMock(array(
+            'principal_names_attribute_name' => $attrName
+        ));
+        $this->assertSame($attrName, $service->getPrincipalNamesAttributeName());
+    }
     
     /*
      * 
