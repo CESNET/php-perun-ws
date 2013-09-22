@@ -143,6 +143,12 @@ return array(
         ),
         
         'metadata_map' => array(
+            
+            'InoPerunApi\Entity\User' => array(
+                'hydrator' => 'PerunWs\User\Hydrator',
+                'route' => 'users'
+            ),
+            
             'InoPerunApi\Entity\RichUser' => array(
                 'hydrator' => 'PerunWs\User\Hydrator',
                 'route' => 'users'
@@ -225,7 +231,8 @@ return array(
         ),
         
         'perun_service' => array(
-            'vo_id' => 123
+            'vo_id' => 123,
+            'principalNamesAttributeName' => 'urn:perun:user:attribute-def:virt:eduPersonPrincipalNames'
         ),
         
         'perun_api' => array(

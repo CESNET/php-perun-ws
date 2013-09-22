@@ -98,7 +98,13 @@ class Service extends AbstractService implements ServiceInterface
     public function fetchAll(array $params = array())
     {
         $params['vo'] = $this->getVoId();
-        if (isset($params['searchString'])) {
+        if (isset($params['principal'])) {
+            $users = $this->getUsersManager()->getUsersByAttributeValue(
+                array(
+                    'attributeName' => $this->getPrincipalNamesAttributeName(),
+                    'attributeValue' => $params['principal']
+                ));
+        } elseif (isset($params['searchString'])) {
             $users = $this->getMembersManager()->findRichMembersWithAttributesInVo($params);
         } else {
             $users = $this->getMembersManager()->getRichMembersWithAttributes($params);

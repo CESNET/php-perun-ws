@@ -2,6 +2,7 @@
 
 namespace PerunWs\User;
 
+use PhlyRestfully\Exception\InvalidArgumentException;
 use Zend\EventManager\AbstractListenerAggregate;
 use Zend\EventManager\EventManagerInterface;
 use PhlyRestfully\ResourceEvent;
@@ -79,8 +80,19 @@ class Listener extends AbstractListenerAggregate
         $params = array();
         
         $search = $e->getQueryParam('search');
-        if (preg_match('/^\w+$/', $search)) {
+        
+        // FIXME - move regexps to config
+        if (null !== $search && ! preg_match('/^\w+$/', $search)) {
+            throw new InvalidArgumentException('Invalid search string', 400);
+        } else {
             $params['searchString'] = $search;
+        }
+        
+        $principal = $e->getQueryParam('principal');
+        if (null !== $principal && ! preg_match('/^[\w\._-]+@[\w\._-]+$/', $principal)) {
+            throw new InvalidArgumentException('Invalid principal name', 400);
+        } else {
+            $params['principal'] = $principal;
         }
         
         $users = $this->service->fetchAll($params);

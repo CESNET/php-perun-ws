@@ -81,4 +81,21 @@ abstract class AbstractService
         
         return $voId;
     }
+
+
+    /**
+     * Returns the name  of the Perun attribute holding the user's ePPNs.
+     * 
+     * @throws Exception\MissingParameterException
+     * @return string
+     */
+    public function getPrincipalNamesAttributeName()
+    {
+        $attributeName = $this->parameters->get('principalNamesAttributeName');
+        if (! $attributeName) {
+            throw new Exception\MissingParameterException('principalNamesAttributeName');
+        }
+        
+        return $attributeName;
+    }
 }
