@@ -2,6 +2,7 @@
 
 namespace PerunWs\User\Group;
 
+use PhlyRestfully\Exception\RuntimeException;
 use Zend\EventManager\EventManagerInterface;
 use Zend\EventManager\AbstractListenerAggregate;
 use PhlyRestfully\ResourceEvent;
@@ -53,7 +54,12 @@ class Listener extends AbstractListenerAggregate
     public function onFetchAll(ResourceEvent $e)
     {
         $userId = $e->getRouteParam('user_id');
-        $groups = $this->service->fetchUserGroups($userId);
+        
+        try {
+            $groups = $this->service->fetchUserGroups($userId);
+        } catch (MemberRetrievalException $e) {
+            throw new RuntimeException($e->getMessage(), 400, $e);
+        }
         
         return $groups;
     }

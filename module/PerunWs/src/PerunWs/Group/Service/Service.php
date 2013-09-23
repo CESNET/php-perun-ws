@@ -5,6 +5,7 @@ namespace PerunWs\Group\Service;
 use PerunWs\Perun\Service\AbstractService;
 use InoPerunApi\Manager\GenericManager;
 use InoPerunApi\Entity\Group;
+use InoPerunApi\Entity;
 
 
 /**
@@ -38,6 +39,11 @@ class Service extends AbstractService implements ServiceInterface
      * @var GenericManager
      */
     protected $membersManager;
+
+    /**
+     * @var Entity\Factory\FactoryInterface
+     */
+    protected $entityFactory;
 
 
     /**
@@ -119,6 +125,27 @@ class Service extends AbstractService implements ServiceInterface
 
 
     /**
+     * @return Entity\Factory\FactoryInterface
+     */
+    public function getEntityFactory()
+    {
+        if (! $this->entityFactory instanceof Entity\Factory\FactoryInterface) {
+            $this->entityFactory = new Entity\Factory\GenericFactory();
+        }
+        return $this->entityFactory;
+    }
+
+
+    /**
+     * @param Entity\Factory\FactoryInterface $entityFactory
+     */
+    public function setEntityFactory(Entity\Factory\FactoryInterface $entityFactory)
+    {
+        $this->entityFactory = $entityFactory;
+    }
+
+
+    /**
      * {@inheritdoc}
      * @see \PerunWs\Group\Service\ServiceInterface::fetchAll()
      */
@@ -153,9 +180,9 @@ class Service extends AbstractService implements ServiceInterface
      */
     public function create($data)
     {
-        $group = new Group(
+        $group = $this->getEntityFactory()->createEntityWithName('Group', 
             array(
-                Group::PROP_NAME => $data->name,
+                'name' => $data->name,
                 'description' => $data->description
             ));
         
@@ -176,6 +203,7 @@ class Service extends AbstractService implements ServiceInterface
      */
     public function patch($id, $data)
     {
+        // FIXME - make it work + tests
         $groupData = array(
             'id' => $id,
             'name' => $data->name,
@@ -284,7 +312,13 @@ class Service extends AbstractService implements ServiceInterface
                     'vo' => $this->getVoId(),
                     'user' => $userId
                 ));
-        } catch (\Exception $e) {}
+        } catch (\Exception $e) {
+            /*
+             * FIXME - the server returns a generic error instead of "not found",
+             * there is no way how to determine whether the member is not found or
+             * some general eror has occured.
+             */
+        }
         
         if (null === $member) {
             throw new Exception\MemberRetrievalException(
