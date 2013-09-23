@@ -13,8 +13,20 @@ use InoPerunApi\Entity\Group;
 class Service extends AbstractService implements ServiceInterface
 {
 
+    /**
+     * The name of the group manager (remote APi object).
+     * 
+     * @see http://perun.metacentrum.cz/javadoc/cz/metacentrum/perun/core/api/GroupsManager.html
+     * @var string
+     */
     protected $groupsManagerName = 'groupsManager';
 
+    /**
+     * The name of the members manager (remote API object).
+     * 
+     * @see http://perun.metacentrum.cz/javadoc/cz/metacentrum/perun/core/api/MembersManager.html
+     * @var string
+     */
     protected $membersManagerName = 'membersManager';
 
     /**
@@ -26,6 +38,42 @@ class Service extends AbstractService implements ServiceInterface
      * @var GenericManager
      */
     protected $membersManager;
+
+
+    /**
+     * @return string
+     */
+    public function getGroupsManagerName()
+    {
+        return $this->groupsManagerName;
+    }
+
+
+    /**
+     * @param string $groupsManagerName
+     */
+    public function setGroupsManagerName($groupsManagerName)
+    {
+        $this->groupsManagerName = $groupsManagerName;
+    }
+
+
+    /**
+     * @return string
+     */
+    public function getMembersManagerName()
+    {
+        return $this->membersManagerName;
+    }
+
+
+    /**
+     * @param string $membersManagerName
+     */
+    public function setMembersManagerName($membersManagerName)
+    {
+        $this->membersManagerName = $membersManagerName;
+    }
 
 
     /**
@@ -105,15 +153,17 @@ class Service extends AbstractService implements ServiceInterface
      */
     public function create($data)
     {
-        $group = new Group(array(
-            Group::PROP_NAME => $data->name,
-            'description' => $data->description
-        ));
+        $group = new Group(
+            array(
+                Group::PROP_NAME => $data->name,
+                'description' => $data->description
+            ));
         
-        $newGroup = $this->getGroupsManager()->createGroup(array(
-            'vo' => $this->getVoId(),
-            'group' => $group
-        ));
+        $newGroup = $this->getGroupsManager()->createGroup(
+            array(
+                'vo' => $this->getVoId(),
+                'group' => $group
+            ));
         // _dump($newGroup);
         
         return $newGroup;
@@ -175,9 +225,10 @@ class Service extends AbstractService implements ServiceInterface
     public function fetchUserGroups($userId)
     {
         $member = $this->getMemberByUser($userId);
-        $groups = $this->getGroupsManager()->getAllMemberGroups(array(
-            'member' => $member->getId()
-        ));
+        $groups = $this->getGroupsManager()->getAllMemberGroups(
+            array(
+                'member' => $member->getId()
+            ));
         
         return $groups;
     }
@@ -190,10 +241,11 @@ class Service extends AbstractService implements ServiceInterface
     public function addUserToGroup($userId, $groupId)
     {
         $member = $this->getMemberByUser($userId);
-        $this->getGroupsManager()->addMember(array(
-            'group' => $groupId,
-            'member' => $member->getId()
-        ));
+        $this->getGroupsManager()->addMember(
+            array(
+                'group' => $groupId,
+                'member' => $member->getId()
+            ));
         
         return $member;
     }
@@ -206,10 +258,11 @@ class Service extends AbstractService implements ServiceInterface
     public function removeUserFromGroup($userId, $groupId)
     {
         $member = $this->getMemberByUser($userId);
-        $this->getGroupsManager()->removeMember(array(
-            'group' => $groupId,
-            'member' => $member->getId()
-        ));
+        $this->getGroupsManager()->removeMember(
+            array(
+                'group' => $groupId,
+                'member' => $member->getId()
+            ));
         
         return true;
     }
@@ -226,14 +279,16 @@ class Service extends AbstractService implements ServiceInterface
         $member = null;
         
         try {
-            $member = $this->getMembersManager()->getMemberByUser(array(
-                'vo' => $this->getVoId(),
-                'user' => $userId
-            ));
+            $member = $this->getMembersManager()->getMemberByUser(
+                array(
+                    'vo' => $this->getVoId(),
+                    'user' => $userId
+                ));
         } catch (\Exception $e) {}
         
         if (null === $member) {
-            throw new Exception\MemberRetrievalException(sprintf("Cannot retrieve member for user ID:%d and VO ID:%d", $userId, $this->getVoId()));
+            throw new Exception\MemberRetrievalException(
+                sprintf("Cannot retrieve member for user ID:%d and VO ID:%d", $userId, $this->getVoId()));
         }
         
         return $member;

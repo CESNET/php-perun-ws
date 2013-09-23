@@ -29,6 +29,24 @@ abstract class AbstractService
      */
     public function __construct(Parameters $parameters)
     {
+        $this->setParameters($parameters);
+    }
+
+
+    /**
+     * @return Parameters
+     */
+    public function getParameters()
+    {
+        return $this->parameters;
+    }
+
+
+    /**
+     * @param Parameters $parameters
+     */
+    public function setParameters($parameters)
+    {
         $this->parameters = $parameters;
     }
 
