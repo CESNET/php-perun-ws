@@ -166,9 +166,16 @@ class Service extends AbstractService implements ServiceInterface
      */
     public function fetch($id)
     {
-        $group = $this->getGroupsManager()->getGroupById(array(
-            'id' => $id
-        ));
+        try {
+            $group = $this->getGroupsManager()->getGroupById(array(
+                'id' => $id
+            ));
+        } catch (PerunErrorException $e) {
+            if (self::PERUN_EXCEPTION_GROUP_NOT_EXISTS == $e->getErrorName()) {
+                return null;
+            }
+            throw $e;
+        }
         
         return $group;
     }
@@ -224,6 +231,7 @@ class Service extends AbstractService implements ServiceInterface
      */
     public function delete($id)
     {
+        //FIXME check for non-existent
         $this->getGroupsManager()->deleteGroup(array(
             'group' => $id
         ));
@@ -238,9 +246,17 @@ class Service extends AbstractService implements ServiceInterface
      */
     public function fetchMembers($id)
     {
-        $members = $this->getGroupsManager()->getGroupRichMembers(array(
-            'group' => $id
-        ));
+        try {
+            $members = $this->getGroupsManager()->getGroupRichMembers(
+                array(
+                    'group' => $id
+                ));
+        } catch (PerunErrorException $e) {
+            if (self::PERUN_EXCEPTION_GROUP_NOT_EXISTS == $e->getErrorName()) {
+                throw new Exception\GroupRetrievalException(sprintf("Group ID:%d not found", $id), null, $e);
+            }
+            throw $e;
+        }
         
         return $members;
     }
@@ -304,25 +320,17 @@ class Service extends AbstractService implements ServiceInterface
      */
     public function getMemberByUser($userId)
     {
-        $member = null;
-        
         try {
             $member = $this->getMembersManager()->getMemberByUser(
                 array(
                     'vo' => $this->getVoId(),
                     'user' => $userId
                 ));
-        } catch (\Exception $e) {
-            /*
-             * FIXME - the server returns a generic error instead of "not found",
-             * there is no way how to determine whether the member is not found or
-             * some general eror has occured.
-             */
-        }
-        
-        if (null === $member) {
-            throw new Exception\MemberRetrievalException(
-                sprintf("Cannot retrieve member for user ID:%d and VO ID:%d", $userId, $this->getVoId()));
+        } catch (PerunErrorException $e) {
+            if (self::PERUN_EXCEPTION_USER_NOT_EXISTS == $e->getErrorName()) {
+                throw new Exception\MemberRetrievalException(sprintf("User ID:%d not found", $userId));
+            }
+            throw $e;
         }
         
         return $member;

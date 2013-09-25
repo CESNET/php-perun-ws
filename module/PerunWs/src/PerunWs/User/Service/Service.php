@@ -83,9 +83,17 @@ class Service extends AbstractService implements ServiceInterface
      */
     public function fetch($id)
     {
-        $user = $this->getUsersManager()->getRichUserWithAttributes(array(
-            'user' => $id
-        ));
+        try {
+            $user = $this->getUsersManager()->getRichUserWithAttributes(
+                array(
+                    'user' => $id
+                ));
+        } catch (PerunErrorException $e) {
+            if (self::PERUN_EXCEPTION_USER_NOT_EXISTS == $e->getErrorName()) {
+                return null;
+            }
+            throw $e;
+        }
         
         return $user;
     }

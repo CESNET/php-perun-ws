@@ -62,7 +62,7 @@ class Listener extends AbstractListenerAggregate
         $id = $e->getParam('id');
         $user = $this->service->fetch($id);
         if (! $user) {
-            throw new DomainException('User not found', 404);
+            throw new DomainException(sprintf("User ID:%d not found", $id), 404);
         }
         
         return $user;

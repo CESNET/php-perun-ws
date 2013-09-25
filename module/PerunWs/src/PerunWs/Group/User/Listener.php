@@ -81,8 +81,12 @@ class Listener extends AbstractListenerAggregate
     {
         $id = $e->getRouteParam('group_id');
         
-        $users = $this->service->fetchMembers($id);
-        // _dump($users);
+        try {
+            $users = $this->service->fetchMembers($id);
+        } catch (GroupRetrievalException $e) {
+            throw new DomainException($e->getMessage(), 404, $e);
+        }
+        
         return $users;
     }
 
@@ -98,7 +102,11 @@ class Listener extends AbstractListenerAggregate
         $groupId = $e->getRouteParam('group_id');
         $userId = $e->getRouteParam('user_id');
         
-        $member = $this->service->addUserToGroup($userId, $groupId);
+        try {
+            $member = $this->service->addUserToGroup($userId, $groupId);
+        } catch (MemberRetrievalException $e) {
+            throw new DomainException($e->getMessage(), 404, $e);
+        }
         
         $resource = new HalResource(
             array(
@@ -121,6 +129,10 @@ class Listener extends AbstractListenerAggregate
         $groupId = $e->getRouteParam('group_id');
         $userId = $e->getRouteParam('user_id');
         
-        return $this->service->removeUserFromGroup($userId, $groupId);
+        try {
+            return $this->service->removeUserFromGroup($userId, $groupId);
+        } catch (MemberRetrievalException $e) {
+            throw new DomainException($e->getMessage(), 404, $e);
+        }
     }
 }
