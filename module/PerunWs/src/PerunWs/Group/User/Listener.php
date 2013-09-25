@@ -7,6 +7,8 @@ use Zend\EventManager\AbstractListenerAggregate;
 use PerunWs\Group\Service\ServiceInterface;
 use PhlyRestfully\ResourceEvent;
 use PhlyRestfully\HalResource;
+use PerunWs\Group\Service\Exception\GroupRetrievalException;
+use PerunWs\Group\Service\Exception\MemberRetrievalException;
 
 
 /**

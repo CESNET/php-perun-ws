@@ -6,6 +6,7 @@ use PerunWs\Perun\Service\AbstractService;
 use InoPerunApi\Manager\GenericManager;
 use InoPerunApi\Entity\Group;
 use InoPerunApi\Entity;
+use InoPerunApi\Manager\Exception\PerunErrorException;
 
 
 /**
@@ -13,6 +14,10 @@ use InoPerunApi\Entity;
  */
 class Service extends AbstractService implements ServiceInterface
 {
+
+    const PERUN_EXCEPTION_GROUP_NOT_EXISTS = 'GroupNotExistsException';
+    
+    const PERUN_EXCEPTION_USER_NOT_EXISTS = 'UserNotExistsException';
 
     /**
      * The name of the group manager (remote APi object).
@@ -231,7 +236,7 @@ class Service extends AbstractService implements ServiceInterface
      */
     public function delete($id)
     {
-        //FIXME check for non-existent
+        // FIXME check for non-existent
         $this->getGroupsManager()->deleteGroup(array(
             'group' => $id
         ));

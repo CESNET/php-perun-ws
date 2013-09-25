@@ -4,6 +4,7 @@ namespace PerunWs\User\Service;
 
 use PerunWs\Perun\Service\AbstractService;
 use InoPerunApi\Manager\GenericManager;
+use InoPerunApi\Manager\Exception\PerunErrorException;
 
 
 /**
@@ -11,6 +12,8 @@ use InoPerunApi\Manager\GenericManager;
  */
 class Service extends AbstractService implements ServiceInterface
 {
+
+    const PERUN_EXCEPTION_USER_NOT_EXISTS = 'UserNotExistsException';
 
     protected $usersManagerName = 'usersManager';
 
