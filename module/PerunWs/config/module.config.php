@@ -224,7 +224,7 @@ return array(
         ),
         
         'authentication' => array(
-            'adapter' => 'PerunWs\Authentication\Adapter\Simple',
+            'adapter' => 'PerunWs\Authentication\Adapter\HttpBasic',
             'options' => array(
                 'auth_file_path' => '/path/to/file'
             )
