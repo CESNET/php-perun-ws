@@ -6,7 +6,7 @@ use PhlyRestfully\Exception\RuntimeException;
 use Zend\EventManager\EventManagerInterface;
 use Zend\EventManager\AbstractListenerAggregate;
 use PhlyRestfully\ResourceEvent;
-use PerunWs\Group\Service\ServiceInterface;
+use PerunWs\Group;
 use PerunWs\Group\Service\Exception\MemberRetrievalException;
 
 
@@ -17,7 +17,7 @@ class Listener extends AbstractListenerAggregate
 {
 
     /**
-     * @var ServiceInterface
+     * @var Group\Service\ServiceInterface
      */
     protected $service;
 
@@ -25,9 +25,27 @@ class Listener extends AbstractListenerAggregate
     /**
      * Constructor.
      * 
-     * @param ServiceInterface $service
+     * @param Group\Service\ServiceInterface $service
      */
-    public function __construct(ServiceInterface $service)
+    public function __construct(Group\Service\ServiceInterface $service)
+    {
+        $this->setService($service);
+    }
+
+
+    /**
+     * @return Group\Service\ServiceInterface
+     */
+    public function getService()
+    {
+        return $this->service;
+    }
+
+
+    /**
+     * @param Group\Service\ServiceInterface $service
+     */
+    public function setService($service)
     {
         $this->service = $service;
     }

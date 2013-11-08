@@ -63,4 +63,13 @@ abstract class AbstractCachedService
             $method
         ), $arguments);
     }
+
+
+    public function directCall($method, array $arguments)
+    {
+        return call_user_func_array(array(
+            $this->objectCache->getOptions()->getObject(),
+            $method
+        ), $arguments);
+    }
 }

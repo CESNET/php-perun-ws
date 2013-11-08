@@ -4,6 +4,7 @@ namespace PerunWsTest\Group\Service;
 
 use Zend\Stdlib\Parameters;
 use PerunWs\Group\Service\Service;
+use InoPerunApi\Manager\Exception\PerunErrorException;
 
 
 class ServiceTest extends \PHPUnit_Framework_Testcase
@@ -102,6 +103,49 @@ class ServiceTest extends \PHPUnit_Framework_Testcase
     }
 
 
+    public function testFetchWithGeneralException()
+    {
+        $this->setExpectedException('Exception', 'general exception');
+        
+        $id = 123;
+        
+        $groupsManager = $this->getManagerMock(array(
+            'getGroupById'
+        ));
+        $groupsManager->expects($this->once())
+            ->method('getGroupById')
+            ->with(array(
+            'id' => $id
+        ))
+            ->will($this->throwException(new \Exception('general exception')));
+        
+        $this->service->setGroupsManager($groupsManager);
+        $this->service->fetch($id);
+    }
+
+
+    public function testFetchWithNotExistsException()
+    {
+        $id = 123;
+        
+        $exception = new PerunErrorException('perun error');
+        $exception->setErrorName(Service::PERUN_EXCEPTION_GROUP_NOT_EXISTS);
+        
+        $groupsManager = $this->getManagerMock(array(
+            'getGroupById'
+        ));
+        $groupsManager->expects($this->once())
+            ->method('getGroupById')
+            ->with(array(
+            'id' => $id
+        ))
+            ->will($this->throwException($exception));
+        
+        $this->service->setGroupsManager($groupsManager);
+        $this->assertNull($this->service->fetch($id));
+    }
+
+
     public function testCreate()
     {
         $voId = 123;
@@ -120,11 +164,10 @@ class ServiceTest extends \PHPUnit_Framework_Testcase
         $entityFactory = $this->getEntityFactoryMock();
         $entityFactory->expects($this->once())
             ->method('createEntityWithName')
-            ->with('Group', 
-            array(
-                'name' => $data->name,
-                'description' => $data->description
-            ))
+            ->with('Group', array(
+            'name' => $data->name,
+            'description' => $data->description
+        ))
             ->will($this->returnValue($group));
         $this->service->setEntityFactory($entityFactory);
         
@@ -142,8 +185,10 @@ class ServiceTest extends \PHPUnit_Framework_Testcase
         
         $this->assertSame($newGroup, $this->service->create($data));
     }
-
-
+    
+    /*
+    public function testPatch() {}
+    */
     public function testDelete()
     {
         $id = 123;
@@ -165,6 +210,7 @@ class ServiceTest extends \PHPUnit_Framework_Testcase
     public function testFetchMembers()
     {
         $id = 123;
+        $users = $this->getUserCollectionMock();
         
         $groupsManager = $this->getManagerMock(array(
             'getGroupRichMembers'
@@ -173,40 +219,59 @@ class ServiceTest extends \PHPUnit_Framework_Testcase
             ->method('getGroupRichMembers')
             ->with(array(
             'group' => $id
+        ))
+            ->will($this->returnValue($users));
+        $this->service->setGroupsManager($groupsManager);
+        
+        $this->assertSame($users, $this->service->fetchMembers($id));
+    }
+
+
+    public function testFetchMembersWithGeneralException()
+    {
+        $this->setExpectedException('Exception', 'general exception');
+        
+        $id = 123;
+        
+        $exception = new \Exception('general exception');
+        
+        $groupsManager = $this->getManagerMock(array(
+            'getGroupRichMembers'
         ));
+        $groupsManager->expects($this->once())
+            ->method('getGroupRichMembers')
+            ->with(array(
+            'group' => $id
+        ))
+            ->will($this->throwException($exception));
         $this->service->setGroupsManager($groupsManager);
         
         $this->service->fetchMembers($id);
     }
 
 
-    /* FIXME
-    public function testFetchUserGroupsWithInvalidMember()
+    public function testFetchMembersWithNotExistsException()
     {
-        $this->setExpectedException('PerunWs\Group\Service\Exception\MemberRetrievalException');
+        $this->setExpectedException('PerunWs\Group\Service\Exception\GroupRetrievalException');
         
-        $userId = 123;
-        $voId = 456;
+        $id = 123;
         
-        $this->service->setParameters(new Parameters(array(
-            'vo_id' => $voId
-        )));
+        $exception = new PerunErrorException();
+        $exception->setErrorName(Service::PERUN_EXCEPTION_GROUP_NOT_EXISTS);
         
-        $membersManager = $this->getManagerMock(array(
-            'getMemberByUser'
+        $groupsManager = $this->getManagerMock(array(
+            'getGroupRichMembers'
         ));
-        $membersManager->expects($this->once())
-            ->method('getMemberByUser')
+        $groupsManager->expects($this->once())
+            ->method('getGroupRichMembers')
             ->with(array(
-            'vo' => $voId,
-            'user' => $userId
+            'group' => $id
         ))
-            ->will($this->throwException(new \Exception()));
-        $this->service->setMembersManager($membersManager);
+            ->will($this->throwException($exception));
+        $this->service->setGroupsManager($groupsManager);
         
-        $this->service->fetchUserGroups($userId);
+        $this->service->fetchMembers($id);
     }
-    */
 
 
     public function testFetchUserGroups()
@@ -249,6 +314,162 @@ class ServiceTest extends \PHPUnit_Framework_Testcase
         
         $this->assertSame($groups, $this->service->fetchUserGroups($userId, $groupId));
     }
+
+
+    public function testAddUserToGroup()
+    {
+        $userId = 123;
+        $memberId = 456;
+        $groupId = 789;
+        
+        $member = $this->getMemberMock($memberId);
+        
+        $service = $this->getMockBuilder('PerunWs\Group\Service\Service')
+            ->setMethods(array(
+            'getMemberByUser'
+        ))
+            ->disableOriginalConstructor()
+            ->getMock();
+        $service->expects($this->once())
+            ->method('getMemberByUser')
+            ->with($userId)
+            ->will($this->returnValue($member));
+        
+        $groupsManager = $this->getManagerMock(array(
+            'addMember'
+        ));
+        $groupsManager->expects($this->once())
+            ->method('addMember')
+            ->with(array(
+            'group' => $groupId,
+            'member' => $memberId
+        ));
+        $service->setGroupsManager($groupsManager);
+        
+        $this->assertSame($member, $service->addUserToGroup($userId, $groupId));
+    }
+
+
+    public function testRemoveUserFromGroup()
+    {
+        $userId = 123;
+        $memberId = 456;
+        $groupId = 789;
+        
+        $member = $this->getMemberMock($memberId);
+        
+        $service = $this->getMockBuilder('PerunWs\Group\Service\Service')
+            ->setMethods(array(
+            'getMemberByUser'
+        ))
+            ->disableOriginalConstructor()
+            ->getMock();
+        $service->expects($this->once())
+            ->method('getMemberByUser')
+            ->with($userId)
+            ->will($this->returnValue($member));
+        
+        $groupsManager = $this->getManagerMock(array(
+            'removeMember'
+        ));
+        $groupsManager->expects($this->once())
+            ->method('removeMember')
+            ->with(array(
+            'group' => $groupId,
+            'member' => $memberId
+        ));
+        $service->setGroupsManager($groupsManager);
+        
+        $this->assertTrue($service->removeUserFromGroup($userId, $groupId));
+    }
+
+
+    public function testGetMemberByUserWithGeneralException()
+    {
+        $this->setExpectedException('InoPerunApi\Manager\Exception\PerunErrorException', 'general error');
+        
+        $voId = 123;
+        $userId = 456;
+        
+        $exception = new PerunErrorException('general error');
+        
+        $membersManager = $this->getManagerMock(array(
+            'getMemberByUser'
+        ));
+        $membersManager->expects($this->once())
+            ->method('getMemberByUser')
+            ->with(array(
+            'vo' => $voId,
+            'user' => $userId
+        ))
+            ->will($this->throwException($exception));
+        
+        $this->service->setMembersManager($membersManager);
+        $this->service->setParameters(new Parameters(array(
+            'vo_id' => $voId
+        )));
+        
+        $this->service->getMemberByUser($userId);
+    }
+
+
+    public function testGetMemberByUserWithNotExistsException()
+    {
+        $this->setExpectedException('PerunWs\Group\Service\Exception\MemberRetrievalException');
+        
+        $voId = 123;
+        $userId = 456;
+        
+        $exception = new PerunErrorException();
+        $exception->setErrorName(Service::PERUN_EXCEPTION_USER_NOT_EXISTS);
+        
+        $membersManager = $this->getManagerMock(array(
+            'getMemberByUser'
+        ));
+        $membersManager->expects($this->once())
+            ->method('getMemberByUser')
+            ->with(array(
+            'vo' => $voId,
+            'user' => $userId
+        ))
+            ->will($this->throwException($exception));
+        
+        $this->service->setMembersManager($membersManager);
+        $this->service->setParameters(new Parameters(array(
+            'vo_id' => $voId
+        )));
+        
+        $this->service->getMemberByUser($userId);
+    }
+
+
+    public function testGetMemberByUser()
+    {
+        $voId = 123;
+        $userId = 456;
+        $member = $this->getMemberMock();
+        
+        $exception = new PerunErrorException();
+        $exception->setErrorName(Service::PERUN_EXCEPTION_USER_NOT_EXISTS);
+        
+        $membersManager = $this->getManagerMock(array(
+            'getMemberByUser'
+        ));
+        $membersManager->expects($this->once())
+            ->method('getMemberByUser')
+            ->with(array(
+            'vo' => $voId,
+            'user' => $userId
+        ))
+            ->will($this->returnValue($member));
+        
+        $this->service->setMembersManager($membersManager);
+        $this->service->setParameters(new Parameters(array(
+            'vo_id' => $voId
+        )));
+        
+        $this->assertSame($member, $this->service->getMemberByUser($userId));
+    }
     
     /*
      * 
@@ -280,6 +501,13 @@ class ServiceTest extends \PHPUnit_Framework_Testcase
     {
         $group = $this->getMock('InoPerunApi\Entity\Group');
         return $group;
+    }
+
+
+    protected function getUserCollectionMock()
+    {
+        $userCollection = $this->getMock('InoPerunApi\Entity\Collection\UserCollection');
+        return $userCollection;
     }
 
 

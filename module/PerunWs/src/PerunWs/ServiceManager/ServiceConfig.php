@@ -112,6 +112,12 @@ class ServiceConfig extends Config
                 
                 $service = new Group\Service\Service($services->get('PerunWs\ServiceParameters'));
                 $service->setEntityManagerFactory($entityManagerFactory);
+                
+                $cacheStorage = $services->get('PerunWs\CacheStorage');
+                if ($cacheStorage) {
+                    $service = new Group\Service\CachedService($service, $cacheStorage);
+                }
+                
                 return $service;
             },
             

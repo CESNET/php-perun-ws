@@ -36,6 +36,12 @@ class HydratorTest extends \PHPUnit_Framework_TestCase
         $displayName = 'Ivan Novakov';
         $organization = 'Foo Inc.';
         $mail = 'novakov@foo.org';
+        $phone = '123456';
+        $preferredLanguage = 'pt';
+        $principalNames = array(
+            'foo',
+            'bar'
+        );
         
         $user = new User(array(
             'id' => $id,
@@ -53,6 +59,18 @@ class HydratorTest extends \PHPUnit_Framework_TestCase
                 new Attribute(array(
                     'friendlyName' => 'displayName',
                     'value' => $displayName
+                )),
+                new Attribute(array(
+                    'friendlyName' => 'phone',
+                    'value' => $phone
+                )),
+                new Attribute(array(
+                    'friendlyName' => 'preferredLanguage',
+                    'value' => $preferredLanguage
+                )),
+                new Attribute(array(
+                    'friendlyName' => 'eduPersonPrincipalNames',
+                    'value' => $principalNames
                 ))
             ))
         ));
@@ -64,5 +82,8 @@ class HydratorTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($displayName, $data['display_name']);
         $this->assertSame($mail, $data['mail']);
         $this->assertSame($organization, $data['organization']);
+        $this->assertSame($phone, $data['phone']);
+        $this->assertSame($preferredLanguage, $data['language']);
+        $this->assertSame($principalNames, $data['principal_names']);
     }
 }

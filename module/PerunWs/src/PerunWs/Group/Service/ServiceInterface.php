@@ -2,11 +2,13 @@
 
 namespace PerunWs\Group\Service;
 
+use PerunWs\Perun;
+
 
 /**
  * Group service interface.
  */
-interface ServiceInterface
+interface ServiceInterface extends Perun\Service\ServiceInterface
 {
 
 
