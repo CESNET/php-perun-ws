@@ -88,12 +88,14 @@ class Listener extends AbstractListenerAggregate
             $params['searchString'] = $search;
         }
         
+        /* OBSOLETE
         $principal = $e->getQueryParam('principal');
         if (null !== $principal && ! preg_match('/^[\w\._-]+@[\w\._-]+$/', $principal)) {
             throw new InvalidArgumentException('Invalid principal name', 400);
         } else {
             $params['principal'] = $principal;
         }
+        */
         
         $users = $this->service->fetchAll($params);
         

@@ -35,6 +35,19 @@ return array(
             ),
             
             /*
+             * /principal/:principal_name
+             */
+            'principal' => array(
+                'type' => 'Segment',
+                'options' => array(
+                    'route' => '/principal[/:principal_name]',
+                    'defaults' => array(
+                        'controller' => 'PerunWs\PrincipalController'
+                    )
+                )
+            ),
+            
+            /*
              * /groups/{group_id}
              */
             'groups' => array(
@@ -101,6 +114,18 @@ return array(
                     'get'
                 ),
                 'route_name' => 'users/user-groups'
+            ),
+            
+            'PerunWs\PrincipalController' => array(
+                'identifier_name' => 'principal_name',
+                'listener' => 'PerunWs\PrincipalListener',
+                'collection_http_options' => array(
+                    'get'
+                ),
+                'resource_http_options' => array(
+                    'get'
+                ),
+                'route_name' => 'principal'
             ),
             
             'PerunWs\GroupController' => array(

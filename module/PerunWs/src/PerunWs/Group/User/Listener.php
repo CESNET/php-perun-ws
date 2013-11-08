@@ -4,9 +4,10 @@ namespace PerunWs\Group\User;
 
 use Zend\EventManager\EventManagerInterface;
 use Zend\EventManager\AbstractListenerAggregate;
-use PerunWs\Group\Service\ServiceInterface;
 use PhlyRestfully\ResourceEvent;
 use PhlyRestfully\HalResource;
+use PhlyRestfully\Exception\DomainException;
+use PerunWs\Group\Service\ServiceInterface;
 use PerunWs\Group\Service\Exception\GroupRetrievalException;
 use PerunWs\Group\Service\Exception\MemberRetrievalException;
 
@@ -110,11 +111,10 @@ class Listener extends AbstractListenerAggregate
             throw new DomainException($e->getMessage(), 404, $e);
         }
         
-        $resource = new HalResource(
-            array(
-                'user_id' => $userId,
-                'group_id' => $groupId
-            ), $userId);
+        $resource = new HalResource(array(
+            'user_id' => $userId,
+            'group_id' => $groupId
+        ), $userId);
         
         return $resource;
     }

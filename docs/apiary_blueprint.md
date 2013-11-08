@@ -1,4 +1,4 @@
-HOST: https://shongo-auth.cesnet.cz/perun-ng/
+HOST: https://shongo-auth.cesnet.cz/devel/perun/
 
 --- Shongo Perun Web Service ---
 
@@ -67,6 +67,10 @@ GET /users{?search}
             "language": "en",
             "member_id": 123,
             "member_status": "VALID",
+            "principal_names": [
+                "novakov@cesnet.cz",
+                "novakoi@fel.cvut.cz"
+            ],
             "_links": {
                 "self": {
                     "href": "/users/1"
@@ -78,6 +82,9 @@ GET /users{?search}
             "last_name": "Vomáčka",
             "display_name": "Franta Vomáčka",
             "mail": "franta@email.cz",
+            "principal_names": [
+                "vomacka@cesnet.cz",
+            ],
             "_links": {
                 "self": {
                     "href": "/users/2"
@@ -105,9 +112,13 @@ GET /users/{id}
     "phone": "+420 111 222 333",
     "organization": "CESNET",
     "language": "en",
+    "principal_names": [
+        "novakov@cesnet.cz",
+        "novakoi@fel.cvut.cz"
+    ],
     "_links": {
         "self": {
-            "href": "/users/1
+            "href": "/users/1"
         }
     }
 }
@@ -288,3 +299,23 @@ PUT /groups/{group_id}/users/{user_id}
 Remove a user from the group
 DELETE /groups/{group_id}/users/{user_id}
 < 204
+
+-- Principal resources --
+
+Get a user by principal name (eduPersonPrincipalName).
+GET /principal/{principal_name}
+< 200
+< Content-Type: application/json
+{
+    "id": 123,
+    "first_name": "Ivan",
+    "last_name": "Novakov",
+    "_links": {
+        "self": {
+            "href": "/principal/novakov@cesnet.cz"
+        },
+        "user": {
+            "href": "/users/123"
+        }
+    }
+}

@@ -29,6 +29,8 @@ class Hydrator implements HydratorInterface
     const FIELD_DISPLAY_NAME = 'display_name';
 
     const FIELD_LANGUAGE = 'language';
+    
+    const FIELD_PRINCIPAL_NAMES = 'principal_names';
 
     /**
      * Maps Perun attribute names to local array field names.
@@ -40,7 +42,8 @@ class Hydrator implements HydratorInterface
         'preferredMail' => self::FIELD_MAIL,
         'displayName' => self::FIELD_DISPLAY_NAME,
         'phone' => self::FIELD_PHONE,
-        'preferredLanguage' => self::FIELD_LANGUAGE
+        'preferredLanguage' => self::FIELD_LANGUAGE,
+        'eduPersonPrincipalNames' => self::FIELD_PRINCIPAL_NAMES
     );
 
 
@@ -61,7 +64,7 @@ class Hydrator implements HydratorInterface
         if (! $user instanceof User) {
             throw new UnsupportedObjectException(get_class($user));
         }
-        
+
         $data = array(
             self::FIELD_ID => $user->getId(),
             self::FIELD_FIRST_NAME => $user->getFirstName(),

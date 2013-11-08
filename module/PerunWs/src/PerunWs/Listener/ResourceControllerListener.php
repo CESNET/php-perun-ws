@@ -4,6 +4,7 @@ namespace PerunWs\Listener;
 
 use Zend\EventManager\SharedEventManagerInterface;
 use Zend\EventManager\EventInterface;
+use PhlyRestfully\Link;
 
 
 class ResourceControllerListener extends AbstractSharedListenerAggregate
@@ -22,6 +23,11 @@ class ResourceControllerListener extends AbstractSharedListenerAggregate
         $this->addListener($sharedEvents, $this->collectionControllers, 'getList.post', array(
             $this,
             'onGetListPost'
+        ));
+        
+        $this->addListener($sharedEvents, 'PerunWs\PrincipalController', 'get.post', array(
+            $this,
+            'onPrincipalGetPost'
         ));
     }
 
@@ -44,5 +50,33 @@ class ResourceControllerListener extends AbstractSharedListenerAggregate
             'count' => $count,
             'total' => $total
         ));
+    }
+
+
+    /**
+     * Callback for the "get.post" controller event on the PrincipalController.
+     * Adjusts the links to self and to the user resource.
+     * 
+     * @param EventInterface $e
+     */
+    public function onPrincipalGetPost(EventInterface $e)
+    {
+        /* @var $resource \PhlyRestfully\HalResource */
+        $resource = $e->getParam('resource');
+        $principalName = $e->getParam('id');
+        
+        $link = new Link('user');
+        $link->setRoute('users', array(
+            'user_id' => $resource->id
+        ));
+        
+        /* @var $links \PhlyRestfully\LinkCollection */
+        $links = $resource->getLinks();
+        
+        $links->get('self')->setRouteParams(array(
+            'principal_name' => $principalName
+        ));
+        
+        $links->add($link);
     }
 }

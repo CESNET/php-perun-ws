@@ -2,16 +2,18 @@
 
 namespace PerunWs\ServiceManager;
 
+use Zend\Log\Logger;
 use Zend\Stdlib\Parameters;
 use Zend\ServiceManager\Config;
 use InoPerunApi\Client\ClientFactory;
 use InoPerunApi\Manager\Factory\GenericFactory;
 use PerunWs\User;
 use PerunWs\Group;
+use PerunWs\Principal;
 use PerunWs\Hydrator\DefaultHydrator;
 use PerunWs\Listener;
 use PerunWs\Exception\UndefinedClassException;
-use Zend\Log\Logger;
+
 
 
 class ServiceConfig extends Config
@@ -123,6 +125,11 @@ class ServiceConfig extends Config
             'PerunWs\GroupUsersListener' => function ($services)
             {
                 return new Group\User\Listener($services->get('PerunWs\GroupService'));
+            },
+            
+            'PerunWs\PrincipalListener' => function ($services) 
+            {
+                return new Principal\Listener($services->get('PerunWs\UserService'));
             },
             
             /**

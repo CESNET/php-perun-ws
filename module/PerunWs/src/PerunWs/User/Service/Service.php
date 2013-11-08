@@ -31,6 +31,42 @@ class Service extends AbstractService implements ServiceInterface
 
 
     /**
+     * @return string
+     */
+    public function getUsersManagerName()
+    {
+        return $this->usersManagerName;
+    }
+
+
+    /**
+     * @param string $usersManagerName
+     */
+    public function setUsersManagerName($usersManagerName)
+    {
+        $this->usersManagerName = $usersManagerName;
+    }
+
+
+    /**
+     * @return string
+     */
+    public function getMembersManagerName()
+    {
+        return $this->membersManagerName;
+    }
+
+
+    /**
+     * @param string $membersManagerName
+     */
+    public function setMembersManagerName($membersManagerName)
+    {
+        $this->membersManagerName = $membersManagerName;
+    }
+
+
+    /**
      * Returns the current users entity manager.
      * 
      * @return GenericManager
@@ -87,10 +123,9 @@ class Service extends AbstractService implements ServiceInterface
     public function fetch($id)
     {
         try {
-            $user = $this->getUsersManager()->getRichUserWithAttributes(
-                array(
-                    'user' => $id
-                ));
+            $user = $this->getUsersManager()->getRichUserWithAttributes(array(
+                'user' => $id
+            ));
         } catch (PerunErrorException $e) {
             if (self::PERUN_EXCEPTION_USER_NOT_EXISTS == $e->getErrorName()) {
                 return null;
@@ -109,18 +144,42 @@ class Service extends AbstractService implements ServiceInterface
     public function fetchAll(array $params = array())
     {
         $params['vo'] = $this->getVoId();
-        if (isset($params['principal'])) {
-            $users = $this->getUsersManager()->getUsersByAttributeValue(
-                array(
-                    'attributeName' => $this->getPrincipalNamesAttributeName(),
-                    'attributeValue' => $params['principal']
-                ));
-        } elseif (isset($params['searchString'])) {
+        
+        if (isset($params['searchString'])) {
             $users = $this->getMembersManager()->findRichMembersWithAttributesInVo($params);
         } else {
             $users = $this->getMembersManager()->getRichMembersWithAttributes($params);
         }
         
         return $users;
+    }
+
+
+    /**
+     * Fetches a user by his principal name.
+     * 
+     * @param string $principalName
+     * @throws Exception\MultipleUsersPerPrincipalNameException
+     * @return \InoPerunApi\Entity\User
+     */
+    public function fetchByPrincipalName($principalName)
+    {
+        $params = array(
+            'attributeName' => $this->getPrincipalNamesAttributeName(),
+            'attributeValue' => $principalName
+        );
+        
+        /* @var $users \InoPerunApi\Entity\Collection\UserCollection */
+        $users = $this->getUsersManager()->getUsersByAttributeValue($params);
+        
+        if (! $users->count()) {
+            return null;
+        }
+        
+        if (1 < $users->count()) {
+            throw new Exception\MultipleUsersPerPrincipalNameException(sprintf("Found multiple (%d) users with principal name '%s'", $users->count(), $principalName));
+        }
+        
+        return $users->getAt(0);
     }
 }
