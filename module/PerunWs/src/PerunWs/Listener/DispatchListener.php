@@ -130,6 +130,16 @@ class DispatchListener extends AbstractListenerAggregate implements EventManager
             return $response;
         }
         
+        /*
+         * If there is a query parameter "fresh = 1", do not read from the cache.
+         */
+        if (1 == $request->getQuery('fresh')) {
+            $cacheStorage = $event->getApplication()
+                ->getServiceManager()
+                ->get('PerunWs\CacheStorage');
+            $cacheStorage->getOptions()->setReadable(false);
+        }
+        
         $event->setParam('clientId', $clientInfo->getClientId());
     }
 

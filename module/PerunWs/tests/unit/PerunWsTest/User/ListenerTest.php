@@ -18,9 +18,126 @@ class ListenerTest extends \PHPUnit_Framework_TestCase
     }
 
 
-    public function test()
+    public function testAttach()
     {
-        $this->assertTrue(true);
+        $eventSettings = array(
+            'fetch' => 'onFetch',
+            'fetchAll' => 'onFetchAll'
+        );
+        
+        $events = $this->getEventsMock();
+        
+        $i = 0;
+        foreach ($eventSettings as $eventName => $callbackName) {
+            $events->expects($this->at($i ++))
+                ->method('attach')
+                ->with($eventName, array(
+                $this->listener,
+                $callbackName
+            ));
+        }
+        
+        $this->listener->attach($events);
+    }
+
+
+    public function testOnFetchWithNotFound()
+    {
+        $this->setExpectedException('PhlyRestfully\Exception\DomainException', null, 404);
+        
+        $id = 123;
+        
+        $resourceEvent = $this->getResourceEventMock();
+        $resourceEvent->expects($this->once())
+            ->method('getParam')
+            ->with('id')
+            ->will($this->returnValue($id));
+        
+        $service = $this->getServiceMock();
+        $service->expects($this->once())
+            ->method('fetch')
+            ->with($id)
+            ->will($this->returnValue(null));
+        
+        $this->listener->setService($service);
+        $this->listener->onFetch($resourceEvent);
+    }
+
+
+    public function testOnFetch()
+    {
+        $id = 123;
+        $user = $this->getMock('InoPerunApi\Entity\User');
+        
+        $resourceEvent = $this->getResourceEventMock();
+        $resourceEvent->expects($this->once())
+            ->method('getParam')
+            ->with('id')
+            ->will($this->returnValue($id));
+        
+        $service = $this->getServiceMock();
+        $service->expects($this->once())
+            ->method('fetch')
+            ->with($id)
+            ->will($this->returnValue($user));
+        
+        $this->listener->setService($service);
+        $this->assertSame($user, $this->listener->onFetch($resourceEvent));
+    }
+
+
+    public function testOnFetchAll()
+    {
+        $userCollection = $this->getUserCollectionMock();
+        $resourceEvent = $this->getResourceEventMock();
+        
+        $service = $this->getServiceMock();
+        $service->expects($this->once())
+            ->method('fetchAll')
+            ->will($this->returnValue($userCollection));
+        
+        $this->listener->setService($service);
+        $this->assertSame($userCollection, $this->listener->onFetchAll($resourceEvent));
+    }
+
+
+    public function testOnFetchAllWithInvalidSearchString()
+    {
+        $this->setExpectedException('PhlyRestfully\Exception\InvalidArgumentException', 'Invalid search string', 400);
+        
+        $searchString = 'some invalid search string 123 #$%';
+        
+        $resourceEvent = $this->getResourceEventMock();
+        $resourceEvent->expects($this->once())
+            ->method('getQueryParam')
+            ->with('search')
+            ->will($this->returnValue($searchString));
+        
+        $this->listener->onFetchAll($resourceEvent);
+    }
+
+
+    public function testOnfetchAlllWithSearchString()
+    {
+        $searchString = 'validstring';
+        $userCollection = $this->getUserCollectionMock();
+        
+        $resourceEvent = $this->getResourceEventMock();
+        $resourceEvent->expects($this->once())
+            ->method('getQueryParam')
+            ->with('search')
+            ->will($this->returnValue($searchString));
+        
+        $service = $this->getServiceMock();
+        $service->expects($this->once())
+            ->method('fetchAll')
+            ->with(array(
+            'searchString' => $searchString
+        ))
+            ->will($this->returnValue($userCollection));
+        $this->listener->setService($service);
+        
+        $this->assertSame($userCollection, $this->listener->onFetchAll($resourceEvent));
     }
     
     /*
@@ -28,9 +145,35 @@ class ListenerTest extends \PHPUnit_Framework_TestCase
      */
     protected function getServiceMock()
     {
-        $service = $this->getMockBuilder('PerunWs\User\Service\Service')
-            ->disableOriginalConstructor()
-            ->getMock();
+        $service = $this->getMockBuilder('PerunWs\User\Service\ServiceInterface')->getMock();
         return $service;
+    }
+
+
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected function getEventsMock()
+    {
+        $events = $this->getMockBuilder('Zend\EventManager\EventManagerInterface')->getMock();
+        return $events;
+    }
+
+
+    /**
+     * 
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected function getResourceEventMock()
+    {
+        $resourceEvent = $this->getMockBuilder('PhlyRestfully\ResourceEvent')->getMock();
+        return $resourceEvent;
+    }
+
+
+    protected function getUserCollectionMock()
+    {
+        $userCollection = $this->getMock('InoPerunApi\Entity\Collection\UserCollection');
+        return $userCollection;
     }
 }

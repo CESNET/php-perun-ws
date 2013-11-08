@@ -156,11 +156,8 @@ class Service extends AbstractService implements ServiceInterface
 
 
     /**
-     * Fetches a user by his principal name.
-     * 
-     * @param string $principalName
-     * @throws Exception\MultipleUsersPerPrincipalNameException
-     * @return \InoPerunApi\Entity\User
+     * {@inheritdoc}
+     * @see \PerunWs\User\Service\ServiceInterface::fetchByPrincipalName()
      */
     public function fetchByPrincipalName($principalName)
     {
@@ -168,7 +165,7 @@ class Service extends AbstractService implements ServiceInterface
             'attributeName' => $this->getPrincipalNamesAttributeName(),
             'attributeValue' => $principalName
         );
-        
+
         /* @var $users \InoPerunApi\Entity\Collection\UserCollection */
         $users = $this->getUsersManager()->getUsersByAttributeValue($params);
         

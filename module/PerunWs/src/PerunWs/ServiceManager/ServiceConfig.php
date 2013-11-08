@@ -2,6 +2,7 @@
 
 namespace PerunWs\ServiceManager;
 
+use Zend\Cache;
 use Zend\Log\Logger;
 use Zend\Stdlib\Parameters;
 use Zend\ServiceManager\Config;
@@ -13,7 +14,6 @@ use PerunWs\Principal;
 use PerunWs\Hydrator\DefaultHydrator;
 use PerunWs\Listener;
 use PerunWs\Exception\UndefinedClassException;
-
 
 
 class ServiceConfig extends Config
@@ -34,6 +34,17 @@ class ServiceConfig extends Config
                 $logger = new Logger($config['perun_ws']['logger']);
                 $logger->addProcessor('requestId');
                 return $logger;
+            },
+            
+            'PerunWs\CacheStorage' => function ($services)
+            {
+                $config = $services->get('Config');
+                if (! isset($config['perun_ws']['cache_storage']) || ! is_array($config['perun_ws']['cache_storage'])) {
+                    throw new Exception\MissingConfigException('perun_ws/cache_storage');
+                }
+                
+                $cacheStorage = Cache\StorageFactory::factory($config['perun_ws']['cache_storage']);
+                return $cacheStorage;
             },
             
             'PerunWs\DefaultHydrator' => function ($services)
@@ -83,6 +94,12 @@ class ServiceConfig extends Config
                 
                 $service = new User\Service\Service($services->get('PerunWs\ServiceParameters'));
                 $service->setEntityManagerFactory($entityManagerFactory);
+                
+                $cacheStorage = $services->get('PerunWs\CacheStorage');
+                if ($cacheStorage) {
+                    $service = new User\Service\CachedService($service, $cacheStorage);
+                }
+                
                 return $service;
             },
             
@@ -127,7 +144,7 @@ class ServiceConfig extends Config
                 return new Group\User\Listener($services->get('PerunWs\GroupService'));
             },
             
-            'PerunWs\PrincipalListener' => function ($services) 
+            'PerunWs\PrincipalListener' => function ($services)
             {
                 return new Principal\Listener($services->get('PerunWs\UserService'));
             },

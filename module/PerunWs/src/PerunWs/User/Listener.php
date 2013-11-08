@@ -2,12 +2,11 @@
 
 namespace PerunWs\User;
 
-use PhlyRestfully\Exception\InvalidArgumentException;
 use Zend\EventManager\AbstractListenerAggregate;
 use Zend\EventManager\EventManagerInterface;
 use PhlyRestfully\ResourceEvent;
 use PhlyRestfully\Exception\DomainException;
-use PerunWs\User\Service\Service;
+use PhlyRestfully\Exception\InvalidArgumentException;
 
 
 /**
@@ -17,7 +16,7 @@ class Listener extends AbstractListenerAggregate
 {
 
     /**
-     * @var Service
+     * @var Service\ServiceInterface
      */
     protected $service;
 
@@ -25,9 +24,27 @@ class Listener extends AbstractListenerAggregate
     /**
      * Constructor.
      * 
-     * @param Service $service
+     * @param Service\ServiceInterface $service
      */
-    public function __construct(Service $service)
+    public function __construct(Service\ServiceInterface $service)
+    {
+        $this->setService($service);
+    }
+
+
+    /**
+     * @return Service\ServiceInterface
+     */
+    public function getService()
+    {
+        return $this->service;
+    }
+
+
+    /**
+     * @param Service\ServiceInterface $service
+     */
+    public function setService($service)
     {
         $this->service = $service;
     }
@@ -87,15 +104,6 @@ class Listener extends AbstractListenerAggregate
         } else {
             $params['searchString'] = $search;
         }
-        
-        /* OBSOLETE
-        $principal = $e->getQueryParam('principal');
-        if (null !== $principal && ! preg_match('/^[\w\._-]+@[\w\._-]+$/', $principal)) {
-            throw new InvalidArgumentException('Invalid principal name', 400);
-        } else {
-            $params['principal'] = $principal;
-        }
-        */
         
         $users = $this->service->fetchAll($params);
         

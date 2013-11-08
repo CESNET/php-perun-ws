@@ -9,6 +9,6 @@ class MissingParameterException extends \RuntimeException
 
     public function __construct($paramName)
     {
-        parent::__construct(sprintf("Missing paramtere '%s'", $paramName));
+        parent::__construct(sprintf("Missing parameter '%s'", $paramName));
     }
 }

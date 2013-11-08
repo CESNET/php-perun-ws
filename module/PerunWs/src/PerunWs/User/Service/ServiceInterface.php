@@ -2,11 +2,13 @@
 
 namespace PerunWs\User\Service;
 
+use PerunWs\Perun;
+
 
 /**
  * Service interface for manipulating users.
  */
-interface ServiceInterface
+interface ServiceInterface extends Perun\Service\ServiceInterface
 {
 
 
@@ -26,4 +28,14 @@ interface ServiceInterface
      * @return \InoPerunApi\Entity\User
      */
     public function fetch($id);
+
+
+    /**
+     * Fetches a user by his principal name.
+     *
+     * @param string $principalName
+     * @throws Exception\MultipleUsersPerPrincipalNameException
+     * @return \InoPerunApi\Entity\User
+     */
+    public function fetchByPrincipalName($principalName);
 }

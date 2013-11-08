@@ -16,6 +16,7 @@
         "zendframework/zend-log": ">=2.2.0",
         "zendframework/zend-mvc": ">=2.2.0",
         "zendframework/zend-config": ">=2.2.0",
+        "zendframework/zend-cache": ">=2.2.0",
         
         "zendframework/zend-form": ">=2.2.0",
         "zendframework/zend-serializer": ">=2.2.0",

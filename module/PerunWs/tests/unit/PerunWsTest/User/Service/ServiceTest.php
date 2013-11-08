@@ -16,6 +16,11 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $parameters = $this->getMock('Zend\Stdlib\Parameters');
+        $parameters->expects($this->any())
+            ->method('get')
+            ->with('principal_names_attribute_name')
+            ->will($this->returnValue('principalNames'));
+        
         $this->service = new Service($parameters);
     }
 
@@ -154,6 +159,54 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
             'searchString' => $searchString
         )));
     }
+
+
+    public function testFetchByPrincipalNameWithNotFound()
+    {
+        $principalName = 'foo';
+        $params = array(
+            'attributeName' => $this->service->getPrincipalNamesAttributeName(),
+            'attributeValue' => $principalName
+        );
+        $users = $this->getUserCollectionMock();
+        $users->expects($this->once())
+            ->method('count')
+            ->will($this->returnValue(0));
+        
+        $manager = $this->getManagerMock();
+        $manager->expects($this->once())
+            ->method('getUsersByAttributeValue')
+            ->with($params)
+            ->will($this->returnValue($users));
+        $this->service->setUsersManager($manager);
+        
+        $this->assertNull($this->service->fetchByPrincipalName($principalName));
+    }
+
+
+    public function testFetchByPrincipalNameWithMultipleFound()
+    {
+        $this->setExpectedException('PerunWs\User\Service\Exception\MultipleUsersPerPrincipalNameException');
+        
+        $principalName = 'foo';
+        $params = array(
+            'attributeName' => $this->service->getPrincipalNamesAttributeName(),
+            'attributeValue' => $principalName
+        );
+        $users = $this->getUserCollectionMock();
+        $users->expects($this->any())
+            ->method('count')
+            ->will($this->returnValue(2));
+        
+        $manager = $this->getManagerMock();
+        $manager->expects($this->once())
+            ->method('getUsersByAttributeValue')
+            ->with($params)
+            ->will($this->returnValue($users));
+        $this->service->setUsersManager($manager);
+        
+        $this->service->fetchByPrincipalName($principalName);
+    }
     
     /*
      * 
@@ -169,7 +222,8 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
             ->setMethods(array(
             'getRichUserWithAttributes',
             'getRichMembersWithAttributes',
-            'findRichMembersWithAttributesInVo'
+            'findRichMembersWithAttributesInVo',
+            'getUsersByAttributeValue'
         ))
             ->getMock();
         return $manager;
