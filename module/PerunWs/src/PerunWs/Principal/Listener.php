@@ -6,19 +6,19 @@ use Zend\EventManager\EventManagerInterface;
 use Zend\EventManager\AbstractListenerAggregate;
 use PhlyRestfully\ResourceEvent;
 use PhlyRestfully\Exception\DomainException;
-use PerunWs\User\Service\Service;
+use PerunWs\User\Service\ServiceInterface;
 
 
 class Listener extends AbstractListenerAggregate
 {
 
     /**
-     * @var Service
+     * @var ServiceInterface
      */
     protected $service;
 
 
-    public function __construct(Service $service)
+    public function __construct(ServiceInterface $service)
     {
         $this->service = $service;
     }
