@@ -28,7 +28,7 @@ class ListenerTest extends \PHPUnit_Framework_TestCase
 
     public function testOnFetchAllWithMemberRetrievalException()
     {
-        $this->setExpectedException('PhlyRestfully\Exception\RuntimeException', 'member error');
+        $this->setExpectedException('PhlyRestfully\Exception\RuntimeException', 'member error', 400);
         
         $userId = 123;
         
