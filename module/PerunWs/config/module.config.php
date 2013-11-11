@@ -252,9 +252,9 @@ return array(
             'adapter' => array(
                 'name' => 'filesystem',
                 'options' => array(
-                    'cache_dir' => '/data/var/cache/devel/perun',
+                    'cache_dir' => '/data/var/cache/perun',
                     'dir_level' => 2,
-                    'ttl' => 60,
+                    'ttl' => 3600,
                     'readable' => true,
                     'writable' => true
                 )

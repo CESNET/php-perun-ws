@@ -36,6 +36,24 @@ return array(
                 )
             )
         ),
+
+        'cache_storage' => array(
+            'adapter' => array(
+                'name' => 'filesystem',
+                'options' => array(
+                    'cache_dir' => '/data/var/cache/perun',
+                    'dir_level' => 2,
+                    'ttl' => 60,
+                    'readable' => true,
+                    'writable' => true
+                )
+            ),
+            'plugins' => array(
+                'serializer' => array(
+                    'serializer' => 'Zend\Serializer\Adapter\PhpSerialize'
+                )
+            )
+        ),
     
         'authentication' => array(
             'adapter' => 'PerunWs\Authentication\Adapter\HttpBasic',
