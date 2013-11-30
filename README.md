@@ -1,5 +1,7 @@
 # Perun Web Service
 
+[![Dependency Status](https://www.versioneye.com/user/projects/529a0118632bac7604000032/badge.png)](https://www.versioneye.com/user/projects/529a0118632bac7604000032)
+
 [Perun](http://perun.metacentrum.cz/web/index.shtml) is a content management system that handles user identities, groups, resources and services. 
 It is currently developed by [CESNET](http://www.ces.net/), [CERIT-SC](http://www.cerit-sc.cz/en/) together with students from [Masaryk University in Brno](http://www.muni.cz/).
 
