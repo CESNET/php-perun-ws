@@ -15,6 +15,8 @@ class Service extends AbstractService implements ServiceInterface
 
     const PERUN_EXCEPTION_USER_NOT_EXISTS = 'UserNotExistsException';
 
+    const PERUN_EXCEPTION_MEMBER_NOT_EXISTS = 'MemberNotExistsException';
+
     protected $usersManagerName = 'usersManager';
 
     protected $membersManagerName = 'membersManager';
@@ -123,6 +125,25 @@ class Service extends AbstractService implements ServiceInterface
     public function fetch($id)
     {
         try {
+            $member = $this->getMembersManager()->getMemberByUser(array(
+                'vo' => $this->getVoId(),
+                'user' => $id
+            ));
+            
+            $richMember = $this->getMembersManager()->getRichMemberWithAttributes(array(
+                'id' => $member->getId()
+            ));
+        } catch (PerunErrorException $e) {
+            if (self::PERUN_EXCEPTION_MEMBER_NOT_EXISTS == $e->getErrorName()) {
+                return null;
+            }
+            throw $e;
+        }
+        
+        return $richMember;
+        
+        /*
+        try {
             $user = $this->getUsersManager()->getRichUserWithAttributes(array(
                 'user' => $id
             ));
@@ -134,6 +155,7 @@ class Service extends AbstractService implements ServiceInterface
         }
         
         return $user;
+        */
     }
 
 
@@ -165,11 +187,11 @@ class Service extends AbstractService implements ServiceInterface
             'attributeName' => $this->getPrincipalNamesAttributeName(),
             'attributeValue' => $principalName
         );
-
+        
         /* @var $users \InoPerunApi\Entity\Collection\UserCollection */
         $users = $this->getUsersManager()->getUsersByAttributeValue($params);
         
-        if (! $users->count()) {
+        if (! $users || ! $users->count()) {
             return null;
         }
         
