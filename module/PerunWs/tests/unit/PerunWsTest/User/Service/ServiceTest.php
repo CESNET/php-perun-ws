@@ -49,22 +49,31 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
     }
 
 
-    public function testFetchWithNotExistsException()
+    public function testFetchWithMemberNotExistsException()
     {
         $id = 123;
-        $params = array(
-            'user' => $id
+        
+        $voId = 123;
+        $serviceParams = array(
+            'vo_id' => $voId
         );
+        $this->service->setParameters(new Parameters($serviceParams));
+        
+        $callParams = array(
+            'user' => $id,
+            'vo' => $voId
+        );
+        
         $exception = new PerunErrorException();
-        $exception->setErrorName(Service::PERUN_EXCEPTION_USER_NOT_EXISTS);
+        $exception->setErrorName(Service::PERUN_EXCEPTION_MEMBER_NOT_EXISTS);
         
         $manager = $this->getManagerMock();
         $manager->expects($this->once())
-            ->method('getRichUserWithAttributes')
-            ->with($params)
+            ->method('getMemberByUser')
+            ->with($callParams)
             ->will($this->throwException($exception));
         
-        $this->service->setUsersManager($manager);
+        $this->service->setMembersManager($manager);
         $this->assertNull($this->service->fetch($id));
     }
 
@@ -74,37 +83,68 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $this->setExpectedException('InoPerunApi\Manager\Exception\PerunErrorException');
         
         $id = 123;
-        $params = array(
-            'user' => $id
+        
+        $voId = 123;
+        $serviceParams = array(
+            'vo_id' => $voId
         );
+        $this->service->setParameters(new Parameters($serviceParams));
+        
+        $callParams = array(
+            'user' => $id,
+            'vo' => $voId
+        );
+        
+        $exception = new PerunErrorException();
         
         $manager = $this->getManagerMock();
         $manager->expects($this->once())
-            ->method('getRichUserWithAttributes')
-            ->with($params)
-            ->will($this->throwException(new PerunErrorException('perun exception')));
+            ->method('getMemberByUser')
+            ->with($callParams)
+            ->will($this->throwException($exception));
         
-        $this->service->setUsersManager($manager);
+        $this->service->setMembersManager($manager);
         $this->service->fetch($id);
     }
 
 
     public function testFetch()
     {
-        $id = 123;
+        $userId = 123;
+        $memberId = 456;
+        $voId = 789;
+        
         $params = array(
-            'user' => $id
+            'user' => $userId
         );
         $user = $this->getUserMock();
         
+        $member = $this->getMemberMock($memberId);
+        $richMember = $this->getRichMemberMock();
+        
+        $this->service->setParameters(new Parameters(array(
+            'vo_id' => $voId
+        )));
+        
         $manager = $this->getManagerMock();
         $manager->expects($this->once())
-            ->method('getRichUserWithAttributes')
-            ->with($params)
-            ->will($this->returnValue($user));
+            ->method('getMemberByUser')
+            ->with(array(
+            'vo' => $voId,
+            'user' => $userId
+        ))
+            ->will($this->returnValue($member));
         
-        $this->service->setUsersManager($manager);
-        $this->assertSame($user, $this->service->fetch($id));
+        $manager->expects($this->once())
+            ->method('getRichMemberWithAttributes')
+            ->with(array(
+            'id' => $memberId
+        ))
+            ->will($this->returnValue($richMember));
+        
+        $this->service->setMembersManager($manager);
+        
+        $this->assertSame($richMember, $this->service->fetch($userId));
     }
 
 
@@ -223,7 +263,9 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
             'getRichUserWithAttributes',
             'getRichMembersWithAttributes',
             'findRichMembersWithAttributesInVo',
-            'getUsersByAttributeValue'
+            'getUsersByAttributeValue',
+            'getMemberByUser',
+            'getRichMemberWithAttributes'
         ))
             ->getMock();
         return $manager;
@@ -259,5 +301,29 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
     {
         $userCollection = $this->getMock('InoPerunApi\Entity\Collection\UserCollection');
         return $userCollection;
+    }
+
+
+    protected function getMemberMock($id = null)
+    {
+        $member = $this->getMockBuilder('InoPerunApi\Entity\Member')
+            ->setMethods(array(
+            'getId'
+        ))
+            ->getMock();
+        if ($id) {
+            $member->expects($this->once())
+                ->method('getId')
+                ->will($this->returnValue($id));
+        }
+        
+        return $member;
+    }
+
+
+    protected function getRichMemberMock()
+    {
+        $richMember = $this->getMock('InoPerunApi\Entity\RichMember');
+        return $richMember;
     }
 }

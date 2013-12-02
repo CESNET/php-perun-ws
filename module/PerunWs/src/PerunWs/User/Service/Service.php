@@ -130,7 +130,7 @@ class Service extends AbstractService implements ServiceInterface
                 'user' => $id
             ));
             
-            $member = $this->getMembersManager()->getRichMemberWithAttributes(array(
+            $richMember = $this->getMembersManager()->getRichMemberWithAttributes(array(
                 'id' => $member->getId()
             ));
         } catch (PerunErrorException $e) {
@@ -140,7 +140,7 @@ class Service extends AbstractService implements ServiceInterface
             throw $e;
         }
 
-        return $member;
+        return $richMember;
         
         /*
         try {
