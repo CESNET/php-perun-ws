@@ -139,7 +139,7 @@ class Service extends AbstractService implements ServiceInterface
             }
             throw $e;
         }
-
+        
         return $richMember;
         
         /*
@@ -191,7 +191,7 @@ class Service extends AbstractService implements ServiceInterface
         /* @var $users \InoPerunApi\Entity\Collection\UserCollection */
         $users = $this->getUsersManager()->getUsersByAttributeValue($params);
         
-        if (! $users->count()) {
+        if (! $users || ! $users->count()) {
             return null;
         }
         

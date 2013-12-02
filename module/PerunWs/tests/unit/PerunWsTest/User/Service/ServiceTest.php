@@ -201,7 +201,26 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
     }
 
 
-    public function testFetchByPrincipalNameWithNotFound()
+    public function testFetchByPrincipalNameWithNullResult()
+    {
+        $principalName = 'foo';
+        $params = array(
+            'attributeName' => $this->service->getPrincipalNamesAttributeName(),
+            'attributeValue' => $principalName
+        );
+        
+        $manager = $this->getManagerMock();
+        $manager->expects($this->once())
+            ->method('getUsersByAttributeValue')
+            ->with($params)
+            ->will($this->returnValue(null));
+        $this->service->setUsersManager($manager);
+        
+        $this->assertNull($this->service->fetchByPrincipalName($principalName));
+    }
+
+
+    public function testFetchByPrincipalNameWithEmptyCollection()
     {
         $principalName = 'foo';
         $params = array(
