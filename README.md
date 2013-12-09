@@ -16,6 +16,16 @@ This project aims to implement a RESTful API for some of the functionalities pro
 
 - [API description with Apiary.io](http://docs.shongoperunws.apiary.io/)
 
+## Links
+
+* [The Perun Project](http://perun.metacentrum.cz/web/index.shtml)
+* [CESNET](http://www.ces.net/)
+
+
+## Author
+
+* [Ivan Novakov](http://novakov.cz/)
+
 ## License
 
 - [BSD 3 Clause](http://debug.cz/license/bsd-3-clause)
