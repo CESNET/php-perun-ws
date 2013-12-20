@@ -45,6 +45,17 @@ class CachedService extends AbstractCachedService implements ServiceInterface
      */
     public function patch($id, $data)
     {
+        // FIXME - invalidate/refresh cache
+        /*
+         * Invalidate:
+         *   - fetch($id)
+         *   - fetchAll()
+         */
+        $this->invalidateCall('fetch', array(
+            $id
+        ));
+        $this->invalidateCall('fetchAll', array());
+        
         return $this->directCall(__FUNCTION__, func_get_args());
     }
 
@@ -55,6 +66,17 @@ class CachedService extends AbstractCachedService implements ServiceInterface
      */
     public function delete($id)
     {
+        // FIXME - invalidate cache
+        /*
+         * Invalidate:
+         *   - fetch($id)
+         *   - fetchAll()
+         */
+        $this->invalidateCall('fetch', array(
+            $id
+        ));
+        $this->invalidateCall('fetchAll', array());
+        
         return $this->directCall(__FUNCTION__, func_get_args());
     }
 
@@ -85,6 +107,19 @@ class CachedService extends AbstractCachedService implements ServiceInterface
      */
     public function addUserToGroup($userId, $groupId)
     {
+        // FIXME - invalidate/refresh cache
+        /*
+         * Invalidate:
+         *   - fetchMembers($groupId)
+         *   - fetchUserGroups($userId)
+         */
+        $this->invalidateCall('fetchMembers', array(
+            $groupId
+        ));
+        $this->invalidateCall('fetchUserGroups', array(
+            $userId
+        ));
+        
         return $this->directCall(__FUNCTION__, func_get_args());
     }
 
@@ -95,6 +130,19 @@ class CachedService extends AbstractCachedService implements ServiceInterface
      */
     public function removeUserFromGroup($userId, $groupId)
     {
+        // FIXME - invalidate/refresh cache
+        /*
+         * Invalidate:
+         *   - fetchMembers($groupId)
+         *   - fetchUserGroups($userId)
+         */
+        $this->invalidateCall('fetchMembers', array(
+            $groupId
+        ));
+        $this->invalidateCall('fetchUserGroups', array(
+            $userId
+        ));
+        
         return $this->directCall(__FUNCTION__, func_get_args());
     }
 }
