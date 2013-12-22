@@ -145,6 +145,14 @@ class ServiceTest extends \PHPUnit_Framework_Testcase
         $this->assertNull($this->service->fetch($id));
     }
 
+    
+    public function testCreateWithNoName()
+    {
+        $this->setExpectedException('PerunWs\Group\Service\Exception\GroupCreationException', "Missing field 'name'");
+        
+        $data = new \stdClass();
+        $this->service->create($data);
+    }
 
     public function testCreate()
     {

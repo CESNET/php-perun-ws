@@ -5,6 +5,9 @@ namespace PerunWs\Group\Service;
 use PerunWs\Perun\Service\AbstractCachedService;
 
 
+/**
+ * Caching proxy service for the group service object.
+ */
 class CachedService extends AbstractCachedService implements ServiceInterface
 {
 
@@ -35,6 +38,12 @@ class CachedService extends AbstractCachedService implements ServiceInterface
      */
     public function create($data)
     {
+        /*
+         * Invalidate:
+         *   - fetchAll()
+         */
+        $this->invalidateCall('fetchAll', array());
+        
         return $this->directCall(__FUNCTION__, func_get_args());
     }
 
@@ -45,6 +54,16 @@ class CachedService extends AbstractCachedService implements ServiceInterface
      */
     public function patch($id, $data)
     {
+        /*
+         * Invalidate:
+         *   - fetch($id)
+         *   - fetchAll()
+         */
+        $this->invalidateCall('fetch', array(
+            $id
+        ));
+        $this->invalidateCall('fetchAll', array());
+        
         return $this->directCall(__FUNCTION__, func_get_args());
     }
 
@@ -55,6 +74,16 @@ class CachedService extends AbstractCachedService implements ServiceInterface
      */
     public function delete($id)
     {
+        /*
+         * Invalidate:
+         *   - fetch($id)
+         *   - fetchAll()
+         */
+        $this->invalidateCall('fetch', array(
+            $id
+        ));
+        $this->invalidateCall('fetchAll', array());
+        
         return $this->directCall(__FUNCTION__, func_get_args());
     }
 
@@ -85,6 +114,18 @@ class CachedService extends AbstractCachedService implements ServiceInterface
      */
     public function addUserToGroup($userId, $groupId)
     {
+        /*
+         * Invalidate:
+         *   - fetchMembers($groupId)
+         *   - fetchUserGroups($userId)
+         */
+        $this->invalidateCall('fetchMembers', array(
+            $groupId
+        ));
+        $this->invalidateCall('fetchUserGroups', array(
+            $userId
+        ));
+        
         return $this->directCall(__FUNCTION__, func_get_args());
     }
 
@@ -95,6 +136,18 @@ class CachedService extends AbstractCachedService implements ServiceInterface
      */
     public function removeUserFromGroup($userId, $groupId)
     {
+        /*
+         * Invalidate:
+         *   - fetchMembers($groupId)
+         *   - fetchUserGroups($userId)
+         */
+        $this->invalidateCall('fetchMembers', array(
+            $groupId
+        ));
+        $this->invalidateCall('fetchUserGroups', array(
+            $userId
+        ));
+        
         return $this->directCall(__FUNCTION__, func_get_args());
     }
 }

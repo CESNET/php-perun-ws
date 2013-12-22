@@ -72,4 +72,13 @@ abstract class AbstractCachedService
             $method
         ), $arguments);
     }
+
+
+    public function invalidateCall($method, array $arguments)
+    {
+        /* @var $cacheStorage \Zend\Cache\Storage\StorageInterface */
+        $cacheStorage = $this->objectCache->getOptions()->getStorage();
+        $key = $this->objectCache->generateKey($method, $arguments);
+        $cacheStorage->removeItem($key);
+    }
 }
