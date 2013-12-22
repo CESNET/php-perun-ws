@@ -20,7 +20,7 @@
         "zendframework/zend-form": "~2.2",
         "zendframework/zend-serializer": "~2.2",
         "phly/phly-restfully": "~2.2",
-        "ivan-novakov/php-perun-api": "~0.1"
+        "ivan-novakov/php-perun-api": "~0.1l"
     },
     "require-dev": {
         "phpunit/PHPUnit": "3.7.*"
