@@ -5,6 +5,9 @@ namespace PerunWs\Group\Service;
 use PerunWs\Perun\Service\AbstractCachedService;
 
 
+/**
+ * Caching proxy service for the group service object.
+ */
 class CachedService extends AbstractCachedService implements ServiceInterface
 {
 
@@ -51,7 +54,6 @@ class CachedService extends AbstractCachedService implements ServiceInterface
      */
     public function patch($id, $data)
     {
-        // FIXME - invalidate/refresh cache
         /*
          * Invalidate:
          *   - fetch($id)
@@ -72,7 +74,6 @@ class CachedService extends AbstractCachedService implements ServiceInterface
      */
     public function delete($id)
     {
-        // FIXME - invalidate cache
         /*
          * Invalidate:
          *   - fetch($id)
@@ -113,7 +114,6 @@ class CachedService extends AbstractCachedService implements ServiceInterface
      */
     public function addUserToGroup($userId, $groupId)
     {
-        // FIXME - invalidate/refresh cache
         /*
          * Invalidate:
          *   - fetchMembers($groupId)
@@ -136,7 +136,6 @@ class CachedService extends AbstractCachedService implements ServiceInterface
      */
     public function removeUserFromGroup($userId, $groupId)
     {
-        // FIXME - invalidate/refresh cache
         /*
          * Invalidate:
          *   - fetchMembers($groupId)

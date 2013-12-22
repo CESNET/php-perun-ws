@@ -44,7 +44,7 @@ class ServiceConfig extends Config
                 }
                 
                 $cacheStorage = Cache\StorageFactory::factory($config['perun_ws']['cache_storage']);
-                _dump(get_class($cacheStorage));
+
                 return $cacheStorage;
             },
             
