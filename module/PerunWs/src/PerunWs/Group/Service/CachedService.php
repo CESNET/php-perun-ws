@@ -35,6 +35,12 @@ class CachedService extends AbstractCachedService implements ServiceInterface
      */
     public function create($data)
     {
+        /*
+         * Invalidate:
+         *   - fetchAll()
+         */
+        $this->invalidateCall('fetchAll', array());
+        
         return $this->directCall(__FUNCTION__, func_get_args());
     }
 
