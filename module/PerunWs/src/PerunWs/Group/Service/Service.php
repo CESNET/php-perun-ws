@@ -15,7 +15,7 @@ class Service extends AbstractService implements ServiceInterface
 {
 
     const PERUN_EXCEPTION_GROUP_NOT_EXISTS = 'GroupNotExistsException';
-    
+
     const PERUN_EXCEPTION_USER_NOT_EXISTS = 'UserNotExistsException';
 
     /**
@@ -191,30 +191,38 @@ class Service extends AbstractService implements ServiceInterface
      */
     public function create($data)
     {
-        $group = $this->getEntityFactory()->createEntityWithName('Group', 
-            array(
-                'name' => $data->name,
-                'description' => $data->description
-            ));
+        if (! property_exists($data, 'name')) {
+            throw new Exception\GroupCreationException("Missing field 'name'", 400);
+        }
         
-        $newGroup = $this->getGroupsManager()->createGroup(
-            array(
-                'vo' => $this->getVoId(),
-                'group' => $group
-            ));
-        // _dump($newGroup);
+        $group = $this->getEntityFactory()->createEntityWithName('Group', array(
+            'name' => $data->name,
+            'description' => property_exists($data, 'description') ? $data->description : ''
+        ));
+        
+        $newGroup = $this->getGroupsManager()->createGroup(array(
+            'vo' => $this->getVoId(),
+            'group' => $group
+        ));
         
         return $newGroup;
     }
 
 
     /**
+     * FIXME
+     * Currently it doesn't work due to privilege exception:
+     * Error 14319175fa6: Principal /C=CZ/O=CESNET/CN=hroch.cesnet.cz is not authorized to perform action 'updateGroup'
+     * 
      * {@inheritdoc}
      * @see \PerunWs\Group\Service\ServiceInterface::patch()
      */
     public function patch($id, $data)
     {
-        // FIXME - make it work + tests
+        if (! property_exists($data, 'name')) {
+            throw new Exception\GroupCreationException("Missing field 'name'", 400);
+        }
+        
         $groupData = array(
             'id' => $id,
             'name' => $data->name,
@@ -251,10 +259,9 @@ class Service extends AbstractService implements ServiceInterface
     public function fetchMembers($id)
     {
         try {
-            $members = $this->getGroupsManager()->getGroupRichMembers(
-                array(
-                    'group' => $id
-                ));
+            $members = $this->getGroupsManager()->getGroupRichMembers(array(
+                'group' => $id
+            ));
         } catch (PerunErrorException $e) {
             if (self::PERUN_EXCEPTION_GROUP_NOT_EXISTS == $e->getErrorName()) {
                 throw new Exception\GroupRetrievalException(sprintf("Group ID:%d not found", $id), null, $e);
@@ -273,10 +280,9 @@ class Service extends AbstractService implements ServiceInterface
     public function fetchUserGroups($userId)
     {
         $member = $this->getMemberByUser($userId);
-        $groups = $this->getGroupsManager()->getAllMemberGroups(
-            array(
-                'member' => $member->getId()
-            ));
+        $groups = $this->getGroupsManager()->getAllMemberGroups(array(
+            'member' => $member->getId()
+        ));
         
         return $groups;
     }
@@ -289,11 +295,10 @@ class Service extends AbstractService implements ServiceInterface
     public function addUserToGroup($userId, $groupId)
     {
         $member = $this->getMemberByUser($userId);
-        $this->getGroupsManager()->addMember(
-            array(
-                'group' => $groupId,
-                'member' => $member->getId()
-            ));
+        $this->getGroupsManager()->addMember(array(
+            'group' => $groupId,
+            'member' => $member->getId()
+        ));
         
         return $member;
     }
@@ -306,11 +311,10 @@ class Service extends AbstractService implements ServiceInterface
     public function removeUserFromGroup($userId, $groupId)
     {
         $member = $this->getMemberByUser($userId);
-        $this->getGroupsManager()->removeMember(
-            array(
-                'group' => $groupId,
-                'member' => $member->getId()
-            ));
+        $this->getGroupsManager()->removeMember(array(
+            'group' => $groupId,
+            'member' => $member->getId()
+        ));
         
         return true;
     }
@@ -325,11 +329,10 @@ class Service extends AbstractService implements ServiceInterface
     public function getMemberByUser($userId)
     {
         try {
-            $member = $this->getMembersManager()->getMemberByUser(
-                array(
-                    'vo' => $this->getVoId(),
-                    'user' => $userId
-                ));
+            $member = $this->getMembersManager()->getMemberByUser(array(
+                'vo' => $this->getVoId(),
+                'user' => $userId
+            ));
         } catch (PerunErrorException $e) {
             if (self::PERUN_EXCEPTION_USER_NOT_EXISTS == $e->getErrorName()) {
                 throw new Exception\MemberRetrievalException(sprintf("User ID:%d not found", $userId));
