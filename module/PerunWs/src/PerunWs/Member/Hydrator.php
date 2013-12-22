@@ -3,9 +3,10 @@
 namespace PerunWs\Member;
 
 use Zend\Stdlib\Hydrator\HydratorInterface;
+use InoPerunApi\Entity\Member;
 use PerunWs\User;
 use PerunWs\Hydrator\Exception\UnsupportedObjectException;
-use InoPerunApi\Entity\Member;
+use PerunWs\Perun\UserSource;
 
 
 /**
@@ -18,11 +19,49 @@ class Hydrator implements HydratorInterface
 
     const FIELD_MEMBER_STATUS = 'member_status';
 
+    /**
+     * @var User\Hydrator
+     */
     protected $userHydrator;
+
+    /**
+     * @var UserSource\Hydrator
+     */
+    protected $userSourceHydrator;
 
 
     /**
-     * @return \PerunWs\User\Hydrator
+     * @param UserSource\Hydrator $userSourceHydrator
+     */
+    public function setUserSourceHydrator(UserSource\Hydrator $userSourceHydrator)
+    {
+        $this->userSourceHydrator = $userSourceHydrator;
+    }
+
+
+    /**
+     * @return UserSource\Hydrator
+     */
+    public function getUserSourceHydrator()
+    {
+        if (! $this->userSourceHydrator instanceof UserSource\Hydrator) {
+            $this->userSourceHydrator = new UserSource\Hydrator();
+        }
+        return $this->userSourceHydrator;
+    }
+
+
+    /**
+     * @param \PerunWs\User\Hydrator $userHydrator
+     */
+    public function setUserHydrator($userHydrator)
+    {
+        $this->userHydrator = $userHydrator;
+    }
+
+
+    /**
+     * @return User\Hydrator
      */
     public function getUserHydrator()
     {
@@ -47,7 +86,7 @@ class Hydrator implements HydratorInterface
      */
     public function extract($member)
     {
-        // _dump($member->getRichUser());
+        /* @var $member \InoPerunApi\Entity\RichMember */
         if (! $member instanceof Member) {
             throw new UnsupportedObjectException(get_class($member));
         }
@@ -60,6 +99,13 @@ class Hydrator implements HydratorInterface
             
             $user->setUserAttributes($userAttributes);
             $data = $this->getUserHydrator()->extract($user);
+        }
+        
+        $userExtSources = $member->getUserExtSources();
+        if ($userExtSources) {
+            foreach ($userExtSources as $userExtSource) {
+                $data['sources'][] = $this->getUserSourceHydrator()->extract($userExtSource);
+            }
         }
         
         $data += array(
