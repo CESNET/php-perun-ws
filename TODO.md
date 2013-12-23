@@ -1,3 +1,5 @@
 # TODO
 
-* when modifying a group - invalidate the corresponding data in the cache
+- implement the CLI with symfony/console
+- create a separate resource for authentication sources
+- add more tests

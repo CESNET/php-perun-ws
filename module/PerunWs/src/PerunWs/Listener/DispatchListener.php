@@ -131,9 +131,10 @@ class DispatchListener extends AbstractListenerAggregate implements EventManager
         }
         
         /*
-         * If there is a query parameter "fresh = 1", do not read from the cache.
+         * For some conditions disable caching
          */
-        if (1 == $request->getQuery('fresh')) {
+        $cacheControl = $request->getHeader('Cache-Control');
+        if (1 == $request->getQuery('fresh') || ($cacheControl && $cacheControl->hasDirective('no-cache'))) {
             $cacheStorage = $event->getApplication()
                 ->getServiceManager()
                 ->get('PerunWs\CacheStorage');
