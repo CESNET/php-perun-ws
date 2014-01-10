@@ -108,7 +108,7 @@ class ListenerTest extends \PHPUnit_Framework_TestCase
         $searchString = 'some invalid search string 123 #$%';
         
         $resourceEvent = $this->getResourceEventMock();
-        $resourceEvent->expects($this->once())
+        $resourceEvent->expects($this->at(0))
             ->method('getQueryParam')
             ->with('search')
             ->will($this->returnValue($searchString));
@@ -123,7 +123,7 @@ class ListenerTest extends \PHPUnit_Framework_TestCase
         $userCollection = $this->getUserCollectionMock();
         
         $resourceEvent = $this->getResourceEventMock();
-        $resourceEvent->expects($this->once())
+        $resourceEvent->expects($this->at(0))
             ->method('getQueryParam')
             ->with('search')
             ->will($this->returnValue($searchString));
@@ -133,6 +133,52 @@ class ListenerTest extends \PHPUnit_Framework_TestCase
             ->method('fetchAll')
             ->with(array(
             'searchString' => $searchString
+        ))
+            ->will($this->returnValue($userCollection));
+        $this->listener->setService($service);
+        
+        $this->assertSame($userCollection, $this->listener->onFetchAll($resourceEvent));
+    }
+
+
+    public function testOnFetchWithUserIdParamWithInvalidValue()
+    {
+        $this->setExpectedException('PhlyRestfully\Exception\InvalidArgumentException', "Invalid 'user_id' value", 400);
+        
+        $userIdParam = '123,invalid, 789 ,007';
+        
+        $resourceEvent = $this->getResourceEventMock();
+        $resourceEvent->expects($this->at(1))
+            ->method('getQueryParam')
+            ->with('user_id')
+            ->will($this->returnValue($userIdParam));
+        
+        $this->listener->onFetchAll($resourceEvent);
+    }
+
+
+    public function testOnFetchWithUserIdParam()
+    {
+        $userIdParam = '123,456, 789 ,007';
+        $userIdList = array(
+            123,
+            456,
+            789,
+            7
+        );
+        $userCollection = $this->getUserCollectionMock();
+        
+        $resourceEvent = $this->getResourceEventMock();
+        $resourceEvent->expects($this->at(1))
+            ->method('getQueryParam')
+            ->with('user_id')
+            ->will($this->returnValue($userIdParam));
+        
+        $service = $this->getServiceMock();
+        $service->expects($this->once())
+            ->method('fetchAll')
+            ->with(array(
+            'user_id_list' => $userIdList
         ))
             ->will($this->returnValue($userCollection));
         $this->listener->setService($service);

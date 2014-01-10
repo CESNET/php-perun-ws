@@ -20,6 +20,18 @@ class Listener extends AbstractListenerAggregate
      */
     protected $service;
 
+    /**
+     * Delimiter for the "user_id" GET parameter.
+     * @var string
+     */
+    protected $userIdDelimiter = ',';
+
+    /**
+     * Reg. expression to match the "search" GET parameter.
+     * @var string
+     */
+    protected $searchRegexp = '/^\w+$/';
+
 
     /**
      * Constructor.
@@ -90,23 +102,77 @@ class Listener extends AbstractListenerAggregate
      * Returns all users, optionally filtered by a search string.
      * 
      * @param ResourceEvent $e
+     * @throws InvalidArgumentException
      * @return \InoPerunApi\Entity\Collection\UserCollection
      */
     public function onFetchAll(ResourceEvent $e)
     {
         $params = array();
         
-        $search = $e->getQueryParam('search');
+        $searchString = $this->parseSearchParam($e->getQueryParam('search'));
+        if (null !== $searchString) {
+            $params['searchString'] = $searchString;
+        }
         
-        // FIXME - move regexps to config
-        if (null !== $search && ! preg_match('/^\w+$/', $search)) {
-            throw new InvalidArgumentException('Invalid search string', 400);
-        } else {
-            $params['searchString'] = $search;
+        $userIdList = $this->parseUserIdParam($e->getQueryParam('user_id'));
+        if (null !== $userIdList) {
+            $params['user_id_list'] = $userIdList;
         }
         
         $users = $this->service->fetchAll($params);
         
         return $users;
+    }
+
+
+    /**
+     * Processes the "search" GET param.
+     * 
+     * @param string $search
+     * @throws InvalidArgumentException
+     * @return string|null
+     */
+    protected function parseSearchParam($search)
+    {
+        if (null === $search) {
+            return null;
+        }
+        
+        if (! preg_match($this->searchRegexp, $search)) {
+            throw new InvalidArgumentException(sprintf("Invalid search string '%s'", $search), 400);
+        }
+        
+        return trim($search);
+    }
+
+
+    /**
+     * Parses the "user_id" GET parameter and returns a list of user ID values.
+     * 
+     * @param string $userId
+     * @throws InvalidArgumentException
+     * @return array|null
+     */
+    protected function parseUserIdParam($userId)
+    {
+        if (null === $userId) {
+            return null;
+        }
+        
+        $userIdList = explode($this->userIdDelimiter, $userId);
+        if (empty($userIdList)) {
+            return null;
+        }
+        
+        foreach ($userIdList as $index => $userIdValue) {
+            $userIdValue = intval($userIdValue);
+            if (0 === $userIdValue) {
+                throw new InvalidArgumentException(sprintf("Invalid 'user_id' value '%s', should be numbers separated with '%s'", $userId, $this->userIdDelimiter), 400);
+            }
+            
+            $userIdList[$index] = $userIdValue;
+        }
+        
+        return $userIdList;
     }
 }
