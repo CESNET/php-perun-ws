@@ -150,7 +150,7 @@ class ListenerTest extends \PHPUnit_Framework_TestCase
         $resourceEvent = $this->getResourceEventMock();
         $resourceEvent->expects($this->at(1))
             ->method('getQueryParam')
-            ->with('user_id')
+            ->with('filter_user_id')
             ->will($this->returnValue($userIdParam));
         
         $this->listener->onFetchAll($resourceEvent);
@@ -171,14 +171,14 @@ class ListenerTest extends \PHPUnit_Framework_TestCase
         $resourceEvent = $this->getResourceEventMock();
         $resourceEvent->expects($this->at(1))
             ->method('getQueryParam')
-            ->with('user_id')
+            ->with('filter_user_id')
             ->will($this->returnValue($userIdParam));
         
         $service = $this->getServiceMock();
         $service->expects($this->once())
             ->method('fetchAll')
             ->with(array(
-            'user_id_list' => $userIdList
+            'filter_user_id' => $userIdList
         ))
             ->will($this->returnValue($userCollection));
         $this->listener->setService($service);

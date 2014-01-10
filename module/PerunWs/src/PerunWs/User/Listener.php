@@ -21,6 +21,16 @@ class Listener extends AbstractListenerAggregate
     protected $service;
 
     /**
+     * @var string
+     */
+    protected $searchParamName = 'search';
+
+    /**
+     * @var string
+     */
+    protected $userIdParamName = 'filter_user_id';
+
+    /**
      * Delimiter for the "user_id" GET parameter.
      * @var string
      */
@@ -109,16 +119,16 @@ class Listener extends AbstractListenerAggregate
     {
         $params = array();
         
-        $searchString = $this->parseSearchParam($e->getQueryParam('search'));
+        $searchString = $this->parseSearchParam($e->getQueryParam($this->searchParamName));
         if (null !== $searchString) {
             $params['searchString'] = $searchString;
         }
         
-        $userIdList = $this->parseUserIdParam($e->getQueryParam('user_id'));
+        $userIdList = $this->parseUserIdParam($e->getQueryParam($this->userIdParamName));
         if (null !== $userIdList) {
-            $params['user_id_list'] = $userIdList;
+            $params['filter_user_id'] = $userIdList;
         }
-        
+
         $users = $this->service->fetchAll($params);
         
         return $users;
