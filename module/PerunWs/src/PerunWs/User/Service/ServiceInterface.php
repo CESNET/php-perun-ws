@@ -13,19 +13,19 @@ interface ServiceInterface extends Perun\Service\ServiceInterface
 
 
     /**
-     * Returns all records.
+     * Returns all users (members).
      * 
      * @param array $params
-     * @return \InoPerunApi\Entity\Collection\UserCollection
+     * @return \InoPerunApi\Entity\Collection\RichMemberCollection
      */
     public function fetchAll(array $params = array());
 
 
     /**
-     * Returns a single user.
+     * Returns a single user (member).
      * 
      * @param integer $id
-     * @return \InoPerunApi\Entity\User
+     * @return \InoPerunApi\Entity\RichMember
      */
     public function fetch($id);
 
