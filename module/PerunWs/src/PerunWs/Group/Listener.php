@@ -2,12 +2,13 @@
 
 namespace PerunWs\Group;
 
-use PhlyRestfully\Exception\InvalidArgumentException;
 use Zend\EventManager\AbstractListenerAggregate;
 use Zend\EventManager\EventManagerInterface;
 use PhlyRestfully\ResourceEvent;
 use PhlyRestfully\Exception\DomainException;
+use PhlyRestfully\Exception\InvalidArgumentException;
 use PerunWs\Group\Service\ServiceInterface;
+use PerunWs\Util\CsvParser;
 
 
 /**
@@ -20,6 +21,16 @@ class Listener extends AbstractListenerAggregate
      * @var ServiceInterface
      */
     protected $service;
+
+    /**
+     * @var CsvParser
+     */
+    protected $csvParser;
+
+    /**
+     * @var string
+     */
+    protected $groupIdParamName = 'filter_group_id';
 
 
     /**
@@ -48,6 +59,28 @@ class Listener extends AbstractListenerAggregate
     public function getService()
     {
         return $this->service;
+    }
+
+
+    /**
+     * @return CsvParser
+     */
+    public function getCsvParser()
+    {
+        if (! $this->csvParser instanceof CsvParser) {
+            $this->csvParser = new CsvParser();
+        }
+        
+        return $this->csvParser;
+    }
+
+
+    /**
+     * @param CsvParser $csvParser
+     */
+    public function setCsvParser(CsvParser $csvParser)
+    {
+        $this->csvParser = $csvParser;
     }
 
 
@@ -110,7 +143,14 @@ class Listener extends AbstractListenerAggregate
      */
     public function onFetchAll(ResourceEvent $e)
     {
-        $groups = $this->service->fetchAll();
+        $params = array();
+        
+        $groupIdList = $e->getQueryParam($this->groupIdParamName);
+        if (null !== $groupIdList) {
+            $params['filter_group_id'] = $this->parseGroupIdParam($groupIdList);
+        }
+        
+        $groups = $this->service->fetchAll($params);
         
         return $groups;
     }
@@ -157,5 +197,22 @@ class Listener extends AbstractListenerAggregate
     {
         $id = $e->getParam('id');
         return $this->service->delete($id);
+    }
+
+
+    /**
+     * Parses the param value and returns an array of values.
+     * 
+     * @param string $groupId
+     * @throws InvalidArgumentException
+     * @return array|null
+     */
+    protected function parseGroupIdParam($groupId)
+    {
+        try {
+            return $this->getCsvParser()->parse($groupId);
+        } catch (\Exception $e) {
+            throw new InvalidArgumentException($e->getMessage(), 400, $e);
+        }
     }
 }

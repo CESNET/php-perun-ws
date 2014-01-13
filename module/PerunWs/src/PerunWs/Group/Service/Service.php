@@ -6,6 +6,7 @@ use PerunWs\Perun\Service\AbstractService;
 use InoPerunApi\Manager\GenericManager;
 use InoPerunApi\Entity;
 use InoPerunApi\Manager\Exception\PerunErrorException;
+use InoPerunApi\Entity\Collection\GroupCollection;
 
 
 /**
@@ -153,14 +154,15 @@ class Service extends AbstractService implements ServiceInterface
      * {@inheritdoc}
      * @see \PerunWs\Group\Service\ServiceInterface::fetchAll()
      */
-    public function fetchAll()
+    public function fetchAll(array $params = array())
     {
-        $params = array(
-            'vo' => $this->getVoId()
-        );
-        $groups = $this->getGroupsManager()->getGroups($params);
+        $params['vo'] = $this->getVoId();
         
-        return $groups;
+        if (isset($params['filter_group_id']) && is_array($params['filter_group_id'])) {
+            return $this->fetchByMultipleId($params['filter_group_id']);
+        }
+        
+        return $this->getGroupsManager()->getGroups($params);
     }
 
 
@@ -341,5 +343,26 @@ class Service extends AbstractService implements ServiceInterface
         }
         
         return $member;
+    }
+
+
+    /**
+     * Returns a collection of groups by specific IDs.
+     * 
+     * @param array $groupIdList
+     * @return GroupCollection
+     */
+    public function fetchByMultipleId(array $groupIdList)
+    {
+        $groups = new GroupCollection();
+        
+        foreach ($groupIdList as $groupId) {
+            $group = $this->fetch($groupId);
+            if (null !== $group) {
+                $groups->append($group);
+            }
+        }
+        
+        return $groups;
     }
 }

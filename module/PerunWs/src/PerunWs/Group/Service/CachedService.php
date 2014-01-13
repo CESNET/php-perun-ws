@@ -16,7 +16,7 @@ class CachedService extends AbstractCachedService implements ServiceInterface
      * {@inheritdoc}
      * @see \PerunWs\Group\Service\ServiceInterface::fetchAll()
      */
-    public function fetchAll()
+    public function fetchAll(array $params = array())
     {
         return $this->cachedCall(__FUNCTION__, func_get_args());
     }

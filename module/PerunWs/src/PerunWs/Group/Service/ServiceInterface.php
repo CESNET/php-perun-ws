@@ -24,9 +24,10 @@ interface ServiceInterface extends Perun\Service\ServiceInterface
     /**
      * Retrieves all groups
      * 
+     * @param array $params
      * @return \InoPerunApi\Entity\Collection\GroupCollection
      */
-    public function fetchAll();
+    public function fetchAll(array $params = array());
 
 
     /**

@@ -83,6 +83,38 @@ class ServiceTest extends \PHPUnit_Framework_Testcase
     }
 
 
+    public function testFetchAllWithFilterGroupId()
+    {
+        $voId = 123;
+        $groupIdList = array(
+            111,
+            222,
+            333
+        );
+        
+        $groups = $this->getGroupsCollectionMock();
+        
+        $service = $this->getMockBuilder('PerunWs\Group\Service\Service')
+            ->disableOriginalConstructor()
+            ->setMethods(array(
+            'fetchByMultipleId',
+            'getVoId'
+        ))
+            ->getMock();
+        $service->expects($this->once())
+            ->method('fetchByMultipleId')
+            ->with($groupIdList)
+            ->will($this->returnValue($groups));
+        $service->expects($this->once())
+            ->method('getVoId')
+            ->will($this->returnValue($voId));
+        
+        $this->assertSame($groups, $service->fetchAll(array(
+            'filter_group_id' => $groupIdList
+        )));
+    }
+
+
     public function testFetch()
     {
         $id = 123;
@@ -145,7 +177,7 @@ class ServiceTest extends \PHPUnit_Framework_Testcase
         $this->assertNull($this->service->fetch($id));
     }
 
-    
+
     public function testCreateWithNoName()
     {
         $this->setExpectedException('PerunWs\Group\Service\Exception\GroupCreationException', "Missing field 'name'");
@@ -153,6 +185,7 @@ class ServiceTest extends \PHPUnit_Framework_Testcase
         $data = new \stdClass();
         $this->service->create($data);
     }
+
 
     public function testCreate()
     {

@@ -104,6 +104,65 @@ class ListenerTest extends \PHPUnit_Framework_Testcase
     }
 
 
+    public function testOnFetchAllWithInvalidGroupIdFilter()
+    {
+        $this->setExpectedException('PhlyRestfully\Exception\InvalidArgumentException', 'Invalid value');
+        
+        $groupIdParam = '111,222';
+        
+        $resourceEvent = $this->getResourceEventMock();
+        $resourceEvent->expects($this->once())
+            ->method('getQueryParam')
+            ->with('filter_group_id')
+            ->will($this->returnValue($groupIdParam));
+        
+        $csvParser = $this->getCsvParserMock();
+        $csvParser->expects($this->once())
+            ->method('parse')
+            ->with($groupIdParam)
+            ->will($this->throwException(new \InvalidArgumentException('Invalid value')));
+        
+        $this->listener->setCsvParser($csvParser);
+        
+        $this->listener->onFetchAll($resourceEvent);
+    }
+
+
+    public function testOnFetchAllWithGroupIdFilter()
+    {
+        $groupIdParam = '111,222';
+        $groupIdParsed = array(
+            111,
+            222
+        );
+        $groups = $this->getMock('InoPerunApi\Entity\Collection\GroupCollection');
+        
+        $resourceEvent = $this->getResourceEventMock();
+        $resourceEvent->expects($this->once())
+            ->method('getQueryParam')
+            ->with('filter_group_id')
+            ->will($this->returnValue($groupIdParam));
+        
+        $csvParser = $this->getCsvParserMock();
+        $csvParser->expects($this->once())
+            ->method('parse')
+            ->with($groupIdParam)
+            ->will($this->returnValue($groupIdParsed));
+        $this->listener->setCsvParser($csvParser);
+        
+        $service = $this->getServiceMock();
+        $service->expects($this->once())
+            ->method('fetchAll')
+            ->with(array(
+            'filter_group_id' => $groupIdParsed
+        ))
+            ->will($this->returnValue($groups));
+        $this->listener->setService($service);
+        
+        $this->assertSame($groups, $this->listener->onFetchAll($resourceEvent));
+    }
+
+
     public function testOnCreate()
     {
         $data = array(
@@ -194,5 +253,23 @@ class ListenerTest extends \PHPUnit_Framework_Testcase
     {
         $service = $this->getMock('PerunWs\Group\Service\ServiceInterface');
         return $service;
+    }
+
+
+    /**
+     *
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected function getResourceEventMock()
+    {
+        $resourceEvent = $this->getMockBuilder('PhlyRestfully\ResourceEvent')->getMock();
+        return $resourceEvent;
+    }
+
+
+    protected function getCsvParserMock()
+    {
+        $csvParser = $this->getMockBuilder('PerunWs\Util\CsvParser')->getMock();
+        return $csvParser;
     }
 }
