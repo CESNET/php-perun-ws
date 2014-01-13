@@ -201,6 +201,38 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
     }
 
 
+    public function testFetchByAllWithFilterUserId()
+    {
+        $voId = 123;
+        $serviceParams = array(
+            'vo_id' => $voId
+        );
+        
+        $params = array(
+            'filter_user_id' => array(
+                123,
+                456
+            )
+        );
+        $users = $this->getUserCollectionMock();
+        
+        $service = $this->getMockBuilder('PerunWs\User\Service\Service')
+            ->setConstructorArgs(array(
+            new Parameters($serviceParams)
+        ))
+            ->setMethods(array(
+            'fetchByMultipleId'
+        ))
+            ->getMock();
+        $service->expects($this->once())
+            ->method('fetchByMultipleId')
+            ->with($params['filter_user_id'])
+            ->will($this->returnValue($users));
+        
+        $this->assertSame($users, $service->fetchAll($params));
+    }
+
+
     public function testFetchByPrincipalNameWithNullResult()
     {
         $principalName = 'foo';
@@ -265,6 +297,49 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $this->service->setUsersManager($manager);
         
         $this->service->fetchByPrincipalName($principalName);
+    }
+
+
+    public function testFetchByMultipleId()
+    {
+        $userIdList = array(
+            123,
+            456,
+            789
+        );
+        
+        $members = array(
+            $this->getRichMemberMock(),
+            null,
+            $this->getRichMemberMock()
+        );
+        
+        $voId = 123;
+        $serviceParams = array(
+            'vo_id' => $voId
+        );
+        
+        $service = $this->getMockBuilder('PerunWs\User\Service\Service')
+            ->setConstructorArgs(array(
+            new Parameters($serviceParams)
+        ))
+            ->setMethods(array(
+            'fetch'
+        ))
+            ->getMock();
+        
+        foreach ($userIdList as $index => $userId) {
+            $service->expects($this->at($index))
+                ->method('fetch')
+                ->with($userId)
+                ->will($this->returnValue($members[$index]));
+        }
+        
+        $memberCollection = $service->fetchByMultipleId($userIdList);
+        
+        $this->assertCount(2, $memberCollection);
+        $this->assertSame($members[0], $memberCollection->getAt(0));
+        $this->assertSame($members[2], $memberCollection->getAt(1));
     }
     
     /*
@@ -344,5 +419,12 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
     {
         $richMember = $this->getMock('InoPerunApi\Entity\RichMember');
         return $richMember;
+    }
+
+
+    protected function getRichMemberCollectionMock()
+    {
+        $richMemberCollection = $this->getMock('InoPerunApi\Entity\Collection\RichMemberCollection');
+        return $richMemberCollection;
     }
 }

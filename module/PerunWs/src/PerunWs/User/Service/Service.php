@@ -5,6 +5,7 @@ namespace PerunWs\User\Service;
 use PerunWs\Perun\Service\AbstractService;
 use InoPerunApi\Manager\GenericManager;
 use InoPerunApi\Manager\Exception\PerunErrorException;
+use InoPerunApi\Entity\Collection\RichMemberCollection;
 
 
 /**
@@ -141,21 +142,6 @@ class Service extends AbstractService implements ServiceInterface
         }
         
         return $richMember;
-        
-        /*
-        try {
-            $user = $this->getUsersManager()->getRichUserWithAttributes(array(
-                'user' => $id
-            ));
-        } catch (PerunErrorException $e) {
-            if (self::PERUN_EXCEPTION_USER_NOT_EXISTS == $e->getErrorName()) {
-                return null;
-            }
-            throw $e;
-        }
-        
-        return $user;
-        */
     }
 
 
@@ -167,13 +153,15 @@ class Service extends AbstractService implements ServiceInterface
     {
         $params['vo'] = $this->getVoId();
         
-        if (isset($params['searchString'])) {
-            $users = $this->getMembersManager()->findRichMembersWithAttributesInVo($params);
-        } else {
-            $users = $this->getMembersManager()->getRichMembersWithAttributes($params);
+        if (isset($params['filter_user_id']) && is_array($params['filter_user_id'])) {
+            return $this->fetchByMultipleId($params['filter_user_id']);
         }
         
-        return $users;
+        if (isset($params['searchString'])) {
+            return $this->getMembersManager()->findRichMembersWithAttributesInVo($params);
+        }
+        
+        return $this->getMembersManager()->getRichMembersWithAttributes($params);
     }
 
 
@@ -200,5 +188,26 @@ class Service extends AbstractService implements ServiceInterface
         }
         
         return $users->getAt(0);
+    }
+
+
+    /**
+     * Fetches specific members by their user IDs.
+     * 
+     * @param array $userIdList
+     * @return RichMemberCollection
+     */
+    public function fetchByMultipleId(array $userIdList)
+    {
+        $richMembers = new RichMemberCollection();
+        
+        foreach ($userIdList as $userId) {
+            $richMember = $this->fetch($userId);
+            if (null !== $richMember) {
+                $richMembers->append($richMember);
+            }
+        }
+        
+        return $richMembers;
     }
 }

@@ -143,7 +143,7 @@ class ListenerTest extends \PHPUnit_Framework_TestCase
 
     public function testOnFetchWithUserIdParamWithInvalidValue()
     {
-        $this->setExpectedException('PhlyRestfully\Exception\InvalidArgumentException', "Invalid 'user_id' value", 400);
+        $this->setExpectedException('PhlyRestfully\Exception\InvalidArgumentException', "Invalid input value", 400);
         
         $userIdParam = '123,invalid, 789 ,007';
         

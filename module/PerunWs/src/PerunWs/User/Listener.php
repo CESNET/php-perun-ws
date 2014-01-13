@@ -7,6 +7,7 @@ use Zend\EventManager\EventManagerInterface;
 use PhlyRestfully\ResourceEvent;
 use PhlyRestfully\Exception\DomainException;
 use PhlyRestfully\Exception\InvalidArgumentException;
+use PerunWs\Util\CsvParser;
 
 
 /**
@@ -21,6 +22,11 @@ class Listener extends AbstractListenerAggregate
     protected $service;
 
     /**
+     * @var CsvParser
+     */
+    protected $csvParser = null;
+
+    /**
      * @var string
      */
     protected $searchParamName = 'search';
@@ -29,12 +35,6 @@ class Listener extends AbstractListenerAggregate
      * @var string
      */
     protected $userIdParamName = 'filter_user_id';
-
-    /**
-     * Delimiter for the "user_id" GET parameter.
-     * @var string
-     */
-    protected $userIdDelimiter = ',';
 
     /**
      * Reg. expression to match the "search" GET parameter.
@@ -69,6 +69,28 @@ class Listener extends AbstractListenerAggregate
     public function setService($service)
     {
         $this->service = $service;
+    }
+
+
+    /**
+     * @return CsvParser
+     */
+    public function getCsvParser()
+    {
+        if (! $this->csvParser instanceof CsvParser) {
+            $this->csvParser = new CsvParser();
+        }
+        
+        return $this->csvParser;
+    }
+
+
+    /**
+     * @param CsvParser $csvParser
+     */
+    public function setCsvParser(CsvParser $csvParser)
+    {
+        $this->csvParser = $csvParser;
     }
 
 
@@ -128,7 +150,7 @@ class Listener extends AbstractListenerAggregate
         if (null !== $userIdList) {
             $params['filter_user_id'] = $userIdList;
         }
-
+        
         $users = $this->service->fetchAll($params);
         
         return $users;
@@ -165,24 +187,10 @@ class Listener extends AbstractListenerAggregate
      */
     protected function parseUserIdParam($userId)
     {
-        if (null === $userId) {
-            return null;
+        try {
+            return $this->getCsvParser()->parse($userId);
+        } catch (\Exception $e) {
+            throw new InvalidArgumentException($e->getMessage(), 400, $e);
         }
-        
-        $userIdList = explode($this->userIdDelimiter, $userId);
-        if (empty($userIdList)) {
-            return null;
-        }
-        
-        foreach ($userIdList as $index => $userIdValue) {
-            $userIdValue = intval($userIdValue);
-            if (0 === $userIdValue) {
-                throw new InvalidArgumentException(sprintf("Invalid 'user_id' value '%s', should be numbers separated with '%s'", $userId, $this->userIdDelimiter), 400);
-            }
-            
-            $userIdList[$index] = $userIdValue;
-        }
-        
-        return $userIdList;
     }
 }
