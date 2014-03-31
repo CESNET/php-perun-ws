@@ -189,6 +189,11 @@ return array(
                 'route' => 'users'
             ),
             
+            'InoPerunApi\Entity\Collection\UserCollection' => array(
+                'is_collection' => true,
+                'route' => 'users'
+            ),
+            
             'InoPerunApi\Entity\Collection\RichUserCollection' => array(
                 'is_collection' => true,
                 'route' => 'users'

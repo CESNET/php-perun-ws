@@ -176,6 +176,11 @@ class Service extends AbstractService implements ServiceInterface
             $group = $this->getGroupsManager()->getGroupById(array(
                 'id' => $id
             ));
+            
+            $admins = $this->getGroupsManager()->getAdmins(array(
+                'group' => $id
+            ));
+            $group->setAdmins($admins);
         } catch (PerunErrorException $e) {
             if (self::PERUN_EXCEPTION_GROUP_NOT_EXISTS == $e->getErrorName()) {
                 return null;
