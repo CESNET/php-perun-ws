@@ -44,7 +44,7 @@ class ServiceConfig extends Config
                 }
                 
                 $cacheStorage = Cache\StorageFactory::factory($config['perun_ws']['cache_storage']);
-
+                
                 return $cacheStorage;
             },
             
@@ -149,6 +149,14 @@ class ServiceConfig extends Config
             'PerunWs\GroupUsersListener' => function ($services)
             {
                 return new Group\User\Listener($services->get('PerunWs\GroupService'));
+            },
+            
+            /**
+             * Perun group admins resource listener
+             */
+            'PerunWs\GroupAdminsListener' => function ($services)
+            {
+                return new Group\Admin\Listener($services->get('PerunWs\GroupService'));
             },
             
             'PerunWs\PrincipalListener' => function ($services)

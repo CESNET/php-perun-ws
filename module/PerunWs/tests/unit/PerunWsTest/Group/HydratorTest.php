@@ -33,12 +33,14 @@ class HydratorTest extends \PHPUnit_Framework_Testcase
         $groupName = 'group';
         $groupDescription = 'description';
         $parentId = 456;
+        $admins = $this->getMock('InoPerunApi\Entity\Collection\UserCollection');
         
         $expectedData = array(
             'id' => $groupId,
             'name' => $groupName,
             'description' => $groupDescription,
-            'parent_group_id' => $parentId
+            'parent_group_id' => $parentId,
+            'admins' => $admins
         );
         
         $group = new Group();
@@ -46,6 +48,7 @@ class HydratorTest extends \PHPUnit_Framework_Testcase
         $group->setName($groupName);
         $group->setDescription($groupDescription);
         $group->setParentGroupId($parentId);
+        $group->setAdmins($admins);
         
         $this->assertEquals($expectedData, $this->hydrator->extract($group));
     }

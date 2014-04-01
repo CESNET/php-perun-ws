@@ -60,16 +60,27 @@ return array(
                 ),
                 'may_terminate' => true,
                 
-                /*
-                 * /groups/{group_id}/users/{user_id}
-                 */
                 'child_routes' => array(
+                
+                    /*
+                     * /groups/{group_id}/users/{user_id}
+                     */
                     'group-users' => array(
                         'type' => 'Segment',
                         'options' => array(
                             'route' => '/users[/:user_id]',
                             'defaults' => array(
                                 'controller' => 'PerunWs\GroupUsersController'
+                            )
+                        )
+                    ),
+                    
+                    'group-admins' => array(
+                        'type' => 'Segment',
+                        'options' => array(
+                            'route' => '/admins[/:user_id]',
+                            'defaults' => array(
+                                'controller' => 'PerunWs\GroupAdminsController'
                             )
                         )
                     )
@@ -164,6 +175,24 @@ return array(
                     'delete'
                 ),
                 'route_name' => 'groups/group-users'
+            ),
+            
+            'PerunWs\GroupAdminsController' => array(
+                'identifier_name' => 'user_id',
+                'listener' => 'PerunWs\GroupAdminsListener',
+                'resource_identifiers' => array(
+                    'GroupAdminsResource'
+                ),
+                'collection_http_options' => array(
+                    'get'
+                ),
+                'collection_name' => 'admins',
+                'page_size' => 10,
+                'resource_http_options' => array(
+                    'put',
+                    'delete'
+                ),
+                'route_name' => 'groups/group-admins'
             )
         ),
         

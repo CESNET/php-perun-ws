@@ -19,6 +19,10 @@ class Service extends AbstractService implements ServiceInterface
 
     const PERUN_EXCEPTION_USER_NOT_EXISTS = 'UserNotExistsException';
 
+    const PERUN_EXCEPTION_USER_ALREADY_ADMIN = 'AlreadyAdminException';
+
+    const PERUN_EXCEPTION_USER_NOT_ADMIN = 'UserNotAdminException';
+
     /**
      * The name of the group manager (remote APi object).
      * 
@@ -181,6 +185,7 @@ class Service extends AbstractService implements ServiceInterface
                 'group' => $id
             ));
             $group->setAdmins($admins);
+            
         } catch (PerunErrorException $e) {
             if (self::PERUN_EXCEPTION_GROUP_NOT_EXISTS == $e->getErrorName()) {
                 return null;
@@ -322,6 +327,75 @@ class Service extends AbstractService implements ServiceInterface
             'group' => $groupId,
             'member' => $member->getId()
         ));
+        
+        return true;
+    }
+
+
+    public function fetchGroupAdmins($groupId)
+    {
+        try {
+            $users = $this->getGroupsManager()->getAdmins(array(
+                'group' => $groupId
+            ));
+        } catch (PerunErrorException $e) {
+            if (self::PERUN_EXCEPTION_GROUP_NOT_EXISTS == $e->getErrorName()) {
+                throw new Exception\GroupRetrievalException(sprintf("Group ID:%d not found", $groupId), null, $e);
+            }
+            throw $e;
+        }
+        
+        return $users;
+    }
+
+
+    /**
+     * {@inhertidoc}
+     * @see \PerunWs\Group\Service\ServiceInterface::addGroupAdmin()
+     */
+    public function addGroupAdmin($groupId, $userId)
+    {
+        try {
+            $this->getGroupsManager()->addAdmin(array(
+                'group' => $groupId,
+                'user' => $userId
+            ));
+        } catch (PerunErrorException $e) {
+            if (self::PERUN_EXCEPTION_GROUP_NOT_EXISTS == $e->getErrorName()) {
+                throw new Exception\GroupRetrievalException(sprintf("Group ID:%d not found", $groupId), null, $e);
+            }
+            
+            if (self::PERUN_EXCEPTION_USER_ALREADY_ADMIN == $e->getErrorName()) {
+                throw new Exception\UserAlreadyAdminException(sprintf("User ID:%d is already admin in group ID:%d", $userId, $groupId), null, $e);
+            }
+            throw $e;
+        }
+        
+        return true;
+    }
+
+
+    /**
+     * {@inhertidoc}
+     * @see \PerunWs\Group\Service\ServiceInterface::removeGroupAdmin()
+     */
+    public function removeGroupAdmin($groupId, $userId)
+    {
+        try {
+            $this->getGroupsManager()->removeAdmin(array(
+                'group' => $groupId,
+                'user' => $userId
+            ));
+        } catch (PerunErrorException $e) {
+            if (self::PERUN_EXCEPTION_GROUP_NOT_EXISTS == $e->getErrorName()) {
+                throw new Exception\GroupRetrievalException(sprintf("Group ID:%d not found", $groupId), null, $e);
+            }
+            
+            if (self::PERUN_EXCEPTION_USER_NOT_ADMIN == $e->getErrorName()) {
+                throw new Exception\UserNotAdminException(sprintf("User ID:%d is not an admin in group ID:%d", $userId, $groupId), null, $e);
+            }
+            throw $e;
+        }
         
         return true;
     }

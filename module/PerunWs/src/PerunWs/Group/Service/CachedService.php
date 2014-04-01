@@ -150,4 +150,50 @@ class CachedService extends AbstractCachedService implements ServiceInterface
         
         return $this->directCall(__FUNCTION__, func_get_args());
     }
+
+
+    /**
+     * {@inhertidoc}
+     * @see \PerunWs\Group\Service\ServiceInterface::fetchGroupAdmins()
+     */
+    public function fetchGroupAdmins($groupId)
+    {
+        return $this->cachedCall(__FUNCTION__, func_get_args());
+    }
+
+
+    /**
+     * {@inhertidoc}
+     * @see \PerunWs\Group\Service\ServiceInterface::addGroupAdmin()
+     */
+    public function addGroupAdmin($groupId, $userId)
+    {
+        /*
+         * Invalidate:
+         *   - fetchGroupAdmins($groupId)
+         */
+        $this->invalidateCall('fetchGroupAdmins', array(
+            $groupId
+        ));
+        
+        return $this->directCall(__FUNCTION__, func_get_args());
+    }
+
+
+    /**
+     * {@inhertidoc}
+     * @see \PerunWs\Group\Service\ServiceInterface::removeGroupAdmin()
+     */
+    public function removeGroupAdmin($groupId, $userId)
+    {
+        /*
+         * Invalidate:
+         *   - fetchGroupAdmins($groupId)
+         */
+        $this->invalidateCall('fetchGroupAdmins', array(
+            $groupId
+        ));
+        
+        return $this->directCall(__FUNCTION__, func_get_args());
+    }
 }

@@ -118,10 +118,20 @@ class ServiceTest extends \PHPUnit_Framework_Testcase
     public function testFetch()
     {
         $id = 123;
-        $group = $this->getGroupMock();
+        $admins = $this->getUserCollectionMock();
+        
+        $group = $this->getMockBuilder('InoPerunApi\Entity\Group')
+            ->setMethods(array(
+            'setAdmins'
+        ))
+            ->getMock();
+        $group->expects($this->once())
+            ->method('setAdmins')
+            ->with($admins);
         
         $groupsManager = $this->getManagerMock(array(
-            'getGroupById'
+            'getGroupById',
+            'getAdmins'
         ));
         $groupsManager->expects($this->once())
             ->method('getGroupById')
@@ -129,6 +139,12 @@ class ServiceTest extends \PHPUnit_Framework_Testcase
             'id' => $id
         ))
             ->will($this->returnValue($group));
+        $groupsManager->expects($this->once())
+            ->method('getAdmins')
+            ->with(array(
+            'group' => $id
+        ))
+            ->will($this->returnValue($admins));
         $this->service->setGroupsManager($groupsManager);
         
         $this->assertSame($group, $this->service->fetch($id));
@@ -538,6 +554,9 @@ class ServiceTest extends \PHPUnit_Framework_Testcase
     }
 
 
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
     protected function getGroupMock()
     {
         $group = $this->getMock('InoPerunApi\Entity\Group');
