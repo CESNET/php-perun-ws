@@ -95,8 +95,12 @@ class LogListener extends AbstractSharedListenerAggregate
                 /* @var $exception \PhlyRestfully\Exception\DomainException */
                 $exception = $result->getPayload()->detail;
                 
-                $this->log(sprintf("[%s] [%s] %s", $mvcEvent->getParam('clientId'), get_class($exception), $exception->getMessage()), Logger::ERR);
-                $this->logException($exception);
+                if ($exception instanceof \Exception) {
+                    $this->log(sprintf("[%s] [%s] %s", $mvcEvent->getParam('clientId'), get_class($exception), $exception->getMessage()), Logger::ERR);
+                    $this->logException($exception);
+                } else {
+                    $this->log(sprintf("[%s] %s", $mvcEvent->getParam('clientId'), $exception));
+                }
             }
         }
     }
