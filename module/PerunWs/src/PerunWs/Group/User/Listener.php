@@ -108,7 +108,7 @@ class Listener extends AbstractListenerAggregate
         try {
             $member = $this->service->addUserToGroup($userId, $groupId);
         } catch (MemberRetrievalException $e) {
-            throw new DomainException($e->getMessage(), 404, $e);
+            throw new DomainException($e->getMessage(), 400, $e);
         }
         
         $resource = new HalResource(array(
@@ -134,7 +134,7 @@ class Listener extends AbstractListenerAggregate
         try {
             return $this->service->removeUserFromGroup($userId, $groupId);
         } catch (MemberRetrievalException $e) {
-            throw new DomainException($e->getMessage(), 404, $e);
+            throw new DomainException($e->getMessage(), 400, $e);
         }
     }
 }

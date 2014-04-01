@@ -89,7 +89,7 @@ class ListenerTest extends \PHPUnit_Framework_Testcase
 
     public function testOnUpdateWithMemberRetrievalException()
     {
-        $this->setExpectedException('PhlyRestfully\Exception\DomainException', 'message', 404);
+        $this->setExpectedException('PhlyRestfully\Exception\DomainException', 'message', 400);
         
         $groupId = 123;
         $userId = 456;
@@ -141,7 +141,7 @@ class ListenerTest extends \PHPUnit_Framework_Testcase
 
     public function testOnDeleteWithMemberRetrievalException()
     {
-        $this->setExpectedException('PhlyRestfully\Exception\DomainException', 'message', 404);
+        $this->setExpectedException('PhlyRestfully\Exception\DomainException', 'message', 400);
         
         $groupId = 123;
         $userId = 456;
