@@ -16,7 +16,7 @@ class ServiceTest extends \PHPUnit_Framework_Testcase
 
     public function setUp()
     {
-        $this->service = new Service($this->getMock('Zend\Stdlib\Parameters'));
+        $this->service = new Service(new Parameters());
     }
 
 
