@@ -2,14 +2,14 @@
 
 namespace PerunWs\Group\Admin;
 
+use Zend\EventManager\EventManagerInterface;
+use Zend\EventManager\AbstractListenerAggregate;
+use PhlyRestfully\HalResource;
+use PhlyRestfully\ResourceEvent;
+use PhlyRestfully\Exception\DomainException;
 use PerunWs\Group\Service\Exception\UserNotAdminException;
 use PerunWs\Group\Service\Exception\UserAlreadyAdminException;
-use PhlyRestfully\Exception\DomainException;
 use PerunWs\Group\Service\Exception\GroupRetrievalException;
-use PhlyRestfully\HalResource;
-use Zend\EventManager\EventManagerInterface;
-use PhlyRestfully\ResourceEvent;
-use Zend\EventManager\AbstractListenerAggregate;
 use PerunWs\Group\Service\ServiceInterface;
 
 
