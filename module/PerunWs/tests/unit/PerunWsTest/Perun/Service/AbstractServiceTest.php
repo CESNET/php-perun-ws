@@ -3,6 +3,7 @@
 namespace PerunWsTest\Perun\Service;
 
 
+use Zend\Stdlib\Parameters;
 class AbstractServiceTest extends \PHPUnit_Framework_TestCase
 {
 
@@ -116,7 +117,8 @@ class AbstractServiceTest extends \PHPUnit_Framework_TestCase
      */
     protected function getServiceMock($params = array())
     {
-        $parameters = $this->getParametersMock($params);
+        //$parameters = $this->getParametersMock($params);
+        $parameters = new Parameters($params);
         $service = $this->getMockBuilder('PerunWs\Perun\Service\AbstractService')
             ->setConstructorArgs(array(
             $parameters
@@ -127,6 +129,7 @@ class AbstractServiceTest extends \PHPUnit_Framework_TestCase
     }
 
 
+    /*
     protected function getParametersMock(array $params = array())
     {
         $parameters = $this->getMock('Zend\Stdlib\Parameters');
@@ -139,4 +142,5 @@ class AbstractServiceTest extends \PHPUnit_Framework_TestCase
         
         return $parameters;
     }
+    */
 }
