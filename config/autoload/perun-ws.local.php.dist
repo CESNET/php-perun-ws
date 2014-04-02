@@ -63,7 +63,8 @@ return array(
         ),
     
         'perun_service' => array(
-            'vo_id' => 123
+            'vo_id' => 123,
+            'base_group_id' => 456
         ),
     
         'perun_api' => array(

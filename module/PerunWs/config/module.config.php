@@ -309,6 +309,7 @@ return array(
         
         'perun_service' => array(
             'vo_id' => 123,
+            'base_group_id' => 456,
             'principal_names_attribute_name' => 'urn:perun:user:attribute-def:virt:eduPersonPrincipalNames'
         ),
         

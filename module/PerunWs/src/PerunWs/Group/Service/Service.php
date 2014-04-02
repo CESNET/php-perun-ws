@@ -166,7 +166,12 @@ class Service extends AbstractService implements ServiceInterface
             return $this->fetchByMultipleId($params['filter_group_id']);
         }
         
-        return $this->getGroupsManager()->getGroups($params);
+        // $groups = $this->getGroupsManager()->getGroups($params);
+        $groups = $this->getGroupsManager()->getSubGroups(array(
+            'parentGroup' => $this->getBaseGroupId()
+        ));
+        
+        return $groups;
     }
 
 
@@ -176,21 +181,28 @@ class Service extends AbstractService implements ServiceInterface
      */
     public function fetch($id)
     {
+        $groupsManager = $this->getGroupsManager();
+        
         try {
-            $group = $this->getGroupsManager()->getGroupById(array(
+            $group = $groupsManager->getGroupById(array(
                 'id' => $id
             ));
             
-            $admins = $this->getGroupsManager()->getAdmins(array(
+            // Check if group is a subgroup of the base group
+            if ($group->getParentGroupId() !== $this->getBaseGroupId()) {
+                return null;
+            }
+            
+            $admins = $groupsManager->getAdmins(array(
                 'group' => $id
             ));
             $group->setAdmins($admins);
-            
         } catch (PerunErrorException $e) {
             if (self::PERUN_EXCEPTION_GROUP_NOT_EXISTS == $e->getErrorName()) {
                 return null;
             }
-            throw $e;
+            
+            throw new Exception\GroupRetrievalException(sprintf("[%s] %s", $e->getErrorName(), $e->getErrorMessage()), 400, $e);
         }
         
         return $group;
@@ -209,13 +221,18 @@ class Service extends AbstractService implements ServiceInterface
         
         $group = $this->getEntityFactory()->createEntityWithName('Group', array(
             'name' => $data->name,
-            'description' => property_exists($data, 'description') ? $data->description : ''
+            'description' => property_exists($data, 'description') ? $data->description : '',
+            'parentGroupId' => $this->getBaseGroupId()
         ));
         
-        $newGroup = $this->getGroupsManager()->createGroup(array(
-            'vo' => $this->getVoId(),
-            'group' => $group
-        ));
+        try {
+            $newGroup = $this->getGroupsManager()->createGroup(array(
+                'vo' => $this->getVoId(),
+                'group' => $group
+            ));
+        } catch (PerunErrorException $e) {
+            throw new Exception\GroupCreationException(sprintf("[%s] %s", $e->getErrorName(), $e->getErrorMessage()), 400, $e);
+        }
         
         return $newGroup;
     }
@@ -256,9 +273,13 @@ class Service extends AbstractService implements ServiceInterface
     public function delete($id)
     {
         // FIXME check for non-existent
-        $this->getGroupsManager()->deleteGroup(array(
-            'group' => $id
-        ));
+        try {
+            $this->getGroupsManager()->deleteGroup(array(
+                'group' => $id
+            ));
+        } catch (PerunErrorException $e) {
+            throw new Exception\GroupDeleteException(sprintf("[%s] %s", $e->getErrorName(), $e->getErrorMessage(), 400, $e));
+        }
         
         return true;
     }

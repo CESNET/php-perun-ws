@@ -61,20 +61,22 @@ class ServiceTest extends \PHPUnit_Framework_Testcase
     public function testFetchAll()
     {
         $voId = 123;
+        $baseGroupId = 456;
         $params = array(
-            'vo_id' => $voId
+            'vo_id' => $voId,
+            'base_group_id' => $baseGroupId
         );
         $groups = $this->getGroupsCollectionMock();
         
         $this->service->setParameters(new Parameters($params));
         
         $groupsManager = $this->getManagerMock(array(
-            'getGroups'
+            'getSubGroups'
         ));
         $groupsManager->expects($this->once())
-            ->method('getGroups')
+            ->method('getSubGroups')
             ->with(array(
-            'vo' => $voId
+            'parentGroup' => $baseGroupId
         ))
             ->will($this->returnValue($groups));
         
@@ -115,19 +117,65 @@ class ServiceTest extends \PHPUnit_Framework_Testcase
     }
 
 
-    public function testFetch()
+    public function testFetchWithWrongParentGroup()
     {
         $id = 123;
+        $baseGroupId = 456;
+        $wrongParentGroup = 789;
         $admins = $this->getUserCollectionMock();
+        
+        $this->service->setParameters(new Parameters(array(
+            'base_group_id' => $baseGroupId
+        )));
         
         $group = $this->getMockBuilder('InoPerunApi\Entity\Group')
             ->setMethods(array(
-            'setAdmins'
+            'getParentGroupId'
+        ))
+            ->getMock();
+        
+        $group->expects($this->once())
+            ->method('getParentGroupId')
+            ->will($this->returnValue($wrongParentGroup));
+        
+        $groupsManager = $this->getManagerMock(array(
+            'getGroupById'
+        ));
+        $groupsManager->expects($this->once())
+            ->method('getGroupById')
+            ->with(array(
+            'id' => $id
+        ))
+            ->will($this->returnValue($group));
+        
+        $this->service->setGroupsManager($groupsManager);
+        
+        $this->assertNull($this->service->fetch($id));
+    }
+
+
+    public function testFetch()
+    {
+        $id = 123;
+        $baseGroupId = 456;
+        $admins = $this->getUserCollectionMock();
+        
+        $this->service->setParameters(new Parameters(array(
+            'base_group_id' => $baseGroupId
+        )));
+        
+        $group = $this->getMockBuilder('InoPerunApi\Entity\Group')
+            ->setMethods(array(
+            'setAdmins',
+            'getParentGroupId'
         ))
             ->getMock();
         $group->expects($this->once())
             ->method('setAdmins')
             ->with($admins);
+        $group->expects($this->once())
+            ->method('getParentGroupId')
+            ->will($this->returnValue($baseGroupId));
         
         $groupsManager = $this->getManagerMock(array(
             'getGroupById',
@@ -206,6 +254,7 @@ class ServiceTest extends \PHPUnit_Framework_Testcase
     public function testCreate()
     {
         $voId = 123;
+        $baseGroupId = 456;
         $data = new \stdClass();
         
         $data->name = 'foo';
@@ -215,7 +264,8 @@ class ServiceTest extends \PHPUnit_Framework_Testcase
         $newGroup = $this->getGroupMock();
         
         $this->service->setParameters(new Parameters(array(
-            'vo_id' => $voId
+            'vo_id' => $voId,
+            'base_group_id' => $baseGroupId
         )));
         
         $entityFactory = $this->getEntityFactoryMock();
@@ -223,7 +273,8 @@ class ServiceTest extends \PHPUnit_Framework_Testcase
             ->method('createEntityWithName')
             ->with('Group', array(
             'name' => $data->name,
-            'description' => $data->description
+            'description' => $data->description,
+            'parentGroupId' => $baseGroupId
         ))
             ->will($this->returnValue($group));
         $this->service->setEntityFactory($entityFactory);

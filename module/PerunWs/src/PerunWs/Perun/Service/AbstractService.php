@@ -10,6 +10,12 @@ use Zend\Stdlib\Parameters;
 abstract class AbstractService
 {
 
+    const OPT_VO_ID = 'vo_id';
+
+    const OPT_BASE_GROUP_ID = 'base_group_id';
+
+    const OPT_PRINCIPAL_NAMES_ATTRIBUTE_NAME = 'principal_names_attribute_name';
+
     /**
      * The manager factory from the Perun API
      * @var FactoryInterface
@@ -87,33 +93,50 @@ abstract class AbstractService
     /**
      * Returns the ID of the default VO.
      * 
-     * @throws MissingParameterException
      * @return integer
      */
     public function getVoId()
     {
-        $voId = intval($this->parameters->get('vo_id'));
-        if (! $voId) {
-            throw new Exception\MissingParameterException('vo_id');
-        }
-        
-        return $voId;
+        return $this->getRequiredParameter(self::OPT_VO_ID);
+    }
+
+
+    /**
+     * Returns the ID of the base group.
+     * 
+     * @return integer
+     */
+    public function getBaseGroupId()
+    {
+        return $this->getRequiredParameter(self::OPT_BASE_GROUP_ID);
     }
 
 
     /**
      * Returns the name  of the Perun attribute holding the user's ePPNs.
      * 
-     * @throws Exception\MissingParameterException
      * @return string
      */
     public function getPrincipalNamesAttributeName()
     {
-        $attributeName = $this->parameters->get('principal_names_attribute_name');
-        if (! $attributeName) {
-            throw new Exception\MissingParameterException('principal_names_attribute_name');
+        return $this->getRequiredParameter(self::OPT_PRINCIPAL_NAMES_ATTRIBUTE_NAME);
+    }
+
+
+    /**
+     * Tries to retrieve the required parameter. Throws an exception if the parameter is not set.
+     * 
+     * @param string $name
+     * @throws Exception\MissingParameterException
+     * @return mixed
+     */
+    protected function getRequiredParameter($name)
+    {
+        $value = $this->parameters->get($name);
+        if (null === $value) {
+            throw new Exception\MissingParameterException($name);
         }
         
-        return $attributeName;
+        return $value;
     }
 }

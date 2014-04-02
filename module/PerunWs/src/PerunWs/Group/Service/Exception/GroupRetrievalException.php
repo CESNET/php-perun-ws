@@ -3,6 +3,6 @@
 namespace PerunWs\Group\Service\Exception;
 
 
-class GroupRetrievalException extends \RuntimeException
+class GroupRetrievalException extends GroupGenericException
 {
 }

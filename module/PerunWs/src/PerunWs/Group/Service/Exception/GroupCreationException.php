@@ -3,6 +3,6 @@
 namespace PerunWs\Group\Service\Exception;
 
 
-class GroupCreationException extends \RuntimeException
+class GroupCreationException extends GroupGenericException
 {
 }
