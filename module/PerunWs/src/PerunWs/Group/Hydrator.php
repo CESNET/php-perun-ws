@@ -36,7 +36,8 @@ class Hydrator implements HydratorInterface
         
         $data = array(
             'id' => $group->getId(),
-            'name' => $group->getName(),
+            'name' => $group->getShortName(),
+            'unique_name' => $group->getName(),
             'description' => $group->getDescription(),
             'parent_group_id' => $group->getParentGroupId(),
             'admins' => $group->getAdmins()
