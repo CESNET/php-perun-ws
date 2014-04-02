@@ -6,7 +6,7 @@
         "perun", "web service", "rest"
     ],
     "require": {
-        "php": ">=5.3.3",
+        "php": ">=5.3.23",
         
         "zendframework/zend-loader": "~2.3",
         "zendframework/zend-stdlib": "~2.3",
