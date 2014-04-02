@@ -6,6 +6,7 @@ use PerunWs\Group\Admin\Listener;
 use PerunWs\Group\Service\Exception\GroupRetrievalException;
 use PerunWs\Group\Service\Exception\UserAlreadyAdminException;
 use PerunWs\Group\Service\Exception\UserNotAdminException;
+use PerunWs\Group\Service\Exception\GroupGenericException;
 
 
 class ListenerTest extends \PHPUnit_Framework_TestCase
@@ -82,11 +83,11 @@ class ListenerTest extends \PHPUnit_Framework_TestCase
 
     public function testOnFetchAllWithException()
     {
-        $this->setExpectedException('PhlyRestfully\Exception\DomainException', 'group not found', 404);
+        $this->setExpectedException('PerunWs\Group\Service\Exception\GroupRetrievalException', 'group not found', 404);
         
         $groupId = 123;
         $resourceEvent = $this->createResourceEventMock($groupId);
-        $exception = new GroupRetrievalException('group not found');
+        $exception = new GroupRetrievalException('group not found', 404);
         
         $service = $this->createGroupServiceMock();
         $service->expects($this->once())
@@ -116,34 +117,14 @@ class ListenerTest extends \PHPUnit_Framework_TestCase
     }
 
 
-    public function testOnUpdateWithGroupNotFound()
+    public function testOnUpdateWithPerunException()
     {
-        $this->setExpectedException('PhlyRestfully\Exception\DomainException', 'group not found', 400);
+        $this->setExpectedException('PerunWs\Group\Service\Exception\GroupGenericException', 'perun error', 400);
         
         $groupId = 123;
         $userId = 456;
         $resourceEvent = $this->createResourceEventMock($groupId, $userId);
-        $exception = new GroupRetrievalException('group not found');
-        
-        $service = $this->createGroupServiceMock();
-        $service->expects($this->once())
-            ->method('addGroupAdmin')
-            ->with($groupId, $userId)
-            ->will($this->throwException($exception));
-        $this->listener->setService($service);
-        
-        $this->listener->onUpdate($resourceEvent);
-    }
-
-
-    public function testOnUpdateWithUserAlreadyAdmin()
-    {
-        $this->setExpectedException('PhlyRestfully\Exception\DomainException', 'user already admin', 400);
-        
-        $groupId = 123;
-        $userId = 456;
-        $resourceEvent = $this->createResourceEventMock($groupId, $userId);
-        $exception = new UserAlreadyAdminException('user already admin');
+        $exception = new GroupGenericException('perun error', 400);
         
         $service = $this->createGroupServiceMock();
         $service->expects($this->once())
@@ -175,14 +156,14 @@ class ListenerTest extends \PHPUnit_Framework_TestCase
     }
 
 
-    public function testOnDeleteWithGroupNotFound()
+    public function testOnDeleteWithPerunException()
     {
-        $this->setExpectedException('PhlyRestfully\Exception\DomainException', 'group not found', 400);
+        $this->setExpectedException('PerunWs\Group\Service\Exception\GroupGenericException', 'perun error', 400);
         
         $groupId = 123;
         $userId = 456;
         $resourceEvent = $this->createResourceEventMock($groupId, $userId);
-        $exception = new GroupRetrievalException('group not found');
+        $exception = new GroupGenericException('perun error', 400);
         
         $service = $this->createGroupServiceMock();
         $service->expects($this->once())
@@ -208,26 +189,6 @@ class ListenerTest extends \PHPUnit_Framework_TestCase
         $this->listener->setService($service);
         
         $this->assertTrue($this->listener->onDelete($resourceEvent));
-    }
-
-
-    public function testOnDeleteWithUserNotAdmin()
-    {
-        $this->setExpectedException('PhlyRestfully\Exception\DomainException', 'user not admin', 400);
-        
-        $groupId = 123;
-        $userId = 456;
-        $resourceEvent = $this->createResourceEventMock($groupId, $userId);
-        $exception = new UserNotAdminException('user not admin');
-        
-        $service = $this->createGroupServiceMock();
-        $service->expects($this->once())
-            ->method('removeGroupAdmin')
-            ->with($groupId, $userId)
-            ->will($this->throwException($exception));
-        $this->listener->setService($service);
-        
-        $this->listener->onDelete($resourceEvent);
     }
     
     /*

@@ -7,7 +7,7 @@ This project aims to implement a RESTful API for some of the functionalities pro
 
 ## Requirements
 
-- php >= 5.3.3
+- php >= 5.3.23
 - php-perun-api 
 - phly-restfully >= 2.2.0
 - Zend Framework 2

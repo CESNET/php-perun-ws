@@ -272,13 +272,12 @@ class Service extends AbstractService implements ServiceInterface
      */
     public function delete($id)
     {
-        // FIXME check for non-existent
         try {
             $this->getGroupsManager()->deleteGroup(array(
                 'group' => $id
             ));
         } catch (PerunErrorException $e) {
-            throw new Exception\GroupDeleteException(sprintf("[%s] %s", $e->getErrorName(), $e->getErrorMessage(), 400, $e));
+            throw new Exception\GroupDeleteException(sprintf("[%s] %s", $e->getErrorName(), $e->getErrorMessage()), 400, $e);
         }
         
         return true;
@@ -360,10 +359,7 @@ class Service extends AbstractService implements ServiceInterface
                 'group' => $groupId
             ));
         } catch (PerunErrorException $e) {
-            if (self::PERUN_EXCEPTION_GROUP_NOT_EXISTS == $e->getErrorName()) {
-                throw new Exception\GroupRetrievalException(sprintf("Group ID:%d not found", $groupId), null, $e);
-            }
-            throw $e;
+            throw new Exception\GroupGenericException(sprintf("[%s] %s", $e->getErrorName(), $e->getErrorMessage()), 400, $e);
         }
         
         return $users;
@@ -382,14 +378,7 @@ class Service extends AbstractService implements ServiceInterface
                 'user' => $userId
             ));
         } catch (PerunErrorException $e) {
-            if (self::PERUN_EXCEPTION_GROUP_NOT_EXISTS == $e->getErrorName()) {
-                throw new Exception\GroupRetrievalException(sprintf("Group ID:%d not found", $groupId), null, $e);
-            }
-            
-            if (self::PERUN_EXCEPTION_USER_ALREADY_ADMIN == $e->getErrorName()) {
-                throw new Exception\UserAlreadyAdminException(sprintf("User ID:%d is already admin in group ID:%d", $userId, $groupId), null, $e);
-            }
-            throw $e;
+            throw new Exception\GroupGenericException(sprintf("[%s] %s", $e->getErrorName(), $e->getErrorMessage()), 400, $e);
         }
         
         return true;
@@ -408,14 +397,7 @@ class Service extends AbstractService implements ServiceInterface
                 'user' => $userId
             ));
         } catch (PerunErrorException $e) {
-            if (self::PERUN_EXCEPTION_GROUP_NOT_EXISTS == $e->getErrorName()) {
-                throw new Exception\GroupRetrievalException(sprintf("Group ID:%d not found", $groupId), null, $e);
-            }
-            
-            if (self::PERUN_EXCEPTION_USER_NOT_ADMIN == $e->getErrorName()) {
-                throw new Exception\UserNotAdminException(sprintf("User ID:%d is not an admin in group ID:%d", $userId, $groupId), null, $e);
-            }
-            throw $e;
+            throw new Exception\GroupGenericException(sprintf("[%s] %s", $e->getErrorName(), $e->getErrorMessage()), 400, $e);
         }
         
         return true;

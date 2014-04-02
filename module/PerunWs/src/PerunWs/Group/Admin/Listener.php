@@ -83,13 +83,7 @@ class Listener extends AbstractListenerAggregate
     {
         $groupId = $event->getRouteParam('group_id');
         
-        try {
-            $users = $this->getService()->fetchGroupAdmins($groupId);
-        } catch (GroupRetrievalException $e) {
-            throw new DomainException($e->getMessage(), 404, $e);
-        }
-        
-        return $users;
+        return $this->getService()->fetchGroupAdmins($groupId);
     }
 
 
@@ -105,13 +99,7 @@ class Listener extends AbstractListenerAggregate
         $groupId = $event->getRouteParam('group_id');
         $userId = $event->getRouteParam('user_id');
         
-        try {
-            $this->getService()->addGroupAdmin($groupId, $userId);
-        } catch (GroupRetrievalException $e) {
-            throw new DomainException($e->getMessage(), 400, $e);
-        } catch (UserAlreadyAdminException $e) {
-            throw new DomainException($e->getMessage(), 400, $e);
-        }
+        $this->getService()->addGroupAdmin($groupId, $userId);
         
         $resource = new HalResource(array(
             'user_id' => $userId,
@@ -134,13 +122,7 @@ class Listener extends AbstractListenerAggregate
         $groupId = $event->getRouteParam('group_id');
         $userId = $event->getRouteParam('user_id');
         
-        try {
-            $this->getService()->removeGroupAdmin($groupId, $userId);
-        } catch (GroupRetrievalException $e) {
-            throw new DomainException($e->getMessage(), 400, $e);
-        } catch (UserNotAdminException $e) {
-            throw new DomainException($e->getMessage(), 400, $e);
-        }
+        $this->getService()->removeGroupAdmin($groupId, $userId);
         
         return true;
     }
