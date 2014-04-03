@@ -44,29 +44,6 @@ class ListenerTest extends \PHPUnit_Framework_Testcase
     }
 
 
-    public function testOnFetchAllWithGroupRetrievalException()
-    {
-        $this->setExpectedException('PhlyRestfully\Exception\DomainException', 'message', 404);
-        
-        $groupId = 123;
-        
-        $event = $this->getEventMock(array(
-            'group_id' => $groupId
-        ));
-        
-        $exception = new GroupRetrievalException('message');
-        $members = $this->getMock('InoPerunApi\Entity\Collection\MemberCollection');
-        
-        $service = $this->getServiceMock();
-        $service->expects($this->once())
-            ->method('fetchMembers')
-            ->will($this->throwException($exception));
-        $this->listener->setService($service);
-        
-        $this->listener->onFetchAll($event);
-    }
-
-
     public function testOnFetchAll()
     {
         $groupId = 123;
@@ -84,32 +61,6 @@ class ListenerTest extends \PHPUnit_Framework_Testcase
         $this->listener->setService($service);
         
         $this->assertSame($members, $this->listener->onFetchAll($event));
-    }
-
-
-    public function testOnUpdateWithMemberRetrievalException()
-    {
-        $this->setExpectedException('PhlyRestfully\Exception\DomainException', 'message', 400);
-        
-        $groupId = 123;
-        $userId = 456;
-        
-        $data = array(
-            'group_id' => $groupId,
-            'user_id' => $userId
-        );
-        
-        $exception = new MemberRetrievalException('message');
-        $event = $this->getEventMock($data);
-        
-        $service = $this->getServiceMock();
-        $service->expects($this->once())
-            ->method('addUserToGroup')
-            ->with($userId, $groupId)
-            ->will($this->throwException($exception));
-        $this->listener->setService($service);
-        
-        $this->listener->onUpdate($event);
     }
 
 
@@ -136,31 +87,6 @@ class ListenerTest extends \PHPUnit_Framework_Testcase
         $this->assertInstanceOf('PhlyRestfully\HalResource', $resource);
         $this->assertSame($userId, $resource->id);
         $this->assertEquals($resource->resource, $data);
-    }
-
-
-    public function testOnDeleteWithMemberRetrievalException()
-    {
-        $this->setExpectedException('PhlyRestfully\Exception\DomainException', 'message', 400);
-        
-        $groupId = 123;
-        $userId = 456;
-        
-        $data = array(
-            'group_id' => $groupId,
-            'user_id' => $userId
-        );
-        $exception = new MemberRetrievalException('message');
-        
-        $event = $this->getEventMock($data);
-        
-        $service = $this->getServiceMock();
-        $service->expects($this->once())
-            ->method('removeUserFromGroup')
-            ->will($this->throwException($exception));
-        $this->listener->setService($service);
-        
-        $this->listener->onDelete($event);
     }
 
 
