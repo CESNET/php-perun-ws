@@ -503,10 +503,10 @@ class ServiceTest extends \PHPUnit_Framework_Testcase
         $this->service->setMembersManager($membersManager);
         
         $groupsManager = $this->createManagerMock(array(
-            'getAllMemberGroups'
+            'getMemberGroups'
         ));
         $groupsManager->expects($this->once())
-            ->method('getAllMemberGroups')
+            ->method('getMemberGroups')
             ->with(array(
             'member' => $memberId
         ))
@@ -812,8 +812,17 @@ class ServiceTest extends \PHPUnit_Framework_Testcase
      */
     protected function createManagerMock($methods = array(), $managerName = null)
     {
-        $manager = $this->getMockBuilder('InoPerunApi\Manager\GenericManager')
+        $client = $this->getMockBuilder('InoPerunApi\Client\Client')
             ->disableOriginalConstructor()
+            ->getMock();
+        $client->expects($this->any())
+            ->method('sendRequest')
+            ->will($this->throwException(new \RuntimeException('Not expected to be called!')));
+        
+        $manager = $this->getMockBuilder('InoPerunApi\Manager\GenericManager')
+            ->setConstructorArgs(array(
+            $client
+        ))
             ->setMethods($methods)
             ->getMock();
         

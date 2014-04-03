@@ -193,9 +193,12 @@ class Service extends AbstractService implements ServiceInterface
                 return null;
             }
             
+            /*
             $admins = $groupsManager->getAdmins(array(
                 'group' => $id
             ));
+            */
+            $admins = $this->fetchGroupAdmins($id);
             $group->setAdmins($admins);
         } catch (PerunErrorException $e) {
             if (self::PERUN_EXCEPTION_GROUP_NOT_EXISTS == $e->getErrorName()) {
@@ -312,7 +315,8 @@ class Service extends AbstractService implements ServiceInterface
     public function fetchUserGroups($userId)
     {
         $member = $this->getMemberByUser($userId);
-        $groups = $this->getGroupsManager()->getAllMemberGroups(array(
+        // $groups = $this->getGroupsManager()->getAllMemberGroups(array(
+        $groups = $this->getGroupsManager()->getMemberGroups(array(
             'member' => $member->getId()
         ));
         
@@ -352,6 +356,10 @@ class Service extends AbstractService implements ServiceInterface
     }
 
 
+    /**
+     * {@inheritdoc}
+     * @see \PerunWs\Group\Service\ServiceInterface::fetchGroupAdmins()
+     */
     public function fetchGroupAdmins($groupId)
     {
         try {

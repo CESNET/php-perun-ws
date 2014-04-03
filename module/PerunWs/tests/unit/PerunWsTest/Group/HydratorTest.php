@@ -41,7 +41,7 @@ class HydratorTest extends \PHPUnit_Framework_Testcase
             'name' => $groupName,
             'unique_name' => $groupUniqueName,
             'description' => $groupDescription,
-            'parent_group_id' => $parentId,
+            //'parent_group_id' => $parentId,
             'admins' => $admins
         );
         
@@ -50,7 +50,7 @@ class HydratorTest extends \PHPUnit_Framework_Testcase
         $group->setShortName($groupName);
         $group->setName($groupUniqueName);
         $group->setDescription($groupDescription);
-        $group->setParentGroupId($parentId);
+        //$group->setParentGroupId($parentId);
         $group->setAdmins($admins);
         
         $this->assertEquals($expectedData, $this->hydrator->extract($group));
