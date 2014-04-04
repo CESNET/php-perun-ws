@@ -61,10 +61,20 @@ return array(
                 'auth_file_path' => '/path/to/file'
             )
         ),
-    
-        'perun_service' => array(
-            'vo_id' => 123,
-            'base_group_id' => 456
+        
+        'service_options' => array(
+            'group' => array(
+                'vo_id' => 12,
+                'base_group_id' => 34
+            ),
+            'systemgroup' => array(
+                'vo_id' => 56,
+                'base_group_id' => 78
+            ),
+            'user' => array(
+                'vo_id' => 22,
+                'principal_names_attribute_name' => 'urn:perun:user:attribute-def:virt:eduPersonPrincipalNames'
+            )
         ),
     
         'perun_api' => array(

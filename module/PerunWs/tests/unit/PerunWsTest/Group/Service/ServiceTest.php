@@ -604,14 +604,21 @@ class ServiceTest extends \PHPUnit_Framework_Testcase
         $groupId = 789;
         $exception = new PerunErrorException();
         
+        $group = $this->createGroupMock();
+        
         $member = $this->createMemberMock($memberId);
         
         $service = $this->getMockBuilder('PerunWs\Group\Service\Service')
             ->setMethods(array(
+            'fetch',
             'getMemberByUser'
         ))
             ->disableOriginalConstructor()
             ->getMock();
+        $service->expects($this->once())
+            ->method('fetch')
+            ->with($groupId)
+            ->will($this->returnValue($group));
         $service->expects($this->once())
             ->method('getMemberByUser')
             ->with($userId)
@@ -633,20 +640,52 @@ class ServiceTest extends \PHPUnit_Framework_Testcase
     }
 
 
+    public function testAddUserToGroupWithGroupRetrievalException()
+    {
+        $this->setExpectedException('PerunWs\Group\Service\Exception\GroupRetrievalException', null, 400);
+        
+        $userId = 123;
+        $groupId = 789;
+        $exception = new PerunErrorException();
+        
+        $group = $this->createGroupMock();
+        
+        $service = $this->getMockBuilder('PerunWs\Group\Service\Service')
+            ->setMethods(array(
+            'fetch'
+        ))
+            ->disableOriginalConstructor()
+            ->getMock();
+        $service->expects($this->once())
+            ->method('fetch')
+            ->with($groupId)
+            ->will($this->returnValue(null));
+        
+        $service->addUserToGroup($userId, $groupId);
+    }
+
+
     public function testAddUserToGroup()
     {
         $userId = 123;
         $memberId = 456;
         $groupId = 789;
         
+        $group = $this->createGroupMock();
+        
         $member = $this->createMemberMock($memberId);
         
         $service = $this->getMockBuilder('PerunWs\Group\Service\Service')
             ->setMethods(array(
+            'fetch',
             'getMemberByUser'
         ))
             ->disableOriginalConstructor()
             ->getMock();
+        $service->expects($this->once())
+            ->method('fetch')
+            ->with($groupId)
+            ->will($this->returnValue($group));
         $service->expects($this->once())
             ->method('getMemberByUser')
             ->with($userId)
@@ -676,14 +715,21 @@ class ServiceTest extends \PHPUnit_Framework_Testcase
         $groupId = 789;
         $exception = new PerunErrorException();
         
+        $group = $this->createGroupMock();
+        
         $member = $this->createMemberMock($memberId);
         
         $service = $this->getMockBuilder('PerunWs\Group\Service\Service')
             ->setMethods(array(
+            'fetch',
             'getMemberByUser'
         ))
             ->disableOriginalConstructor()
             ->getMock();
+        $service->expects($this->once())
+            ->method('fetch')
+            ->with($groupId)
+            ->will($this->returnValue($group));
         $service->expects($this->once())
             ->method('getMemberByUser')
             ->with($userId)
@@ -705,20 +751,49 @@ class ServiceTest extends \PHPUnit_Framework_Testcase
     }
 
 
+    public function testRemoveUserFromGroupWithGroupRetrievalException()
+    {
+        $this->setExpectedException('PerunWs\Group\Service\Exception\GroupRetrievalException', null, 400);
+        
+        $userId = 123;
+        $groupId = 789;
+        
+        $service = $this->getMockBuilder('PerunWs\Group\Service\Service')
+            ->setMethods(array(
+            'fetch'
+        ))
+            ->disableOriginalConstructor()
+            ->getMock();
+        $service->expects($this->once())
+            ->method('fetch')
+            ->with($groupId)
+            ->will($this->returnValue(null));
+        
+        $service->removeUserFromGroup($userId, $groupId);
+    }
+
+
     public function testRemoveUserFromGroup()
     {
         $userId = 123;
         $memberId = 456;
         $groupId = 789;
         
+        $group = $this->createGroupMock();
+        
         $member = $this->createMemberMock($memberId);
         
         $service = $this->getMockBuilder('PerunWs\Group\Service\Service')
             ->setMethods(array(
+            'fetch',
             'getMemberByUser'
         ))
             ->disableOriginalConstructor()
             ->getMock();
+        $service->expects($this->once())
+            ->method('fetch')
+            ->with($groupId)
+            ->will($this->returnValue($group));
         $service->expects($this->once())
             ->method('getMemberByUser')
             ->with($userId)

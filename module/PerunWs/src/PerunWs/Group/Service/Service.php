@@ -327,6 +327,11 @@ class Service extends AbstractService implements ServiceInterface
      */
     public function addUserToGroup($userId, $groupId)
     {
+        $group = $this->fetch($groupId);
+        if (! $group) {
+            throw new Exception\GroupRetrievalException(sprintf("Group ID:%d not found", $groupId), 400);
+        }
+        
         $member = $this->getMemberByUser($userId);
         
         try {
@@ -348,6 +353,11 @@ class Service extends AbstractService implements ServiceInterface
      */
     public function removeUserFromGroup($userId, $groupId)
     {
+        $group = $this->fetch($groupId);
+        if (! $group) {
+            throw new Exception\GroupRetrievalException(sprintf("Group ID:%d not found", $groupId), 400);
+        }
+        
         $member = $this->getMemberByUser($userId);
         
         try {
