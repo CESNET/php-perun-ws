@@ -3,6 +3,7 @@
 namespace PerunWs\Perun\Service;
 
 use Zend\Cache;
+use Zend\Stdlib\Parameters;
 
 
 abstract class AbstractCachedService
@@ -13,6 +14,11 @@ abstract class AbstractCachedService
      */
     protected $objectCache;
 
+    /**
+     * @var ServiceInterface
+     */
+    protected $service;
+
 
     /**
      * Constructor.
@@ -22,12 +28,32 @@ abstract class AbstractCachedService
      */
     public function __construct(ServiceInterface $service, Cache\Storage\StorageInterface $cacheStorage)
     {
+        $this->service = $service;
+        
         $objectCache = Cache\PatternFactory::factory('object', array(
             'object' => $service,
             'storage' => $cacheStorage
         ));
         
         $this->setObjectCache($objectCache);
+    }
+
+
+    /**
+     * @return Parameters
+     */
+    public function getParameters()
+    {
+        return $this->service->getParameters();
+    }
+
+
+    /**
+     * @param Parameters $parameters
+     */
+    public function setParameters(Parameters $parameters)
+    {
+        $this->service->setParameters($parameters);
     }
 
 

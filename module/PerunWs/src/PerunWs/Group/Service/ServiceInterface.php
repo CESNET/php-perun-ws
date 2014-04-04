@@ -92,4 +92,30 @@ interface ServiceInterface extends Perun\Service\ServiceInterface
      * @param integer $groupId
      */
     public function removeUserFromGroup($userId, $groupId);
+
+
+    /**
+     * Returns a list of group's administrators.
+     * 
+     * @param integer $groupId
+     */
+    public function fetchGroupAdmins($groupId);
+
+
+    /**
+     * Adds the user to the group's administrators list.
+     * 
+     * @param integer $groupId
+     * @param integer $userId
+     */
+    public function addGroupAdmin($groupId, $userId);
+
+
+    /**
+     * Removes the user from the group's administrators list.
+     * 
+     * @param integer $groupId
+     * @param integer $userId
+     */
+    public function removeGroupAdmin($groupId, $userId);
 }

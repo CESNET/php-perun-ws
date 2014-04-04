@@ -2,9 +2,9 @@
 
 namespace PerunWs\Group;
 
-use PerunWs\Hydrator\Exception\UnsupportedObjectException;
-use InoPerunApi\Entity\Group;
 use Zend\Stdlib\Hydrator\HydratorInterface;
+use InoPerunApi\Entity\Group;
+use PerunWs\Hydrator\Exception\UnsupportedObjectException;
 
 
 /**
@@ -36,9 +36,11 @@ class Hydrator implements HydratorInterface
         
         $data = array(
             'id' => $group->getId(),
-            'name' => $group->getName(),
+            'name' => $group->getShortName(),
+            'unique_name' => $group->getName(),
             'description' => $group->getDescription(),
-            'parent_group_id' => $group->getParentGroupId()
+            //'parent_group_id' => $group->getParentGroupId(),
+            'admins' => $group->getAdmins()
         );
         
         return $data;

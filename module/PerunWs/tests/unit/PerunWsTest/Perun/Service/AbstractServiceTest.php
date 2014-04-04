@@ -3,9 +3,19 @@
 namespace PerunWsTest\Perun\Service;
 
 
+use Zend\Stdlib\Parameters;
 class AbstractServiceTest extends \PHPUnit_Framework_TestCase
 {
 
+    public function testSetParameters()
+    {
+        $service = $this->getServiceMock();
+        
+        $params = $this->getMock('Zend\Stdlib\Parameters');
+        $service->setParameters($params);
+        
+        $this->assertSame($params, $service->getParameters());
+    }
 
     public function testGetEntityManagerFactoryWithMissingException()
     {
@@ -51,7 +61,7 @@ class AbstractServiceTest extends \PHPUnit_Framework_TestCase
         $this->setExpectedException('PerunWs\Perun\Service\Exception\MissingParameterException');
         
         $service = $this->getServiceMock();
-        $this->assertSame(123, $service->getVoId());
+        $service->getVoId();
     }
 
 
@@ -66,6 +76,15 @@ class AbstractServiceTest extends \PHPUnit_Framework_TestCase
     }
 
 
+    public function testGetPrincipalNamesAttributeNameWithMissingException()
+    {
+        $this->setExpectedException('PerunWs\Perun\Service\Exception\MissingParameterException');
+        
+        $service = $this->getServiceMock();
+        $service->getPrincipalNamesAttributeName();
+    }
+
+
     public function testGetPrincipalNamesAttributeName()
     {
         $attrName = 'ePPN';
@@ -74,6 +93,27 @@ class AbstractServiceTest extends \PHPUnit_Framework_TestCase
             'principal_names_attribute_name' => $attrName
         ));
         $this->assertSame($attrName, $service->getPrincipalNamesAttributeName());
+    }
+
+
+    public function testGetBaseGroupIdWithMissingException()
+    {
+        $this->setExpectedException('PerunWs\Perun\Service\Exception\MissingParameterException');
+        
+        $service = $this->getServiceMock();
+        $service->getBaseGroupId();
+    }
+
+
+    public function testGetBaseGroupId()
+    {
+        $groupId = 123;
+        
+        $service = $this->getServiceMock(array(
+            'base_group_id' => $groupId
+        ));
+        
+        $this->assertSame($groupId, $service->getBaseGroupId());
     }
     
     /*
@@ -86,7 +126,8 @@ class AbstractServiceTest extends \PHPUnit_Framework_TestCase
      */
     protected function getServiceMock($params = array())
     {
-        $parameters = $this->getParametersMock($params);
+        //$parameters = $this->getParametersMock($params);
+        $parameters = new Parameters($params);
         $service = $this->getMockBuilder('PerunWs\Perun\Service\AbstractService')
             ->setConstructorArgs(array(
             $parameters
@@ -97,6 +138,7 @@ class AbstractServiceTest extends \PHPUnit_Framework_TestCase
     }
 
 
+    /*
     protected function getParametersMock(array $params = array())
     {
         $parameters = $this->getMock('Zend\Stdlib\Parameters');
@@ -109,4 +151,5 @@ class AbstractServiceTest extends \PHPUnit_Framework_TestCase
         
         return $parameters;
     }
+    */
 }

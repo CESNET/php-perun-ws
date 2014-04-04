@@ -24,6 +24,40 @@ class AbstractCachedServiceTest extends \PHPUnit_Framework_TestCase
     }
 
 
+    public function testSetParameters()
+    {
+        $params = $this->getMock('Zend\Stdlib\Parameters');
+        
+        $service = $this->getServiceMock();
+        $service->expects($this->once())
+            ->method('setParameters')
+            ->with($params);
+        
+        $cacheStorage = $this->getCacheStorageMock();
+        
+        $cachedService = $this->getCachedServiceMock($service, $cacheStorage);
+        
+        $cachedService->setParameters($params);
+    }
+
+
+    public function testGetParameters()
+    {
+        $params = $this->getMock('Zend\Stdlib\Parameters');
+        
+        $service = $this->getServiceMock();
+        $service->expects($this->once())
+            ->method('getParameters')
+            ->will($this->returnValue($params));
+        
+        $cacheStorage = $this->getCacheStorageMock();
+        
+        $cachedService = $this->getCachedServiceMock($service, $cacheStorage);
+        
+        $this->assertSame($params, $cachedService->getParameters($params));
+    }
+
+
     public function testCachedCall()
     {
         $service = $this->getServiceMock();

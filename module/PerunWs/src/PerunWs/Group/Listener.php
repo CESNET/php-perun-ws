@@ -196,6 +196,7 @@ class Listener extends AbstractListenerAggregate
     public function onDelete(ResourceEvent $e)
     {
         $id = $e->getParam('id');
+        
         return $this->service->delete($id);
     }
 

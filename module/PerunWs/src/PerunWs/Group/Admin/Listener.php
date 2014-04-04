@@ -1,20 +1,18 @@
 <?php
 
-namespace PerunWs\Group\User;
+namespace PerunWs\Group\Admin;
 
 use Zend\EventManager\EventManagerInterface;
 use Zend\EventManager\AbstractListenerAggregate;
-use PhlyRestfully\ResourceEvent;
 use PhlyRestfully\HalResource;
+use PhlyRestfully\ResourceEvent;
 use PhlyRestfully\Exception\DomainException;
-use PerunWs\Group\Service\ServiceInterface;
+use PerunWs\Group\Service\Exception\UserNotAdminException;
+use PerunWs\Group\Service\Exception\UserAlreadyAdminException;
 use PerunWs\Group\Service\Exception\GroupRetrievalException;
-use PerunWs\Group\Service\Exception\MemberRetrievalException;
+use PerunWs\Group\Service\ServiceInterface;
 
 
-/**
- * Group's users resource listener.
- */
 class Listener extends AbstractListenerAggregate
 {
 
@@ -26,7 +24,7 @@ class Listener extends AbstractListenerAggregate
 
     /**
      * Constructor.
-     * 
+     *
      * @param ServiceInterface $service
      */
     public function __construct(ServiceInterface $service)
@@ -54,7 +52,7 @@ class Listener extends AbstractListenerAggregate
 
 
     /**
-     * {@inheritdoc}
+     * {@inhertidoc}
      * @see \Zend\EventManager\ListenerAggregateInterface::attach()
      */
     public function attach(EventManagerInterface $events)
@@ -75,33 +73,33 @@ class Listener extends AbstractListenerAggregate
 
 
     /**
-     * Returns all group members.
+     * Returns all administrators for the group.
      * 
-     * @param ResourceEvent $e
-     * @return \InoPerunApi\Entity\Collection\MemberCollection
+     * @param ResourceEvent $event
+     * @throws DomainException
+     * @return \InoPerunApi\Entity\Collection\UserCollection
      */
-    public function onFetchAll(ResourceEvent $e)
+    public function onFetchAll(ResourceEvent $event)
     {
-        $id = $e->getRouteParam('group_id');
+        $groupId = $event->getRouteParam('group_id');
         
-        $users = $this->service->fetchMembers($id);
-        
-        return $users;
+        return $this->getService()->fetchGroupAdmins($groupId);
     }
 
 
     /**
-     * Adds a user to the group.
+     * Adds the user to the group's administrators list.
      * 
-     * @param ResourceEvent $e
-     * @return HalResource
+     * @param ResourceEvent $event
+     * @throws DomainException
+     * @return \PhlyRestfully\HalResource
      */
-    public function onUpdate(ResourceEvent $e)
+    public function onUpdate(ResourceEvent $event)
     {
-        $groupId = $e->getRouteParam('group_id');
-        $userId = $e->getRouteParam('user_id');
+        $groupId = $event->getRouteParam('group_id');
+        $userId = $event->getRouteParam('user_id');
         
-        $member = $this->service->addUserToGroup($userId, $groupId);
+        $this->getService()->addGroupAdmin($groupId, $userId);
         
         $resource = new HalResource(array(
             'user_id' => $userId,
@@ -113,16 +111,19 @@ class Listener extends AbstractListenerAggregate
 
 
     /**
-     * Removes a user from the group.
+     * Removes the user from the group's administrators list.
      * 
-     * @param ResourceEvent $e
+     * @param ResourceEvent $event
+     * @throws DomainException
      * @return boolean
      */
-    public function onDelete(ResourceEvent $e)
+    public function onDelete(ResourceEvent $event)
     {
-        $groupId = $e->getRouteParam('group_id');
-        $userId = $e->getRouteParam('user_id');
+        $groupId = $event->getRouteParam('group_id');
+        $userId = $event->getRouteParam('user_id');
         
-        return $this->service->removeUserFromGroup($userId, $groupId);
+        $this->getService()->removeGroupAdmin($groupId, $userId);
+        
+        return true;
     }
 }
