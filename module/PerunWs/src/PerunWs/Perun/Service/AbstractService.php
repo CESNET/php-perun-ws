@@ -51,7 +51,7 @@ abstract class AbstractService
     /**
      * @param Parameters $parameters
      */
-    public function setParameters($parameters)
+    public function setParameters(Parameters $parameters)
     {
         $this->parameters = $parameters;
     }

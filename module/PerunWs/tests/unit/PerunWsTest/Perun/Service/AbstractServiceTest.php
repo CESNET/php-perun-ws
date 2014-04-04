@@ -7,6 +7,15 @@ use Zend\Stdlib\Parameters;
 class AbstractServiceTest extends \PHPUnit_Framework_TestCase
 {
 
+    public function testSetParameters()
+    {
+        $service = $this->getServiceMock();
+        
+        $params = $this->getMock('Zend\Stdlib\Parameters');
+        $service->setParameters($params);
+        
+        $this->assertSame($params, $service->getParameters());
+    }
 
     public function testGetEntityManagerFactoryWithMissingException()
     {
