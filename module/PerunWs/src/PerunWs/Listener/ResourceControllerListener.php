@@ -16,7 +16,8 @@ class ResourceControllerListener extends AbstractSharedListenerAggregate
         'PerunWs\SystemGroupController',
         'PerunWs\GroupUsersController',
         'PerunWs\SystemGroupUsersController',
-        'PerunWs\UserGroupsController'
+        'PerunWs\UserGroupsController',
+        'PerunWs\GroupAdminsController'
     );
 
 
