@@ -1,0 +1,24 @@
+{
+    "id" : 1,
+    "first_name" : "Foo",
+    "last_name" : "Bar",
+    "display_name" : "Foo Bar",
+    "organization" : "Foobar Inc.",
+    "mail" : "foo@bar.org",
+    "language" : "en",
+    "member_id" : 123,
+    "member_status" : "VALID",
+    "principal_names" : [
+        "foo@bar.org", "bar@foo.org"
+    ],
+    "authentication_info" : {
+        "provider" : "https://idp.example.org/shibboleth",
+        "instant" : "2013-12-23T06:37:05.149Z",
+        "loa:" : 2
+    },
+    "_links" : {
+        "self" : {
+            "href" : "/users/1"
+        }
+    }
+}

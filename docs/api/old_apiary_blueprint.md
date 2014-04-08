@@ -6,12 +6,17 @@ HOST: https://shongo-auth.cesnet.cz/devel/perun/
 
 ## Authorization
 
-The web service can be used by registered clients only. Upon registration the client receives a secret. The client then must provide this secret in every request. The secret needs to be passed in the "Authorization" HTTP request header.
+The web service can be used by registered clients only. Upon registration the client receives a secret. The client then must provide this secret in every request. The secret needs to be passed in the _Authorization_ HTTP request header.
 
     GET /users HTTP/1.1
     Accept: application/json
     Authorization: dca51ae20ef3039012a4e1e606439780
+## Caching
 
+The service automatically caches the records it fetches from Perun for some time. If you need to get current data, you may force the web service to fetch data 
+from Perun even if there is an unexpired local copy. You can do this by setting the _Cache-Control_ HTTP header for the current request:
+
+    Cache-Contro: no-cache
 ## Error reporting
 
 In case of an error response (status codes 4xx, 5xx), the body of the response will contain 
@@ -48,6 +53,7 @@ List all users.
 
 Query parameters:
 
+* __filter_user_id__ - comma separated user IDs - the resulting collection will contain the selected users only
 * __search__ (optional) - a search (sub) string to filter the results
 
 GET /users{?search}
@@ -59,18 +65,23 @@ GET /users{?search}
     "_embedded": {
         "users": [{
             "id": 1,
-            "first_name": "Ivan",
-            "last_name": "Novakov",
-            "display_name": "Ivan Novakov",
-            "organization": "CESNET z.s.p.o.",
-            "mail": "ivan.novakov@cesnet.cz",
+            "first_name": "Foo",
+            "last_name": "Bar",
+            "display_name": "Foo Bar",
+            "organization": "Foobar Inc.",
+            "mail": "foo@bar.org",
             "language": "en",
             "member_id": 123,
             "member_status": "VALID",
             "principal_names": [
-                "novakov@cesnet.cz",
-                "novakoi@fel.cvut.cz"
+                "foo@bar.org",
+                "bar@foo.org"
             ],
+            "authentication_info": {
+                "provider": "https://idp.example.org/shibboleth",
+                "instant": "2013-12-23T06:37:05.149Z",
+                "loa:": 2
+            },
             "_links": {
                 "self": {
                     "href": "/users/1"
@@ -82,9 +93,16 @@ GET /users{?search}
             "last_name": "Vomáčka",
             "display_name": "Franta Vomáčka",
             "mail": "franta@email.cz",
+            "member_id": 456,
+            "member_status": "VALID",
             "principal_names": [
-                "vomacka@cesnet.cz",
+                "vomacka@foo.cz"
             ],
+            "authentication_info": {
+                "provider": "https://idp.example.org/shibboleth",
+                "instant": "2013-12-23T06:37:05.149Z",
+                "loa:": 2
+            },
             "_links": {
                 "self": {
                     "href": "/users/2"
@@ -105,17 +123,22 @@ GET /users/{id}
 < Content-Type: application/json
 {
     "id": 1,
-    "first_name": "Ivan",
-    "last_name": "Novakov",
-    "display_name": "Ivan Novakov",
-    "email": "ivan.novakov@cesnet.cz",
+    "first_name": "Foo",
+    "last_name": "Bar",
+    "display_name": "Foo Bar",
+    "email": "foo@bar.org",
     "phone": "+420 111 222 333",
-    "organization": "CESNET",
+    "organization": "Foobar Inc.",
     "language": "en",
     "principal_names": [
-        "novakov@cesnet.cz",
-        "novakoi@fel.cvut.cz"
+        "foo@bar.org",
+        "bar@foo.org"
     ],
+    "authentication_info": {
+        "provider": "https://idp.example.org/shibboleth",
+        "instant": "2013-12-23T06:37:05.149Z",
+        "loa:": 2
+    },
     "_links": {
         "self": {
             "href": "/users/1"
@@ -135,7 +158,7 @@ GET /users/{id}/groups
             "id": 10,
             "name": "first group",
             "description": "The First Group",
-            "parent_group_id": null
+            "parent_group_id": null,
             "_links": {
                 "self": {
                     "href": "/groups/10"
@@ -145,7 +168,7 @@ GET /users/{id}/groups
             "id": 11,
             "name": "second group",
             "description": "The Second Group",
-            "parent_group_id": 4
+            "parent_group_id": 4,
             "_links": {
                 "self": {
                     "href": "/groups/11"
@@ -158,6 +181,11 @@ GET /users/{id}/groups
 -- Group Resources --
 
 List all groups
+
+Query parameters:
+
+* __filter_group_id__ - comma separated list of group IDs - the resulting collection will contain the selected groups only
+
 GET /groups
 < 200
 < Content-Type: application/json
@@ -308,11 +336,11 @@ GET /principal/{principal_name}
 < Content-Type: application/json
 {
     "id": 123,
-    "first_name": "Ivan",
-    "last_name": "Novakov",
+    "first_name": "Foo",
+    "last_name": "Bar",
     "_links": {
         "self": {
-            "href": "/principal/novakov@cesnet.cz"
+            "href": "/principal/foo@bar.org"
         },
         "user": {
             "href": "/users/123"

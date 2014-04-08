@@ -1,0 +1,9 @@
+{
+    "user_id": "123",
+    "group_id": "456",
+    "_links": {
+        "self": {
+            "href": "/groups/123/users/456"
+        }
+    }
+}

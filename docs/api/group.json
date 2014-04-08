@@ -1,0 +1,23 @@
+{
+    "id" : 456,
+    "name" : "somegroup",
+    "unique_name" : "rootgroup:somegroup",
+    "description" : "Simple group description",
+    "admins" : [
+        {
+            "id" : 123,
+            "first_name" : "Some",
+            "last_name" : "Admin",
+            "_links" : {
+                "self" : {
+                    "href" : "/users/123"
+                }
+            }
+        }
+    ],
+    "_links" : {
+        "self" : {
+            "href" : "/groups/456"
+        }
+    }
+}

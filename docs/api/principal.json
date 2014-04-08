@@ -1,0 +1,13 @@
+{
+    "id" : 123,
+    "first_name" : "Some",
+    "last_name" : "Principal",
+    "_links" : {
+        "self" : {
+            "href" : "/principal/some.principal@example.org"
+        },
+        "user" : {
+            "href" : "/users/123"
+        }
+    }
+}
