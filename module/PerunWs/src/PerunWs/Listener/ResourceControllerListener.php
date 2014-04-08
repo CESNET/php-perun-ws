@@ -32,6 +32,16 @@ class ResourceControllerListener extends AbstractSharedListenerAggregate
             $this,
             'onPrincipalGetPost'
         ));
+        
+        $this->addListener($sharedEvents, 'PerunWs\GroupController', 'get.post', array(
+            $this,
+            'onGroupGetPost'
+        ));
+        
+        $this->addListener($sharedEvents, 'PerunWs\GroupAdminsController', 'getList.post', array(
+            $this,
+            'onGroupAdminsGetListPost'
+        ));
     }
 
 
@@ -78,6 +88,46 @@ class ResourceControllerListener extends AbstractSharedListenerAggregate
         
         $links->get('self')->setRouteParams(array(
             'principal_name' => $principalName
+        ));
+        
+        $links->add($link);
+    }
+    
+    public function onGroupGetPost(EventInterface $e)
+    {
+        /* @var $resource \PhlyRestfully\HalResource */
+        $resource = $e->getParam('resource');
+        
+        /* @var $links \PhlyRestfully\LinkCollection */
+        $links = $resource->getLinks();
+        
+        $link = new Link('users');
+        $link->setRoute('groups/group-users');        
+        $links->add($link);
+        
+        $link = new Link('admins');
+        $link->setRoute('groups/group-admins');
+        $links->add($link);
+    }
+
+
+    public function onGroupAdminsGetListPost(EventInterface $e)
+    {
+        /* @var $e \Zend\EventManager\Event */
+        /* @var $controller \PhlyRestfully\ResourceController */
+        $controller = $e->getTarget();
+        $groupId = $controller->getResource()
+            ->getRouteMatch()
+            ->getParam('group_id');
+        
+        /* @var $halCollection \PhlyRestfully\HalCollection */
+        $halCollection = $e->getParam('collection');
+        
+        $links = $halCollection->getLinks();
+        
+        $link = new Link('group');
+        $link->setRoute('groups', array(
+            'group_id' => $groupId
         ));
         
         $links->add($link);
