@@ -42,6 +42,7 @@ class HydratorTest extends \PHPUnit_Framework_TestCase
             'foo',
             'bar'
         );
+        $timezone = 'Some/Zone';
         
         $user = new User(array(
             'id' => $id,
@@ -71,6 +72,10 @@ class HydratorTest extends \PHPUnit_Framework_TestCase
                 new Attribute(array(
                     'friendlyName' => 'eduPersonPrincipalNames',
                     'value' => $principalNames
+                )),
+                new Attribute(array(
+                    'friendlyName' => 'timezone',
+                    'value' => $timezone
                 ))
             ))
         ));
@@ -85,5 +90,6 @@ class HydratorTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($phone, $data['phone']);
         $this->assertSame($preferredLanguage, $data['language']);
         $this->assertSame($principalNames, $data['principal_names']);
+        $this->assertSame($timezone, $data['timezone']);
     }
 }

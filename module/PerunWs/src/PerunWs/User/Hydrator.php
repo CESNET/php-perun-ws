@@ -31,6 +31,8 @@ class Hydrator implements HydratorInterface
     const FIELD_LANGUAGE = 'language';
     
     const FIELD_PRINCIPAL_NAMES = 'principal_names';
+    
+    const FIELD_TIMEZONE = 'timezone';
 
     /**
      * Maps Perun attribute names to local array field names.
@@ -43,7 +45,8 @@ class Hydrator implements HydratorInterface
         'displayName' => self::FIELD_DISPLAY_NAME,
         'phone' => self::FIELD_PHONE,
         'preferredLanguage' => self::FIELD_LANGUAGE,
-        'eduPersonPrincipalNames' => self::FIELD_PRINCIPAL_NAMES
+        'eduPersonPrincipalNames' => self::FIELD_PRINCIPAL_NAMES,
+        'timezone' => self::FIELD_TIMEZONE
     );
 
 
