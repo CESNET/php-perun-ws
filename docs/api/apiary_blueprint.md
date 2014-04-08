@@ -9,12 +9,14 @@ The web service can be used by registered clients only. Upon registration the cl
     GET /users HTTP/1.1
     Accept: application/json
     Authorization: dca51ae20ef3039012a4e1e606439780
+    
 ## Caching
 
 The service automatically caches the records it fetches from Perun for some time. If you need to get current data, you may force the web service to fetch data 
 from Perun even if there is an unexpired local copy. You can do this by setting the _Cache-Control_ HTTP header for the current request:
 
     Cache-Contro: no-cache
+
 ## Error reporting
 
 In case of an error response (status codes 4xx, 5xx), the body of the response will contain 
@@ -392,6 +394,188 @@ Collection of all groups.
 + Response 201
 
     [Group][]
+    
+    
+    
+# Group System Group
+Systemgroup resources.
+
+## System Group [/systemgroups/{id}]
+A single systemgroup.
+
++ Parameters
+    + id (integer) ... The group ID
+    
++ Model (application/hal+json)
+    + Body
+    
+        ```
+        {
+            "id" : 456,
+            "name" : "somegroup",
+            "unique_name" : "rootgroup:somegroup",
+            "description" : "Simple systemgroup description",
+        
+            "_links" : {
+                "self" : {
+                    "href" : "/systemgroups/456"
+                }
+            }
+        }
+        ```
+
+### Retrieve a single systemgroup [GET]
++ Response 200
+
+    [System Group][]
+    
+### Modify a single systemgroup [PUT]
+Updates a group.
+
++ Request (application/json)
+    
+    ```
+    {
+        "name": "New systemgroup name",
+        "description": "New systemgroup description"
+    }
+    ```
+
++ Response 200
+
+    [Group][]
+    
+### Delete a systemgroup [DELETE]
+Deletes a single group.
+
++ Response 204
+
+
+## Systemgroup users [/systemgroups/{id}/users]
+Systemgroup's members.
+
++ Parameters
+    + id (integer) ... The group ID
+    
++ Model (application/hal+json)
+    + Body
+    
+        ```
+        {
+            "count": 1,
+            "total": 1,
+            "_embedded": {
+                "users": [
+                    {
+                        "id": 1,
+                        "first_name": "Ivan",
+                        "last_name": "Novakov",
+                        "member_id": 123,
+                        "member_status": "VALID",
+                        "_links": {
+                            "self": {
+                                "href": "/users/1"
+                            }
+                        }
+                    }
+                ]
+            },
+            "_links": {
+                "self": {
+                    "href": "/systemgroups/5/users"
+                }
+            }
+        }
+        ```
+
+### Retrieve all group's members [GET]
++ Response 200
+
+    [Systemgroup users][]
+    
+## Systemgroup user [/systemgroups/{id}/users/{user_id}]
+A specific systemgroup member.
+
++ Parameters
+    + id (integer) ... The group ID
+    + user_id (integer) ... The user ID
+    
++ Model (application/hal+json)
+    + Body
+    
+        ```
+        {
+            "user_id": "123",
+            "group_id": "456",
+            "_links": {
+                "self": {
+                    "href": "/systemgroups/123/users/456"
+                }
+            }
+        }
+        ```
+
+### Add a user to a group [PUT]
++ Response 200
+
+    [Systemgroup user][]
+    
+### Remove a user from a group [DELETE]
++ Response 204
+
+## Systemgroups Collection [/systemgroups?filter_group_id]
+Collection of all groups.
+
++ Model (application/hal+json)
+    + Body
+    
+        ```
+        {
+            "count": 2,
+            "total": 20,
+            "_embedded": {
+                "groups": [
+                    {
+                        "id": 456,
+                        "name": "somegroup",
+                        "unique_name": "rootgroup:somegroup",
+                        "description": "Simple systemgroup description",
+                        "_links": {
+                            "self": {
+                                "href": "/systemgroups/456"
+                            }
+                        }
+                    }
+                ]
+            },
+            "_links": {
+                "self": {
+                    "href": "/systemgroups"
+                }
+            }
+        }
+        ```
+
+### List all groups [GET]
++ Parameters
+    + filter_group_id (integer, optional) ... A comma-separated list of group IDs to list
+    
++ Response 200
+
+    [Systemgroups Collection][]
+    
+### Greate a group [POST]
+
++ Request (application/json)
+
+    ```
+    {}
+    ```
+
++ Response 201
+
+    [Group][]
+
     
 # Group Principal
 Principal resources.

@@ -1,0 +1,9 @@
+{
+    "user_id" : 123,
+    "group_id" : 456,
+    "_links" : {
+        "self" : {
+            "href" : "/systemgroups/456/users/123"
+        }
+    }
+}
