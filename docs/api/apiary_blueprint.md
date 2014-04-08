@@ -388,15 +388,90 @@ Collection of all groups.
 + Request (application/json)
 
     ```
-    {}
+    {
+        "name": "a new group",
+        "description": "with optional description"
+    }
     ```
 
 + Response 201
 
     [Group][]
     
+## Group admins collection [/group/{id}/admins]
+A list of group's administrators.
+
++ Parameters
+    + id (integer) ... The group ID
+    
++ Model (application/hal+json)
+    + Body
+    
+        ```
+        {
+            "count": 1,
+            "total": 1,
+            "_links": {
+                "self": {
+                    "href": "/groups/123/admins"
+                }
+            },
+            "_embedded": {
+                "admins": [
+                    {
+                        "id": 456,
+                        "first_name": "Some",
+                        "last_name": "User",
+                        "_links": {
+                            "self": {
+                                "href": "/users/456"
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+        ```
+
+### Get all group administrators [GET]
++ Response 200
+
+    [Group admins collection][]
     
     
+## Group admin [/groups/{id}/admins/{user_id}]
+A single administrator resource.
+
++ Parameters
+    + id (integer) ... The group ID
+    + user_id (integer) ... The user ID
+    
++ Model (application/hal+json)
+    + Body
+    
+    
+        ```
+        {
+            "user_id": 123,
+            "group_id": 456,
+            "_links": {
+                "self": {
+                    "href": "/groups/456/admins/123"
+                }
+            }
+        }
+        ```
+    
+### Add a user the group's administrators list [PUT]
++ Response 200
+
+    [Group admin][]
+
+
+### Remove a user from the group's administrators list [DELETE]
++ Response 204
+
+
 # Group System Group
 Systemgroup resources.
 
@@ -569,7 +644,10 @@ Collection of all groups.
 + Request (application/json)
 
     ```
-    {}
+    {
+        "name": "a new systemgroup",
+        "description": "with optional description"
+    }
     ```
 
 + Response 201
