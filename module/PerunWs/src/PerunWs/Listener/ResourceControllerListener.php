@@ -13,6 +13,7 @@ class ResourceControllerListener extends AbstractSharedListenerAggregate
     protected $collectionControllers = array(
         'PerunWs\UserController',
         'PerunWs\GroupController',
+        'PerunWs\SystemGroupController',
         'PerunWs\GroupUsersController',
         'PerunWs\SystemGroupUsersController',
         'PerunWs\UserGroupsController'
