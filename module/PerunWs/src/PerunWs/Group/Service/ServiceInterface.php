@@ -2,6 +2,7 @@
 
 namespace PerunWs\Group\Service;
 
+use Zend\Stdlib\Parameters;
 use PerunWs\Perun;
 
 
@@ -24,10 +25,10 @@ interface ServiceInterface extends Perun\Service\ServiceInterface
     /**
      * Retrieves all groups
      * 
-     * @param array $params
+     * @param Parameters $params
      * @return \InoPerunApi\Entity\Collection\GroupCollection
      */
-    public function fetchAll(array $params = array());
+    public function fetchAll(Parameters $params);
 
 
     /**

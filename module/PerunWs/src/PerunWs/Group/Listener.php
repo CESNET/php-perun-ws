@@ -2,6 +2,8 @@
 
 namespace PerunWs\Group;
 
+use PerunWs\Util\ParametersFactory;
+use Zend\Stdlib\Parameters;
 use Zend\EventManager\AbstractListenerAggregate;
 use Zend\EventManager\EventManagerInterface;
 use PhlyRestfully\ResourceEvent;
@@ -26,6 +28,11 @@ class Listener extends AbstractListenerAggregate
      * @var CsvParser
      */
     protected $csvParser;
+
+    /**
+     * @var ParametersFactory
+     */
+    protected $parametersFactory;
 
     /**
      * @var string
@@ -81,6 +88,28 @@ class Listener extends AbstractListenerAggregate
     public function setCsvParser(CsvParser $csvParser)
     {
         $this->csvParser = $csvParser;
+    }
+
+
+    /**
+     * @return ParametersFactory
+     */
+    public function getParametersFactory()
+    {
+        if (! $this->parametersFactory instanceof ParametersFactory) {
+            $this->parametersFactory = new ParametersFactory();
+        }
+        
+        return $this->parametersFactory;
+    }
+
+
+    /**
+     * @param ParametersFactory $parametersFactory
+     */
+    public function setParametersFactory(ParametersFactory $parametersFactory)
+    {
+        $this->parametersFactory = $parametersFactory;
     }
 
 
@@ -143,11 +172,11 @@ class Listener extends AbstractListenerAggregate
      */
     public function onFetchAll(ResourceEvent $e)
     {
-        $params = array();
+        $params = $this->getParametersFactory()->createParameters();
         
         $groupIdList = $e->getQueryParam($this->groupIdParamName);
         if (null !== $groupIdList) {
-            $params['filter_group_id'] = $this->parseGroupIdParam($groupIdList);
+            $params->set('filter_group_id', $this->parseGroupIdParam($groupIdList));
         }
         
         $groups = $this->service->fetchAll($params);

@@ -2,10 +2,11 @@
 
 namespace PerunWsTest\Group;
 
+use Zend\Stdlib\Parameters;
 use PerunWs\Group\Listener;
 
 
-class ListenerTest extends \PHPUnit_Framework_Testcase
+class ListenerTest extends \PHPUnit_Framework_TestCase
 {
 
     protected $listener;
@@ -47,7 +48,7 @@ class ListenerTest extends \PHPUnit_Framework_Testcase
     {
         $this->setExpectedException('PhlyRestfully\Exception\InvalidArgumentException', null, 400);
         
-        $event = $this->getEventMock();
+        $event = $this->createEventMock();
         $this->listener->onFetch($event);
     }
 
@@ -58,7 +59,7 @@ class ListenerTest extends \PHPUnit_Framework_Testcase
         
         $id = 123;
         
-        $event = $this->getEventMock($id);
+        $event = $this->createEventMock($id);
         $service = $this->getMock('PerunWs\Group\Service\ServiceInterface');
         $service->expects($this->once())
             ->method('fetch')
@@ -76,8 +77,8 @@ class ListenerTest extends \PHPUnit_Framework_Testcase
         $id = 123;
         $group = $this->getMock('InoPerunApi\Entity\Group');
         
-        $event = $this->getEventMock($id);
-        $service = $this->getServiceMock();
+        $event = $this->createEventMock($id);
+        $service = $this->createServiceMock();
         $service->expects($this->once())
             ->method('fetch')
             ->with($id)
@@ -93,10 +94,15 @@ class ListenerTest extends \PHPUnit_Framework_Testcase
     {
         $groups = $this->getMock('InoPerunApi\Entity\Collection\GroupCollection');
         
-        $event = $this->getEventMock();
-        $service = $this->getServiceMock();
+        $params = $this->createParametersMock();
+        $paramsFactory = $this->createParametersFactoryMock($params);
+        $this->listener->setParametersFactory($paramsFactory);
+        
+        $event = $this->createEventMock();
+        $service = $this->createServiceMock();
         $service->expects($this->once())
             ->method('fetchAll')
+            ->with($params)
             ->will($this->returnValue($groups));
         $this->listener->setService($service);
         
@@ -110,13 +116,13 @@ class ListenerTest extends \PHPUnit_Framework_Testcase
         
         $groupIdParam = '111,222';
         
-        $resourceEvent = $this->getResourceEventMock();
+        $resourceEvent = $this->createResourceEventMock();
         $resourceEvent->expects($this->once())
             ->method('getQueryParam')
             ->with('filter_group_id')
             ->will($this->returnValue($groupIdParam));
         
-        $csvParser = $this->getCsvParserMock();
+        $csvParser = $this->createCsvParserMock();
         $csvParser->expects($this->once())
             ->method('parse')
             ->with($groupIdParam)
@@ -137,25 +143,30 @@ class ListenerTest extends \PHPUnit_Framework_Testcase
         );
         $groups = $this->getMock('InoPerunApi\Entity\Collection\GroupCollection');
         
-        $resourceEvent = $this->getResourceEventMock();
+        $params = $this->createParametersMock();
+        $params->expects($this->once())
+            ->method('set')
+            ->with('filter_group_id', $groupIdParsed);
+        $paramsFactory = $this->createParametersFactoryMock($params);
+        $this->listener->setParametersFactory($paramsFactory);
+        
+        $resourceEvent = $this->createResourceEventMock();
         $resourceEvent->expects($this->once())
             ->method('getQueryParam')
             ->with('filter_group_id')
             ->will($this->returnValue($groupIdParam));
         
-        $csvParser = $this->getCsvParserMock();
+        $csvParser = $this->createCsvParserMock();
         $csvParser->expects($this->once())
             ->method('parse')
             ->with($groupIdParam)
             ->will($this->returnValue($groupIdParsed));
         $this->listener->setCsvParser($csvParser);
         
-        $service = $this->getServiceMock();
+        $service = $this->createServiceMock();
         $service->expects($this->once())
             ->method('fetchAll')
-            ->with(array(
-            'filter_group_id' => $groupIdParsed
-        ))
+            ->with($params)
             ->will($this->returnValue($groups));
         $this->listener->setService($service);
         
@@ -170,9 +181,9 @@ class ListenerTest extends \PHPUnit_Framework_Testcase
         );
         $group = $this->getMock('InoPerunApi\Entity\Group');
         
-        $event = $this->getEventMock(null, $data);
+        $event = $this->createEventMock(null, $data);
         
-        $service = $this->getServiceMock();
+        $service = $this->createServiceMock();
         $service->expects($this->once())
             ->method('create')
             ->with($data)
@@ -192,9 +203,9 @@ class ListenerTest extends \PHPUnit_Framework_Testcase
         
         $group = $this->getMock('InoPerunApi\Entity\Group');
         
-        $event = $this->getEventMock($id, $data);
+        $event = $this->createEventMock($id, $data);
         
-        $service = $this->getServiceMock();
+        $service = $this->createServiceMock();
         $service->expects($this->once())
             ->method('patch')
             ->with($id, $data)
@@ -210,9 +221,9 @@ class ListenerTest extends \PHPUnit_Framework_Testcase
         $id = 123;
         $result = true;
         
-        $event = $this->getEventMock($id);
+        $event = $this->createEventMock($id);
         
-        $service = $this->getServiceMock();
+        $service = $this->createServiceMock();
         $service->expects($this->once())
             ->method('delete')
             ->with($id)
@@ -225,7 +236,7 @@ class ListenerTest extends \PHPUnit_Framework_Testcase
     /*
      * 
      */
-    protected function getEventMock($id = null, $data = null)
+    protected function createEventMock($id = null, $data = null)
     {
         $event = $this->getMock('PhlyRestfully\ResourceEvent');
         $i = 0;
@@ -249,7 +260,7 @@ class ListenerTest extends \PHPUnit_Framework_Testcase
     /**
      * @return \PHPUnit_Framework_MockObject_MockObject
      */
-    protected function getServiceMock()
+    protected function createServiceMock()
     {
         $service = $this->getMock('PerunWs\Group\Service\ServiceInterface');
         return $service;
@@ -260,16 +271,49 @@ class ListenerTest extends \PHPUnit_Framework_Testcase
      *
      * @return \PHPUnit_Framework_MockObject_MockObject
      */
-    protected function getResourceEventMock()
+    protected function createResourceEventMock()
     {
         $resourceEvent = $this->getMockBuilder('PhlyRestfully\ResourceEvent')->getMock();
         return $resourceEvent;
     }
 
 
-    protected function getCsvParserMock()
+    /**
+     *
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected function createCsvParserMock()
     {
         $csvParser = $this->getMockBuilder('PerunWs\Util\CsvParser')->getMock();
         return $csvParser;
+    }
+
+
+    /**
+     *
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected function createParametersMock()
+    {
+        $params = $this->getMock('Zend\Stdlib\Parameters');
+        
+        return $params;
+    }
+
+
+    /**
+     *
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected function createParametersFactoryMock($params = null, $inputParams = array())
+    {
+        $factory = $this->getMock('PerunWs\Util\ParametersFactory');
+        if ($params) {
+            $factory->expects($this->once())
+                ->method('createParameters')
+                ->with($inputParams)
+                ->will($this->returnValue($params));
+        }
+        return $factory;
     }
 }
