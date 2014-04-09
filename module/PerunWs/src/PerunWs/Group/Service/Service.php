@@ -2,12 +2,15 @@
 
 namespace PerunWs\Group\Service;
 
-use PerunWs\Perun\Service\AbstractService;
+use InoPerunApi\Entity\Member;
+use Zend\Stdlib\Parameters;
 use InoPerunApi\Manager\GenericManager;
 use InoPerunApi\Entity;
 use InoPerunApi\Manager\Exception\PerunErrorException;
 use InoPerunApi\Entity\Collection\GroupCollection;
 use InoPerunApi\Entity\Group;
+use PerunWs\Group\TypeToParentGroupMap;
+use PerunWs\Perun\Service\AbstractService;
 
 
 /**
@@ -54,6 +57,11 @@ class Service extends AbstractService implements ServiceInterface
      * @var Entity\Factory\FactoryInterface
      */
     protected $entityFactory;
+
+    /**
+     * @var TypeToParentGroupMap
+     */
+    protected $typeToParentGroupMap;
 
 
     /**
@@ -156,19 +164,35 @@ class Service extends AbstractService implements ServiceInterface
 
 
     /**
+     * @return \PerunWs\Group\TypeToParentGroupMap
+     */
+    public function getTypeToParentGroupMap()
+    {
+        return $this->typeToParentGroupMap;
+    }
+
+
+    /**
+     * @param \PerunWs\Group\TypeToParentGroupMap $typeToParentGroupMap
+     */
+    public function setTypeToParentGroupMap($typeToParentGroupMap)
+    {
+        $this->typeToParentGroupMap = $typeToParentGroupMap;
+    }
+
+
+    /**
      * {@inheritdoc}
      * @see \PerunWs\Group\Service\ServiceInterface::fetchAll()
      */
-    public function fetchAll(array $params = array())
+    public function fetchAll(Parameters $params)
     {
-        /* @var $groups \InoPerunApi\Entity\Collection\GroupCollection */
-        $groups = $this->getGroupsManager()->getSubGroups(array(
-            'parentGroup' => $this->getBaseGroupId()
-        ));
+        $parentGroupId = $this->getParentGroupIdByGroupType($params->get('filter_type'));
         
-        if (isset($params['filter_group_id']) && is_array($params['filter_group_id'])) {
-            $groups = $this->filterGroupCollectionById($groups, $params['filter_group_id']);
-        }
+        $groups = $this->fetchChildGroups($parentGroupId);
+        $groups = $this->filterGroups($groups, $params);
+        
+        // FIXME - set "type" properties
         
         return $groups;
     }
@@ -180,26 +204,14 @@ class Service extends AbstractService implements ServiceInterface
      */
     public function fetch($id)
     {
-        $groupsManager = $this->getGroupsManager();
-        
         try {
-            $group = $groupsManager->getGroupById(array(
-                'id' => $id
-            ));
-            
-            // Check if group is a subgroup of the base group
-            if (! $this->isValidGroup($group)) {
+            $group = $this->fetchGroup($id);
+        } catch (Exception\GroupRetrievalException $e) {
+            if ($e->isNotFound()) {
                 return null;
             }
             
-            $admins = $this->fetchGroupAdmins($id);
-            $group->setAdmins($admins);
-        } catch (PerunErrorException $e) {
-            if (self::PERUN_EXCEPTION_GROUP_NOT_EXISTS == $e->getErrorName()) {
-                return null;
-            }
-            
-            throw new Exception\GroupRetrievalException(sprintf("[%s] %s", $e->getErrorName(), $e->getErrorMessage()), 400, $e);
+            throw $e;
         }
         
         return $group;
@@ -216,22 +228,19 @@ class Service extends AbstractService implements ServiceInterface
             throw new Exception\GroupCreationException("Missing field 'name'", 400);
         }
         
+        if (! property_exists($data, 'type')) {
+            throw new Exception\GroupCreationException("Missing field 'type'", 400);
+        }
+        
+        $parentGroupId = $this->getTypeToParentGroupMap()->typeToParentGroup($data->type);
+        
         $group = $this->getEntityFactory()->createEntityWithName('Group', array(
             'name' => $data->name,
             'description' => property_exists($data, 'description') ? $data->description : '',
-            'parentGroupId' => $this->getBaseGroupId()
+            'parentGroupId' => $parentGroupId
         ));
         
-        try {
-            $newGroup = $this->getGroupsManager()->createGroup(array(
-                'vo' => $this->getVoId(),
-                'group' => $group
-            ));
-        } catch (PerunErrorException $e) {
-            throw new Exception\GroupCreationException(sprintf("[%s] %s", $e->getErrorName(), $e->getErrorMessage()), 400, $e);
-        }
-        
-        return $newGroup;
+        return $this->createGroup($group);
     }
 
 
@@ -245,6 +254,11 @@ class Service extends AbstractService implements ServiceInterface
      */
     public function patch($id, $data)
     {
+        /*
+         * check is valid group
+         */
+        $group = $this->fetchGroup($id);
+        
         if (! property_exists($data, 'name')) {
             throw new Exception\GroupCreationException("Missing field 'name'", 400);
         }
@@ -269,15 +283,9 @@ class Service extends AbstractService implements ServiceInterface
      */
     public function delete($id)
     {
-        try {
-            $this->getGroupsManager()->deleteGroup(array(
-                'group' => $id
-            ));
-        } catch (PerunErrorException $e) {
-            throw new Exception\GroupDeleteException(sprintf("[%s] %s", $e->getErrorName(), $e->getErrorMessage()), 400, $e);
-        }
+        $group = $this->fetchGroup($id);
         
-        return true;
+        return $this->deleteGroup($id);
     }
 
 
@@ -287,15 +295,9 @@ class Service extends AbstractService implements ServiceInterface
      */
     public function fetchMembers($id)
     {
-        try {
-            $members = $this->getGroupsManager()->getGroupRichMembers(array(
-                'group' => $id
-            ));
-        } catch (PerunErrorException $e) {
-            throw new Exception\GroupGenericException(sprintf("Group ID:%d not found", $id), 400, $e);
-        }
+        $group = $this->fetchGroup($id);
         
-        return $members;
+        return $this->fetchGroupMembers($id);
     }
 
 
@@ -306,15 +308,7 @@ class Service extends AbstractService implements ServiceInterface
     public function fetchUserGroups($userId)
     {
         $member = $this->getMemberByUser($userId);
-        
-        try {
-            $groups = $this->getGroupsManager()->getMemberGroups(array(
-                'member' => $member->getId()
-            ));
-        } catch (PerunErrorException $e) {
-            throw new Exception\GroupGenericException(sprintf("[%s] %s", $e->getErrorName(), $e->getErrorMessage()), 400, $e);
-        }
-        
+        $groups = $this->fetchMemberGroups($member);
         $groups = $this->filterGroupCollectionByValidation($groups);
         
         return $groups;
@@ -327,21 +321,9 @@ class Service extends AbstractService implements ServiceInterface
      */
     public function addUserToGroup($userId, $groupId)
     {
-        $group = $this->fetch($groupId);
-        if (! $group) {
-            throw new Exception\GroupRetrievalException(sprintf("Group ID:%d not found", $groupId), 400);
-        }
-        
+        $group = $this->fetchGroup($groupId);
         $member = $this->getMemberByUser($userId);
-        
-        try {
-            $this->getGroupsManager()->addMember(array(
-                'group' => $groupId,
-                'member' => $member->getId()
-            ));
-        } catch (PerunErrorException $e) {
-            throw new Exception\GroupGenericException(sprintf("[%s] %s", $e->getErrorName(), $e->getErrorMessage()), 400, $e);
-        }
+        $this->addMemberToGroup($member, $group);
         
         return $member;
     }
@@ -353,21 +335,9 @@ class Service extends AbstractService implements ServiceInterface
      */
     public function removeUserFromGroup($userId, $groupId)
     {
-        $group = $this->fetch($groupId);
-        if (! $group) {
-            throw new Exception\GroupRetrievalException(sprintf("Group ID:%d not found", $groupId), 400);
-        }
-        
+        $group = $this->fetchGroup($groupId);
         $member = $this->getMemberByUser($userId);
-        
-        try {
-            $this->getGroupsManager()->removeMember(array(
-                'group' => $groupId,
-                'member' => $member->getId()
-            ));
-        } catch (PerunErrorException $e) {
-            throw new Exception\GroupGenericException(sprintf("[%s] %s", $e->getErrorName(), $e->getErrorMessage()), 400, $e);
-        }
+        $this->removeMemberFromGroup($member, $group);
         
         return true;
     }
@@ -377,15 +347,10 @@ class Service extends AbstractService implements ServiceInterface
      * {@inheritdoc}
      * @see \PerunWs\Group\Service\ServiceInterface::fetchGroupAdmins()
      */
-    public function fetchGroupAdmins($groupId)
+    public function fetchAdmins($groupId)
     {
-        try {
-            $users = $this->getGroupsManager()->getAdmins(array(
-                'group' => $groupId
-            ));
-        } catch (PerunErrorException $e) {
-            throw new Exception\GroupGenericException(sprintf("[%s] %s", $e->getErrorName(), $e->getErrorMessage()), 400, $e);
-        }
+        $group = $this->fetchGroup($groupId);
+        $users = $this->fetchGroupAdmins($group);
         
         return $users;
     }
@@ -395,16 +360,10 @@ class Service extends AbstractService implements ServiceInterface
      * {@inhertidoc}
      * @see \PerunWs\Group\Service\ServiceInterface::addGroupAdmin()
      */
-    public function addGroupAdmin($groupId, $userId)
+    public function addAdmin($groupId, $userId)
     {
-        try {
-            $this->getGroupsManager()->addAdmin(array(
-                'group' => $groupId,
-                'user' => $userId
-            ));
-        } catch (PerunErrorException $e) {
-            throw new Exception\GroupGenericException(sprintf("[%s] %s", $e->getErrorName(), $e->getErrorMessage()), 400, $e);
-        }
+        $group = $this->fetchGroup($groupId);
+        $this->addAdminToGroup($userId, $group);
         
         return true;
     }
@@ -414,16 +373,10 @@ class Service extends AbstractService implements ServiceInterface
      * {@inhertidoc}
      * @see \PerunWs\Group\Service\ServiceInterface::removeGroupAdmin()
      */
-    public function removeGroupAdmin($groupId, $userId)
+    public function removeAdmin($groupId, $userId)
     {
-        try {
-            $this->getGroupsManager()->removeAdmin(array(
-                'group' => $groupId,
-                'user' => $userId
-            ));
-        } catch (PerunErrorException $e) {
-            throw new Exception\GroupGenericException(sprintf("[%s] %s", $e->getErrorName(), $e->getErrorMessage()), 400, $e);
-        }
+        $group = $this->fetchGroup($groupId);
+        $this->removeAdminFromGroup($userId, $group);
         
         return true;
     }
@@ -525,11 +478,7 @@ class Service extends AbstractService implements ServiceInterface
      */
     public function isValidGroup(Group $group)
     {
-        if ($group->getParentGroupId() !== $this->getBaseGroupId()) {
-            return false;
-        }
-        
-        return true;
+        return $this->getTypeToParentGroupMap()->isValidParentGroup($group->getParentGroupId());
     }
 
 
@@ -539,10 +488,201 @@ class Service extends AbstractService implements ServiceInterface
      * @param Group $group
      * @throws Exception\InvalidGroupException
      */
-    protected function checkGroup(Group $group)
+    public function checkGroup(Group $group)
     {
         if (! $this->isValidGroup($group)) {
             throw new Exception\InvalidGroupException(sprintf("Invalid group ID:%d", $group->getId()), 400);
         }
+    }
+
+
+    public function fetchGroup($id, $fetchAdmins = false)
+    {
+        $groupsManager = $this->getGroupsManager();
+        
+        try {
+            $group = $groupsManager->getGroupById(array(
+                'id' => $id
+            ));
+        } catch (PerunErrorException $e) {
+            $exception = new Exception\GroupRetrievalException(sprintf("[%s] %s", $e->getErrorName(), $e->getErrorMessage()), 400, $e);
+            if (self::PERUN_EXCEPTION_GROUP_NOT_EXISTS === $e->getErrorName()) {
+                $exception->setNotFound(true);
+            }
+            
+            throw $exception;
+        }
+        
+        if (! $this->isValidGroup($group)) {
+            return null;
+        }
+        
+        if ($fetchAdmins) {
+            $admins = $this->fetchGroupAdmins($id);
+            $group->setAdmins($admins);
+        }
+        
+        return $group;
+    }
+
+
+    public function fetchChildGroups($parentGroupId)
+    {
+        /* @var $groups \InoPerunApi\Entity\Collection\GroupCollection */
+        // FIXME - use try - catch
+        $groups = $this->getGroupsManager()->getSubGroups(array(
+            'parentGroup' => $parentGroupId
+        ));
+        
+        return $groups;
+    }
+
+
+    public function createGroup(Group $group)
+    {
+        try {
+            $createdGroup = $this->getGroupsManager()->createGroup(array(
+                'vo' => $this->getVoId(),
+                'group' => $group
+            ));
+        } catch (PerunErrorException $e) {
+            throw new Exception\GroupCreationException(sprintf("[%s] %s", $e->getErrorName(), $e->getErrorMessage()), 400, $e);
+        }
+        
+        return $createdGroup;
+    }
+
+
+    public function deleteGroup($id)
+    {
+        try {
+            $this->getGroupsManager()->deleteGroup(array(
+                'group' => $id
+            ));
+        } catch (PerunErrorException $e) {
+            throw new Exception\GroupDeleteException(sprintf("[%s] %s", $e->getErrorName(), $e->getErrorMessage()), 400, $e);
+        }
+        
+        return true;
+    }
+
+
+    public function fetchGroupMembers($id)
+    {
+        try {
+            $members = $this->getGroupsManager()->getGroupRichMembers(array(
+                'group' => $id
+            ));
+        } catch (PerunErrorException $e) {
+            throw new Exception\GroupGenericException(sprintf("Group ID:%d not found", $id), 400, $e);
+        }
+        
+        return $members;
+    }
+
+
+    public function fetchMemberGroups(Member $member)
+    {
+        try {
+            $groups = $this->getGroupsManager()->getMemberGroups(array(
+                'member' => $member->getId()
+            ));
+        } catch (PerunErrorException $e) {
+            throw new Exception\GroupGenericException(sprintf("[%s] %s", $e->getErrorName(), $e->getErrorMessage()), 400, $e);
+        }
+    }
+
+
+    public function addMemberToGroup(Member $member, Group $group)
+    {
+        try {
+            $this->getGroupsManager()->addMember(array(
+                'group' => $group->getId(),
+                'member' => $member->getId()
+            ));
+        } catch (PerunErrorException $e) {
+            throw new Exception\GroupGenericException(sprintf("[%s] %s", $e->getErrorName(), $e->getErrorMessage()), 400, $e);
+        }
+    }
+
+
+    public function removeMemberFromGroup(Member $member, Group $group)
+    {
+        try {
+            $this->getGroupsManager()->removeMember(array(
+                'group' => $group->getId(),
+                'member' => $member->getId()
+            ));
+        } catch (PerunErrorException $e) {
+            throw new Exception\GroupGenericException(sprintf("[%s] %s", $e->getErrorName(), $e->getErrorMessage()), 400, $e);
+        }
+    }
+
+
+    public function fetchGroupAdmins(Group $group)
+    {
+        try {
+            $users = $this->getGroupsManager()->getAdmins(array(
+                'group' => $group->getId()
+            ));
+        } catch (PerunErrorException $e) {
+            throw new Exception\GroupGenericException(sprintf("[%s] %s", $e->getErrorName(), $e->getErrorMessage()), 400, $e);
+        }
+        
+        return $users;
+    }
+
+
+    public function addAdminToGroup($userId, Group $group)
+    {
+        try {
+            $this->getGroupsManager()->addAdmin(array(
+                'group' => $group->getId(),
+                'user' => $userId
+            ));
+        } catch (PerunErrorException $e) {
+            throw new Exception\GroupGenericException(sprintf("[%s] %s", $e->getErrorName(), $e->getErrorMessage()), 400, $e);
+        }
+    }
+
+
+    public function removeAdminFromGroup($userId, Group $group)
+    {
+        try {
+            $this->getGroupsManager()->removeAdmin(array(
+                'group' => $group->getId(),
+                'user' => $userId
+            ));
+        } catch (PerunErrorException $e) {
+            throw new Exception\GroupGenericException(sprintf("[%s] %s", $e->getErrorName(), $e->getErrorMessage()), 400, $e);
+        }
+    }
+
+
+    public function filterGroups(GroupCollection $groups, Parameters $params)
+    {
+        if (isset($params['filter_group_id']) && is_array($params['filter_group_id'])) {
+            $groups = $this->filterGroupCollectionById($groups, $params['filter_group_id']);
+        }
+        
+        return $groups;
+    }
+
+
+    /**
+     * Gets the parent group ID based on the group type.
+     * 
+     * @param string $groupType
+     * @throws Exception\GroupGenericException
+     * @return integer
+     */
+    public function getParentGroupIdByGroupType($groupType)
+    {
+        $parentGroupId = $this->getTypeToParentGroupMap()->typeToParentGroup($groupType);
+        if (null === $parentGroupId) {
+            throw new Exception\GroupGenericException(sprintf("Unknown group type '%s'", $groupType), 400);
+        }
+        
+        return $parentGroupId;
     }
 }

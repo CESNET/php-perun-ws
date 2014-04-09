@@ -100,7 +100,7 @@ interface ServiceInterface extends Perun\Service\ServiceInterface
      * 
      * @param integer $groupId
      */
-    public function fetchGroupAdmins($groupId);
+    public function fetchAdmins($groupId);
 
 
     /**
@@ -109,7 +109,7 @@ interface ServiceInterface extends Perun\Service\ServiceInterface
      * @param integer $groupId
      * @param integer $userId
      */
-    public function addGroupAdmin($groupId, $userId);
+    public function addAdmin($groupId, $userId);
 
 
     /**
@@ -118,5 +118,5 @@ interface ServiceInterface extends Perun\Service\ServiceInterface
      * @param integer $groupId
      * @param integer $userId
      */
-    public function removeGroupAdmin($groupId, $userId);
+    public function removeAdmin($groupId, $userId);
 }

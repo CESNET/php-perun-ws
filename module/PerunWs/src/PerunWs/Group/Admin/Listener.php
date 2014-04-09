@@ -83,7 +83,7 @@ class Listener extends AbstractListenerAggregate
     {
         $groupId = $event->getRouteParam('group_id');
         
-        return $this->getService()->fetchGroupAdmins($groupId);
+        return $this->getService()->fetchAdmins($groupId);
     }
 
 
@@ -99,7 +99,7 @@ class Listener extends AbstractListenerAggregate
         $groupId = $event->getRouteParam('group_id');
         $userId = $event->getRouteParam('user_id');
         
-        $this->getService()->addGroupAdmin($groupId, $userId);
+        $this->getService()->addAdmin($groupId, $userId);
         
         $resource = new HalResource(array(
             'user_id' => $userId,
@@ -122,7 +122,7 @@ class Listener extends AbstractListenerAggregate
         $groupId = $event->getRouteParam('group_id');
         $userId = $event->getRouteParam('user_id');
         
-        $this->getService()->removeGroupAdmin($groupId, $userId);
+        $this->getService()->removeAdmin($groupId, $userId);
         
         return true;
     }

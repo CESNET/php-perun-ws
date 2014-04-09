@@ -91,7 +91,7 @@ class ListenerTest extends \PHPUnit_Framework_TestCase
         
         $service = $this->createGroupServiceMock();
         $service->expects($this->once())
-            ->method('fetchGroupAdmins')
+            ->method('fetchAdmins')
             ->with($groupId)
             ->will($this->throwException($exception));
         $this->listener->setService($service);
@@ -108,7 +108,7 @@ class ListenerTest extends \PHPUnit_Framework_TestCase
         
         $service = $this->createGroupServiceMock();
         $service->expects($this->once())
-            ->method('fetchGroupAdmins')
+            ->method('fetchAdmins')
             ->with($groupId)
             ->will($this->returnValue($admins));
         $this->listener->setService($service);
@@ -128,7 +128,7 @@ class ListenerTest extends \PHPUnit_Framework_TestCase
         
         $service = $this->createGroupServiceMock();
         $service->expects($this->once())
-            ->method('addGroupAdmin')
+            ->method('addAdmin')
             ->with($groupId, $userId)
             ->will($this->throwException($exception));
         $this->listener->setService($service);
@@ -145,7 +145,7 @@ class ListenerTest extends \PHPUnit_Framework_TestCase
         
         $service = $this->createGroupServiceMock();
         $service->expects($this->once())
-            ->method('addGroupAdmin')
+            ->method('addAdmin')
             ->with($groupId, $userId);
         $this->listener->setService($service);
         
@@ -167,7 +167,7 @@ class ListenerTest extends \PHPUnit_Framework_TestCase
         
         $service = $this->createGroupServiceMock();
         $service->expects($this->once())
-            ->method('removeGroupAdmin')
+            ->method('removeAdmin')
             ->with($groupId, $userId)
             ->will($this->throwException($exception));
         $this->listener->setService($service);
@@ -184,7 +184,7 @@ class ListenerTest extends \PHPUnit_Framework_TestCase
         
         $service = $this->createGroupServiceMock();
         $service->expects($this->once())
-            ->method('removeGroupAdmin')
+            ->method('removeAdmin')
             ->with($groupId, $userId);
         $this->listener->setService($service);
         
