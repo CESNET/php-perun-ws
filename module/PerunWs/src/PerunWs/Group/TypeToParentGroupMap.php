@@ -6,14 +6,54 @@ namespace PerunWs\Group;
 class TypeToParentGroupMap
 {
 
+    /**
+     * @var array
+     */
+    protected $mapDef;
 
     /**
-     * Returns the default group type.
+     * @var array
+     */
+    protected $reversedMapDef;
+
+
+    /**
+     * Constructor.
      * 
+     * @param array $map
+     */
+    public function __construct(array $mapDef)
+    {
+        $this->setMapDef($mapDef);
+    }
+
+
+    /**
+     * @return array
+     */
+    public function getMapDef()
+    {
+        return $this->mapDef;
+    }
+
+
+    /**
+     * @param array $map
+     */
+    public function setMapDef(array $mapDef)
+    {
+        $this->mapDef = $mapDef;
+    }
+
+
+    /**
      * @return string
      */
     public function getDefaultType()
-    {}
+    {
+        reset($this->mapDef);
+        return key($this->mapDef);
+    }
 
 
     /**
@@ -23,7 +63,17 @@ class TypeToParentGroupMap
      * @return integer
      */
     public function typeToParentGroup($type)
-    {}
+    {
+        if (! isset($this->mapDef[$type])) {
+            throw new \InvalidArgumentException(sprintf("Unknown group type '%s'", $type));
+        }
+        
+        if (! isset($this->mapDef[$type]['group_id'])) {
+            throw new \RuntimeException(sprintf("Missing group ID for type '%s'", $type));
+        }
+        
+        return $this->mapDef[$type]['group_id'];
+    }
 
 
     /**
@@ -33,7 +83,17 @@ class TypeToParentGroupMap
      * @return integer
      */
     public function typeToVo($type)
-    {}
+    {
+        if (! isset($this->mapDef[$type])) {
+            throw new \InvalidArgumentException(sprintf("Unknown group type '%s'", $type));
+        }
+        
+        if (! isset($this->mapDef[$type]['vo_id'])) {
+            throw new \RuntimeException(sprintf("Missing VO ID for type '%s'", $type));
+        }
+        
+        return $this->mapDef[$type]['vo_id'];
+    }
 
 
     /**
@@ -43,7 +103,15 @@ class TypeToParentGroupMap
      * @return string
      */
     public function parentGroupToType($groupId)
-    {}
+    {
+        $reversedMapDef = $this->getReversedMapDef();
+        
+        if (! isset($reversedMapDef[$groupId])) {
+            throw new \InvalidArgumentException(sprintf("Unknown group ID '%d'", $groupId));
+        }
+        
+        return $reversedMapDef[$groupId];
+    }
 
 
     /**
@@ -53,5 +121,33 @@ class TypeToParentGroupMap
      * @return boolean
      */
     public function isValidParentGroup($groupId)
-    {}
+    {
+        try {
+            $type = $this->parentGroupToType($groupId);
+        } catch (\InvalidArgumentException $e) {
+            return false;
+        }
+        
+        return true;
+    }
+
+
+    /**
+     * Returns the "reversed" map definition, mapping "group ID --> type".
+     * 
+     * @return array
+     */
+    protected function getReversedMapDef()
+    {
+        if (null === $this->reversedMapDef) {
+            $this->reversedMapDef = array();
+            foreach ($this->mapDef as $type => $fields) {
+                if (isset($fields['group_id'])) {
+                    $this->reversedMapDef[$fields['group_id']] = $type;
+                }
+            }
+        }
+        
+        return $this->reversedMapDef;
+    }
 }
