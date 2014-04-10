@@ -337,6 +337,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $member = $this->createMemberMock();
         $groups = $this->createGroupsCollectionMock();
         $filteredGroups = $this->createGroupsCollectionMock();
+        $filteredGroupsByType= $this->createGroupsCollectionMock();
         
         $params = $this->createParametersMock();
         
@@ -345,7 +346,8 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
             'extractGroupTypes',
             'fetchUserGroupsFromVos',
             'filterGroupCollectionByValidation',
-            'fixGroupTypes'
+            'fixGroupTypes',
+            'filterGroupCollectionByType'
         ))
             ->disableOriginalConstructor()
             ->getMock();
@@ -376,7 +378,12 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
             ->method('fixGroupTypes')
             ->with($filteredGroups);
         
-        $this->assertSame($filteredGroups, $service->fetchUserGroups($userId, $params));
+        $service->expects($this->once())
+            ->method('filterGroupCollectionByType')
+            ->with($filteredGroups, $groupTypes)
+            ->will($this->returnValue($filteredGroupsByType));
+        
+        $this->assertSame($filteredGroupsByType, $service->fetchUserGroups($userId, $params));
     }
 
 

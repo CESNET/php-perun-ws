@@ -316,6 +316,7 @@ class Service extends AbstractService implements ServiceInterface
         $groups = $this->fetchUserGroupsFromVos($userId, $vos);
         $groups = $this->filterGroupCollectionByValidation($groups);
         $this->fixGroupTypes($groups);
+        $groups = $this->filterGroupCollectionByType($groups, $groupTypes);
         
         return $groups;
     }
@@ -445,6 +446,29 @@ class Service extends AbstractService implements ServiceInterface
         foreach ($groups as $group) {
             /* @var $group \InoPerunApi\Entity\Group */
             if (in_array($group->getId(), $filterIds)) {
+                $filteredGroups[] = $group;
+            }
+        }
+        
+        $groups->setEntities($filteredGroups);
+        
+        return $groups;
+    }
+
+
+    /**
+     * The returned collection contains only groups of the specified type.
+     *  
+     * @param GroupCollection $groups
+     * @param string $groupType
+     * @return GroupCollection
+     */
+    public function filterGroupCollectionByType(GroupCollection $groups, array $groupTypes)
+    {
+        $filteredGroups = array();
+        foreach ($groups as $group) {
+            /* @var $group \InoPerunApi\Entity\Group */
+            if (in_array($group->getType(), $groupTypes)) {
                 $filteredGroups[] = $group;
             }
         }
