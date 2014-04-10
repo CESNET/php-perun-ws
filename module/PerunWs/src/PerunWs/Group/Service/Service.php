@@ -199,7 +199,7 @@ class Service extends AbstractService implements ServiceInterface
         }
         
         $groups = $this->fetchAllGroupsByType($groupTypes);
-        $groups = $this->filterGroups($groups, $params);
+        $groups = $this->processGroups($groups, $params);
         // FIXME - set "type" properties
         
         return $groups;
@@ -222,6 +222,8 @@ class Service extends AbstractService implements ServiceInterface
             throw $e;
         }
         
+        $this->fixGroupType($group);
+        
         return $group;
     }
 
@@ -240,7 +242,7 @@ class Service extends AbstractService implements ServiceInterface
             throw new Exception\GroupCreationException("Missing field 'type'", 400);
         }
         
-        $parentGroupId = $this->getTypeToParentGroupMap()->typeToParentGroup($data->type);
+        $parentGroupId = $this->getParentGroupIdByGroupType($data->type);
         
         $group = $this->getEntityFactory()->createEntityWithName('Group', array(
             'name' => $data->name,
@@ -248,7 +250,7 @@ class Service extends AbstractService implements ServiceInterface
             'parentGroupId' => $parentGroupId
         ));
         
-        return $this->createGroup($group);
+        return $this->createGroup($group, $data->type);
     }
 
 
@@ -317,7 +319,8 @@ class Service extends AbstractService implements ServiceInterface
     {
         $member = $this->getMemberByUser($userId);
         $groups = $this->fetchMemberGroups($member);
-        $groups = $this->filterGroupCollectionByValidation($groups);
+        //$groups = $this->filterGroupCollectionByValidation($groups);
+        $this->fixGroupTypes($groups);
         
         return $groups;
     }
@@ -570,16 +573,24 @@ class Service extends AbstractService implements ServiceInterface
     }
 
 
-    public function createGroup(Group $group)
+    public function createGroup(Group $group, $groupType)
     {
         try {
+            $targetVoId = $this->getTypeToParentGroupMap()->typeToVo($groupType);
+        } catch (\Exception $e) {
+            throw new Exception\GroupGenericException($e->getMessage(), 400, $e);
+        }
+        
+        try {
             $createdGroup = $this->getGroupsManager()->createGroup(array(
-                'vo' => $this->getVoId(),
+                'vo' => $targetVoId,
                 'group' => $group
             ));
         } catch (PerunErrorException $e) {
             throw new Exception\GroupCreationException(sprintf("[%s] %s", $e->getErrorName(), $e->getErrorMessage()), 400, $e);
         }
+        
+        $this->fixGroupType($createdGroup);
         
         return $createdGroup;
     }
@@ -691,6 +702,29 @@ class Service extends AbstractService implements ServiceInterface
     }
 
 
+    /**
+     * Groups post-retrieval post-processing.
+     * 
+     * @param GroupCollection $groups
+     * @param Parameters $params
+     * @return GroupCollection
+     */
+    public function processGroups(GroupCollection $groups, Parameters $params)
+    {
+        $groups = $this->filterGroups($groups, $params);
+        $this->fixGroupTypes($groups);
+        
+        return $groups;
+    }
+
+
+    /**
+     * Applies filterings to the groups.
+     * 
+     * @param GroupCollection $groups
+     * @param Parameters $params
+     * @return GroupCollection
+     */
     public function filterGroups(GroupCollection $groups, Parameters $params)
     {
         if (isset($params['filter_group_id']) && is_array($params['filter_group_id'])) {
@@ -698,6 +732,36 @@ class Service extends AbstractService implements ServiceInterface
         }
         
         return $groups;
+    }
+
+
+    /**
+     * Adjusts group types for all groups in the collection.
+     * 
+     * @param GroupCollection $groups
+     */
+    public function fixGroupTypes(GroupCollection $groups)
+    {
+        foreach ($groups as $group) {
+            $this->fixGroupType($group);
+        }
+    }
+
+
+    /**
+     * Adjusts the group type according to the parent group ID.
+     * 
+     * @param Group $group
+     */
+    public function fixGroupType(Group $group)
+    {
+        try {
+            $groupType = $this->getTypeToParentGroupMap()->parentGroupToType($group->getParentGroupId());
+        } catch (\Exception $e) {
+            throw new Exception\GroupGenericException($e->getMessage(), 400);
+        }
+        
+        $group->setType($groupType);
     }
 
 
@@ -710,9 +774,10 @@ class Service extends AbstractService implements ServiceInterface
      */
     public function getParentGroupIdByGroupType($groupType)
     {
-        $parentGroupId = $this->getTypeToParentGroupMap()->typeToParentGroup($groupType);
-        if (null === $parentGroupId) {
-            throw new Exception\GroupGenericException(sprintf("Unknown group type '%s'", $groupType), 400);
+        try {
+            $parentGroupId = $this->getTypeToParentGroupMap()->typeToParentGroup($groupType);
+        } catch (\Exception $e) {
+            throw new Exception\GroupGenericException($e->getMessage(), 400);
         }
         
         return $parentGroupId;

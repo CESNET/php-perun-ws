@@ -79,7 +79,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $service = $this->getMockBuilder('PerunWs\Group\Service\Service')
             ->setMethods(array(
             'fetchAllGroupsByType',
-            'filterGroups'
+            'processGroups'
         ))
             ->disableOriginalConstructor()
             ->getMock();
@@ -90,7 +90,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue($groups));
         
         $service->expects($this->once())
-            ->method('filterGroups')
+            ->method('processGroups')
             ->with($groups)
             ->will($this->returnValue($filteredGroups));
         
@@ -115,7 +115,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $service = $this->getMockBuilder('PerunWs\Group\Service\Service')
             ->setMethods(array(
             'fetchAllGroupsByType',
-            'filterGroups'
+            'processGroups'
         ))
             ->disableOriginalConstructor()
             ->getMock();
@@ -126,7 +126,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue($groups));
         
         $service->expects($this->once())
-            ->method('filterGroups')
+            ->method('processGroups')
             ->with($groups)
             ->will($this->returnValue($filteredGroups));
         
@@ -147,14 +147,20 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         
         $service = $this->getMockBuilder('PerunWs\Group\Service\Service')
             ->setMethods(array(
-            'fetchGroup'
+            'fetchGroup',
+            'fixGroupType'
         ))
             ->disableOriginalConstructor()
             ->getMock();
+        
         $service->expects($this->once())
             ->method('fetchGroup')
             ->with($groupId)
             ->will($this->returnValue($group));
+        
+        $service->expects($this->once())
+            ->method('fixGroupType')
+            ->with($group);
         
         $this->assertSame($group, $service->fetch($groupId));
     }
@@ -327,7 +333,8 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
             ->setMethods(array(
             'getMemberByUser',
             'fetchMemberGroups',
-            'filterGroupCollectionByValidation'
+            'filterGroupCollectionByValidation',
+            'fixGroupTypes'
         ))
             ->disableOriginalConstructor()
             ->getMock();
@@ -346,6 +353,10 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
             ->method('filterGroupCollectionByValidation')
             ->with($groups)
             ->will($this->returnValue($filteredGroups));
+        
+        $service->expects($this->once())
+            ->method('fixGroupTypes')
+            ->with($filteredGroups);
         
         $this->assertSame($filteredGroups, $service->fetchUserGroups($userId));
     }

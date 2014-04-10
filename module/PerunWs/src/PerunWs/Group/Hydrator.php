@@ -38,8 +38,8 @@ class Hydrator implements HydratorInterface
             'id' => $group->getId(),
             'name' => $group->getShortName(),
             'unique_name' => $group->getName(),
+            'type' => $group->getType(),
             'description' => $group->getDescription(),
-            //'parent_group_id' => $group->getParentGroupId(),
             'admins' => $group->getAdmins()
         );
         

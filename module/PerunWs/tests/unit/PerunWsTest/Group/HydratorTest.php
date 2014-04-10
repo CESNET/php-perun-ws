@@ -32,16 +32,16 @@ class HydratorTest extends \PHPUnit_Framework_Testcase
         $groupId = 123;
         $groupName = 'group';
         $groupUniqueName = 'parent:group';
+        $groupType = 'foo';
         $groupDescription = 'description';
-        $parentId = 456;
         $admins = $this->getMock('InoPerunApi\Entity\Collection\UserCollection');
         
         $expectedData = array(
             'id' => $groupId,
             'name' => $groupName,
             'unique_name' => $groupUniqueName,
+            'type' => 'foo',
             'description' => $groupDescription,
-            //'parent_group_id' => $parentId,
             'admins' => $admins
         );
         
@@ -49,8 +49,8 @@ class HydratorTest extends \PHPUnit_Framework_Testcase
         $group->setId($groupId);
         $group->setShortName($groupName);
         $group->setName($groupUniqueName);
+        $group->setType($groupType);
         $group->setDescription($groupDescription);
-        //$group->setParentGroupId($parentId);
         $group->setAdmins($admins);
         
         $this->assertEquals($expectedData, $this->hydrator->extract($group));
