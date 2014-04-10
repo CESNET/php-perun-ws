@@ -72,9 +72,10 @@ interface ServiceInterface extends Perun\Service\ServiceInterface
      * Returns the list of user's groups.
      * 
      * @param integer $userId
+     * @param Parameters $params
      * @return \InoPerunApi\Entity\Collection\GroupCollection
      */
-    public function fetchUserGroups($userId);
+    public function fetchUserGroups($userId, Parameters $params);
 
 
     /**

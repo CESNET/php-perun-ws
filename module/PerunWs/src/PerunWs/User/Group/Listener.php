@@ -2,12 +2,14 @@
 
 namespace PerunWs\User\Group;
 
-use PhlyRestfully\Exception\RuntimeException;
 use Zend\EventManager\EventManagerInterface;
 use Zend\EventManager\AbstractListenerAggregate;
 use PhlyRestfully\ResourceEvent;
+use PhlyRestfully\Exception\RuntimeException;
 use PerunWs\Group;
 use PerunWs\Group\Service\Exception\MemberRetrievalException;
+use PerunWs\Util\ParametersFactory;
+use PerunWs\Util\CsvParser;
 
 
 /**
@@ -20,6 +22,16 @@ class Listener extends AbstractListenerAggregate
      * @var Group\Service\ServiceInterface
      */
     protected $service;
+
+    /**
+     * @var ParametersFactory
+     */
+    protected $parametersFactory;
+
+    /**
+     * @var CsvParser
+     */
+    protected $csvParser;
 
 
     /**
@@ -52,6 +64,50 @@ class Listener extends AbstractListenerAggregate
 
 
     /**
+     * @return ParametersFactory
+     */
+    public function getParametersFactory()
+    {
+        if (! $this->parametersFactory instanceof ParametersFactory) {
+            $this->parametersFactory = new ParametersFactory();
+        }
+        
+        return $this->parametersFactory;
+    }
+
+
+    /**
+     * @return CsvParser
+     */
+    public function getCsvParser()
+    {
+        if (! $this->csvParser instanceof CsvParser) {
+            $this->csvParser = new CsvParser();
+        }
+        
+        return $this->csvParser;
+    }
+
+
+    /**
+     * @param CsvParser $csvParser
+     */
+    public function setCsvParser(CsvParser $csvParser)
+    {
+        $this->csvParser = $csvParser;
+    }
+
+
+    /**
+     * @param ParametersFactory $parametersFactory
+     */
+    public function setParametersFactory(ParametersFactory $parametersFactory)
+    {
+        $this->parametersFactory = $parametersFactory;
+    }
+
+
+    /**
      * {@inheritdoc}
      * @see \Zend\EventManager\ListenerAggregateInterface::attach()
      */
@@ -72,13 +128,16 @@ class Listener extends AbstractListenerAggregate
      */
     public function onFetchAll(ResourceEvent $e)
     {
+        $params = $this->getParametersFactory()->createParameters();
+        
+        if ($groupType = $e->getQueryParam('filter_type')) {
+            $params->set('filter_type', $this->getCsvParser()
+                ->parse($groupType));
+        }
+        
         $userId = $e->getRouteParam('user_id');
         
-        try {
-            $groups = $this->service->fetchUserGroups($userId);
-        } catch (MemberRetrievalException $e) {
-            throw new RuntimeException($e->getMessage(), 400, $e);
-        }
+        $groups = $this->service->fetchUserGroups($userId, $params);
         
         return $groups;
     }

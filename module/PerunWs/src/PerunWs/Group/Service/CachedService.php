@@ -3,7 +3,6 @@
 namespace PerunWs\Group\Service;
 
 use Zend\Stdlib\Parameters;
-
 use PerunWs\Perun\Service\AbstractCachedService;
 
 
@@ -104,7 +103,7 @@ class CachedService extends AbstractCachedService implements ServiceInterface
      * {@inheritdoc}
      * @see \PerunWs\Group\Service\ServiceInterface::fetchUserGroups()
      */
-    public function fetchUserGroups($userId)
+    public function fetchUserGroups($userId, Parameters $params)
     {
         return $this->cachedCall(__FUNCTION__, func_get_args());
     }

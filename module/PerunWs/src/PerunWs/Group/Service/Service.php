@@ -193,10 +193,13 @@ class Service extends AbstractService implements ServiceInterface
      */
     public function fetchAll(Parameters $params)
     {
+        /*
         $groupTypes = $params->get('filter_type');
         if (null === $groupTypes) {
             $groupTypes = $this->getTypeToParentGroupMap()->getAllTypes();
         }
+        */
+        $groupTypes = $this->extractGroupTypes($params);
         
         $groups = $this->fetchAllGroupsByType($groupTypes);
         $groups = $this->processGroups($groups, $params);
@@ -315,11 +318,13 @@ class Service extends AbstractService implements ServiceInterface
      * {@inheritdoc}
      * @see \PerunWs\Group\Service\ServiceInterface::fetchUserGroups()
      */
-    public function fetchUserGroups($userId)
+    public function fetchUserGroups($userId, Parameters $params)
     {
-        $member = $this->getMemberByUser($userId);
-        $groups = $this->fetchMemberGroups($member);
-        //$groups = $this->filterGroupCollectionByValidation($groups);
+        $groupTypes = $this->extractGroupTypes($params);
+        $vos = $this->getTypeToParentGroupMap()->typesToVos($groupTypes);
+        
+        $groups = $this->fetchUserGroupsFromVos($userId, $vos);
+        $groups = $this->filterGroupCollectionByValidation($groups);
         $this->fixGroupTypes($groups);
         
         return $groups;
@@ -333,7 +338,10 @@ class Service extends AbstractService implements ServiceInterface
     public function addUserToGroup($userId, $groupId)
     {
         $group = $this->fetchGroup($groupId);
-        $member = $this->getMemberByUser($userId);
+        // FIXME
+        $voId = 421;
+        //$voId = $this->getTypeToParentGroupMap()->typeToVo($group->getType());
+        $member = $this->getMemberByUser($userId, $voId);
         $this->addMemberToGroup($member, $group);
         
         return $member;
@@ -347,7 +355,9 @@ class Service extends AbstractService implements ServiceInterface
     public function removeUserFromGroup($userId, $groupId)
     {
         $group = $this->fetchGroup($groupId);
-        $member = $this->getMemberByUser($userId);
+        // FIXME
+        $voId = 421;
+        $member = $this->getMemberByUser($userId, $voId);
         $this->removeMemberFromGroup($member, $group);
         
         return true;
@@ -399,15 +409,15 @@ class Service extends AbstractService implements ServiceInterface
      * @param integer $userId
      * @return \InoPerunApi\Entity\Member|null
      */
-    public function getMemberByUser($userId)
+    public function getMemberByUser($userId, $voId)
     {
         try {
             $member = $this->getMembersManager()->getMemberByUser(array(
-                'vo' => $this->getVoId(),
+                'vo' => $voId,
                 'user' => $userId
             ));
         } catch (PerunErrorException $e) {
-            throw new Exception\MemberRetrievalException(sprintf("User ID:%d not found", $userId), 400);
+            throw new Exception\MemberRetrievalException(sprintf("User ID:%d not found in VO ID:%d", $userId, $voId), 400);
         }
         
         return $member;
@@ -573,6 +583,25 @@ class Service extends AbstractService implements ServiceInterface
     }
 
 
+    public function fetchUserGroupsFromVos($userId, array $vos)
+    {
+        $allGroups = null;
+        foreach ($vos as $voId) {
+            $member = $this->getMemberByUser($userId, $voId);
+            $groups = $this->fetchMemberGroups($member);
+            
+            if (null === $allGroups) {
+                $allGroups = $groups;
+                continue;
+            }
+            
+            $allGroups->appendCollection($groups);
+        }
+        
+        return $allGroups;
+    }
+
+
     public function createGroup(Group $group, $groupType)
     {
         try {
@@ -633,6 +662,8 @@ class Service extends AbstractService implements ServiceInterface
         } catch (PerunErrorException $e) {
             throw new Exception\GroupGenericException(sprintf("[%s] %s", $e->getErrorName(), $e->getErrorMessage()), 400, $e);
         }
+        
+        return $groups;
     }
 
 
@@ -781,5 +812,22 @@ class Service extends AbstractService implements ServiceInterface
         }
         
         return $parentGroupId;
+    }
+
+
+    /**
+     * Returns available group types - either from input parameters, or all types.
+     * 
+     * @param Parameters $params
+     * @return array
+     */
+    protected function extractGroupTypes(Parameters $params)
+    {
+        $groupTypes = $params->get('filter_type');
+        if (null === $groupTypes) {
+            $groupTypes = $this->getTypeToParentGroupMap()->getAllTypes();
+        }
+        
+        return $groupTypes;
     }
 }

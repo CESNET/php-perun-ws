@@ -325,14 +325,25 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
     public function testFetchUserGroups()
     {
         $userId = 123;
+        $groupTypes = array(
+            'foo',
+            'bar'
+        );
+        $vos = array(
+            111,
+            222
+        );
+        
         $member = $this->createMemberMock();
         $groups = $this->createGroupsCollectionMock();
         $filteredGroups = $this->createGroupsCollectionMock();
         
+        $params = $this->createParametersMock();
+        
         $service = $this->getMockBuilder('PerunWs\Group\Service\Service')
             ->setMethods(array(
-            'getMemberByUser',
-            'fetchMemberGroups',
+            'extractGroupTypes',
+            'fetchUserGroupsFromVos',
             'filterGroupCollectionByValidation',
             'fixGroupTypes'
         ))
@@ -340,13 +351,20 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
             ->getMock();
         
         $service->expects($this->once())
-            ->method('getMemberByUser')
-            ->with($userId)
-            ->will($this->returnValue($member));
+            ->method('extractGroupTypes')
+            ->with($params)
+            ->will($this->returnValue($groupTypes));
+        
+        $map = $this->createTypeMapMock();
+        $map->expects($this->once())
+            ->method('typesToVos')
+            ->with($groupTypes)
+            ->will($this->returnValue($vos));
+        $service->setTypeToParentGroupMap($map);
         
         $service->expects($this->once())
-            ->method('fetchMemberGroups')
-            ->with($member)
+            ->method('fetchUserGroupsFromVos')
+            ->with($userId, $vos)
             ->will($this->returnValue($groups));
         
         $service->expects($this->once())
@@ -358,7 +376,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
             ->method('fixGroupTypes')
             ->with($filteredGroups);
         
-        $this->assertSame($filteredGroups, $service->fetchUserGroups($userId));
+        $this->assertSame($filteredGroups, $service->fetchUserGroups($userId, $params));
     }
 
 
@@ -536,11 +554,8 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
             ->will($this->throwException($exception));
         
         $this->service->setMembersManager($membersManager);
-        $this->service->setParameters(new Parameters(array(
-            'vo_id' => $voId
-        )));
         
-        $this->service->getMemberByUser($userId);
+        $this->service->getMemberByUser($userId, $voId);
     }
 
 
@@ -565,11 +580,8 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue($member));
         
         $this->service->setMembersManager($membersManager);
-        $this->service->setParameters(new Parameters(array(
-            'vo_id' => $voId
-        )));
         
-        $this->assertSame($member, $this->service->getMemberByUser($userId));
+        $this->assertSame($member, $this->service->getMemberByUser($userId, $voId));
     }
 
 
@@ -763,5 +775,14 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
             ->getMock();
         
         return $map;
+    }
+
+
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected function createParametersMock()
+    {
+        return $this->getMock('Zend\Stdlib\Parameters');
     }
 }

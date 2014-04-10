@@ -108,6 +108,23 @@ class TypeToParentGroupMap
 
 
     /**
+     * Returns unordered list of unique VOs that correspond to the provided types.
+     * 
+     * @param array $types
+     * @return array
+     */
+    public function typesToVos(array $types)
+    {
+        $vos = array();
+        foreach ($types as $type) {
+            $vos[$this->typeToVo($type)] = $type;
+        }
+        
+        return array_keys($vos);
+    }
+
+
+    /**
      * Returns the corresponding group type to the provided parent group ID.
      * 
      * @param integer $groupId
