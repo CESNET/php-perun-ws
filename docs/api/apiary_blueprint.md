@@ -87,11 +87,11 @@ A single user object.
     [User][]
     
 
-## User Groups [/user/{id}/groups]
+## User Groups [/user/{id}/groups{?filter_type}]
 The list of groups the user is member of.
 
 + Parameters
-    + id (string) ... The user ID
+    + id (integer) ... The user ID
     
 + Model (application/hal+json)
     + Body
@@ -106,6 +106,7 @@ The list of groups the user is member of.
                         "id": 456,
                         "name": "somegroup",
                         "unique_name": "rootgroup:somegroup",
+                        "type": "user",
                         "description": "Simple group description",
                         "_links": {
                             "self": {
@@ -124,12 +125,15 @@ The list of groups the user is member of.
         ```
 
 ### Retrieve user's groups [GET]
++ Parameters
+    + filter_type (string, optional) ... Return groups of the specified type only (multiple values separated by commas may be used)
+
 + Response 200
 
     [User Groups][]
     
 
-## Users Collection [/users?search,filter_user_id]
+## Users Collection [/users{?search,filter_user_id}]
 Collection of all users.
 
 + Model (application/hal+json)
@@ -222,6 +226,7 @@ A single group.
             "id" : 456,
             "name" : "somegroup",
             "unique_name" : "rootgroup:somegroup",
+            "type": "user",
             "description" : "Simple group description",
             "admins" : [
                 {
@@ -342,7 +347,7 @@ A specific group member.
 ### Remove a user from a group [DELETE]
 + Response 204
 
-## Groups Collection [/groups?filter_group_id]
+## Groups Collection [/groups{?filter_group_id,filter_type}]
 Collection of all groups.
 
 + Model (application/hal+json)
@@ -358,6 +363,7 @@ Collection of all groups.
                         "id": 456,
                         "name": "somegroup",
                         "unique_name": "rootgroup:somegroup",
+                        "type": "user",
                         "description": "Simple group description",
                         "_links": {
                             "self": {
@@ -378,6 +384,7 @@ Collection of all groups.
 ### List all groups [GET]
 + Parameters
     + filter_group_id (integer, optional) ... A comma-separated list of group IDs to list
+    + filter_type (string, optional) ... Return groups of the specified type only (multiple values separated by commas may be used)
     
 + Response 200
 
@@ -390,7 +397,8 @@ Collection of all groups.
     ```
     {
         "name": "a new group",
-        "description": "with optional description"
+        "description": "with optional description",
+        "type": "user"
     }
     ```
 
@@ -470,189 +478,6 @@ A single administrator resource.
 
 ### Remove a user from the group's administrators list [DELETE]
 + Response 204
-
-
-# Group System Group
-Systemgroup resources.
-
-## System Group [/systemgroups/{id}]
-A single systemgroup.
-
-+ Parameters
-    + id (integer) ... The group ID
-    
-+ Model (application/hal+json)
-    + Body
-    
-        ```
-        {
-            "id" : 456,
-            "name" : "somegroup",
-            "unique_name" : "rootgroup:somegroup",
-            "description" : "Simple systemgroup description",
-        
-            "_links" : {
-                "self" : {
-                    "href" : "/systemgroups/456"
-                }
-            }
-        }
-        ```
-
-### Retrieve a single systemgroup [GET]
-+ Response 200
-
-    [System Group][]
-    
-### Modify a single systemgroup [PUT]
-Updates a group.
-
-+ Request (application/json)
-    
-    ```
-    {
-        "name": "New systemgroup name",
-        "description": "New systemgroup description"
-    }
-    ```
-
-+ Response 200
-
-    [Group][]
-    
-### Delete a systemgroup [DELETE]
-Deletes a single group.
-
-+ Response 204
-
-
-## Systemgroup users [/systemgroups/{id}/users]
-Systemgroup's members.
-
-+ Parameters
-    + id (integer) ... The group ID
-    
-+ Model (application/hal+json)
-    + Body
-    
-        ```
-        {
-            "count": 1,
-            "total": 1,
-            "_embedded": {
-                "users": [
-                    {
-                        "id": 1,
-                        "first_name": "Ivan",
-                        "last_name": "Novakov",
-                        "member_id": 123,
-                        "member_status": "VALID",
-                        "_links": {
-                            "self": {
-                                "href": "/users/1"
-                            }
-                        }
-                    }
-                ]
-            },
-            "_links": {
-                "self": {
-                    "href": "/systemgroups/5/users"
-                }
-            }
-        }
-        ```
-
-### Retrieve all group's members [GET]
-+ Response 200
-
-    [Systemgroup users][]
-    
-## Systemgroup user [/systemgroups/{id}/users/{user_id}]
-A specific systemgroup member.
-
-+ Parameters
-    + id (integer) ... The group ID
-    + user_id (integer) ... The user ID
-    
-+ Model (application/hal+json)
-    + Body
-    
-        ```
-        {
-            "user_id": "123",
-            "group_id": "456",
-            "_links": {
-                "self": {
-                    "href": "/systemgroups/123/users/456"
-                }
-            }
-        }
-        ```
-
-### Add a user to a group [PUT]
-+ Response 200
-
-    [Systemgroup user][]
-    
-### Remove a user from a group [DELETE]
-+ Response 204
-
-## Systemgroups Collection [/systemgroups?filter_group_id]
-Collection of all groups.
-
-+ Model (application/hal+json)
-    + Body
-    
-        ```
-        {
-            "count": 2,
-            "total": 20,
-            "_embedded": {
-                "groups": [
-                    {
-                        "id": 456,
-                        "name": "somegroup",
-                        "unique_name": "rootgroup:somegroup",
-                        "description": "Simple systemgroup description",
-                        "_links": {
-                            "self": {
-                                "href": "/systemgroups/456"
-                            }
-                        }
-                    }
-                ]
-            },
-            "_links": {
-                "self": {
-                    "href": "/systemgroups"
-                }
-            }
-        }
-        ```
-
-### List all groups [GET]
-+ Parameters
-    + filter_group_id (integer, optional) ... A comma-separated list of group IDs to list
-    
-+ Response 200
-
-    [Systemgroups Collection][]
-    
-### Greate a group [POST]
-
-+ Request (application/json)
-
-    ```
-    {
-        "name": "a new systemgroup",
-        "description": "with optional description"
-    }
-    ```
-
-+ Response 201
-
-    [Group][]
 
     
 # Group Principal

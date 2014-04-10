@@ -2,6 +2,7 @@
     "id" : 456,
     "name" : "somegroup",
     "unique_name" : "rootgroup:somegroup",
+    "type" : "user",
     "description" : "Simple group description",
     "admins" : [
         {
