@@ -51,6 +51,7 @@ class CsvParser
             return null;
         }
         
+        /*
         foreach ($values as $index => $value) {
             $value = intval($value);
             if (0 === $value) {
@@ -59,7 +60,26 @@ class CsvParser
             
             $values[$index] = $value;
         }
-        
+        */
         return $values;
+    }
+
+
+    public function parseNumbers($input)
+    {
+        $numbers = $this->parse($input);
+        
+        if (is_array($numbers)) {
+            foreach ($numbers as $index => $value) {
+                $value = intval($value);
+                if (0 === $value) {
+                    throw new \InvalidArgumentException(sprintf("Invalid input value '%s', should be numbers separated with '%s'", $input, $this->delimiter));
+                }
+                
+                $numbers[$index] = $value;
+            }
+        }
+        
+        return $numbers;
     }
 }

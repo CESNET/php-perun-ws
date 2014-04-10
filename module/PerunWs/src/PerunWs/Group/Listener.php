@@ -39,6 +39,11 @@ class Listener extends AbstractListenerAggregate
      */
     protected $groupIdParamName = 'filter_group_id';
 
+    /**
+     * @var string
+     */
+    protected $groupTypeParamName = 'filter_type';
+
 
     /**
      * Constructor.
@@ -174,6 +179,12 @@ class Listener extends AbstractListenerAggregate
     {
         $params = $this->getParametersFactory()->createParameters();
         
+        $groupType = $e->getQueryParam($this->groupTypeParamName);
+        if (null !== $groupType) {
+            $params->set('filter_type', $this->getCsvParser()
+                ->parse($groupType));
+        }
+        
         $groupIdList = $e->getQueryParam($this->groupIdParamName);
         if (null !== $groupIdList) {
             $params->set('filter_group_id', $this->parseGroupIdParam($groupIdList));
@@ -240,7 +251,7 @@ class Listener extends AbstractListenerAggregate
     protected function parseGroupIdParam($groupId)
     {
         try {
-            return $this->getCsvParser()->parse($groupId);
+            return $this->getCsvParser()->parseNumbers($groupId);
         } catch (\Exception $e) {
             throw new InvalidArgumentException($e->getMessage(), 400, $e);
         }

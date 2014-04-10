@@ -2,6 +2,7 @@
 
 namespace PerunWs\ServiceManager;
 
+use PerunWs\Group\TypeToParentGroupMap;
 use Zend\Cache;
 use Zend\Log\Logger;
 use Zend\Stdlib\Parameters;
@@ -94,6 +95,21 @@ class ServiceConfig extends Config
             },
             
             /**
+             * TypeToParentGroupMap - maps group types to parent group IDs
+             */
+            'PerunWs\GroupTypeMap' => function ($services)
+            {
+                $config = $services->get('Config');
+                if (! isset($config['perun_ws']['group_type_map']) || ! is_array($config['perun_ws']['group_type_map'])) {
+                    throw new Exception\MissingConfigException('perun_ws/group_type_map');
+                }
+                
+                $map = new TypeToParentGroupMap($config['perun_ws']['group_type_map']);
+                
+                return $map;
+            },
+            
+            /**
              * Perun user service
              */
             'PerunWs\UserService' => function ($services)
@@ -118,7 +134,7 @@ class ServiceConfig extends Config
             {
                 $entityManagerFactory = $services->get('PerunWs\EntityManagerFactory');
                 
-                $groupService = new Group\Service\Service($services->get('PerunWs\GroupServiceParameters'));
+                $groupService = new Group\Service\Service($services->get('PerunWs\GroupTypeMap'));
                 $groupService->setEntityManagerFactory($entityManagerFactory);
                 
                 $cacheStorage = $services->get('PerunWs\CacheStorage');
@@ -150,43 +166,12 @@ class ServiceConfig extends Config
                 return new Group\Listener($services->get('PerunWs\GroupService'));
             },
             
-            'PerunWs\SystemGroupsListener' => function ($services)
-            {
-                $groupService = $services->get('PerunWs\GroupService');
-                
-                $systemGroupsParams = $services->get('PerunWs\SystemGroupServiceParameters');
-                if (! $systemGroupsParams) {
-                    throw new MissingDependencyException('PerunWs\SystemGroupServiceParameters');
-                }
-                
-                $groupService->setParameters($systemGroupsParams);
-                
-                return new Group\Listener($groupService);
-            },
-            
             /**
              * Perun group's users resource listener
              */
             'PerunWs\GroupUsersListener' => function ($services)
             {
                 $groupService = $services->get('PerunWs\GroupService');
-                
-                return new Group\User\Listener($groupService);
-            },
-            
-            /**
-             * Perun system group's users resource listener
-             */
-            'PerunWs\SystemGroupUsersListener' => function ($services)
-            {
-                $groupService = $services->get('PerunWs\GroupService');
-                
-                $systemGroupsParams = $services->get('PerunWs\SystemGroupServiceParameters');
-                if (! $systemGroupsParams) {
-                    throw new MissingDependencyException('PerunWs\SystemGroupServiceParameters');
-                }
-                
-                $groupService->setParameters($systemGroupsParams);
                 
                 return new Group\User\Listener($groupService);
             },
@@ -215,36 +200,6 @@ class ServiceConfig extends Config
                 }
                 
                 $parameters->fromArray($config['perun_ws']['service_options']['user']);
-                
-                return $parameters;
-            },
-            
-            'PerunWs\GroupServiceParameters' => function ($services)
-            {
-                
-                $parameters = new Parameters();
-                
-                $config = $services->get('Config');
-                if (! isset($config['perun_ws']['service_options']['group']) || ! is_array($config['perun_ws']['service_options']['group'])) {
-                    throw new Exception\MissingConfigException('perun_ws/service_options/group');
-                }
-                
-                $parameters->fromArray($config['perun_ws']['service_options']['group']);
-                
-                return $parameters;
-            },
-            
-            'PerunWs\SystemGroupServiceParameters' => function ($services)
-            {
-                
-                $parameters = new Parameters();
-                
-                $config = $services->get('Config');
-                if (! isset($config['perun_ws']['service_options']['systemgroup']) || ! is_array($config['perun_ws']['service_options']['systemgroup'])) {
-                    throw new Exception\MissingConfigException('perun_ws/service_options/systemgroup');
-                }
-                
-                $parameters->fromArray($config['perun_ws']['service_options']['systemgroup']);
                 
                 return $parameters;
             },

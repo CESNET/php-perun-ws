@@ -117,14 +117,14 @@ class ListenerTest extends \PHPUnit_Framework_TestCase
         $groupIdParam = '111,222';
         
         $resourceEvent = $this->createResourceEventMock();
-        $resourceEvent->expects($this->once())
+        $resourceEvent->expects($this->at(1))
             ->method('getQueryParam')
             ->with('filter_group_id')
             ->will($this->returnValue($groupIdParam));
         
         $csvParser = $this->createCsvParserMock();
         $csvParser->expects($this->once())
-            ->method('parse')
+            ->method('parseNumbers')
             ->with($groupIdParam)
             ->will($this->throwException(new \InvalidArgumentException('Invalid value')));
         
@@ -151,16 +151,56 @@ class ListenerTest extends \PHPUnit_Framework_TestCase
         $this->listener->setParametersFactory($paramsFactory);
         
         $resourceEvent = $this->createResourceEventMock();
-        $resourceEvent->expects($this->once())
+        $resourceEvent->expects($this->at(1))
             ->method('getQueryParam')
             ->with('filter_group_id')
             ->will($this->returnValue($groupIdParam));
         
         $csvParser = $this->createCsvParserMock();
         $csvParser->expects($this->once())
-            ->method('parse')
+            ->method('parseNumbers')
             ->with($groupIdParam)
             ->will($this->returnValue($groupIdParsed));
+        $this->listener->setCsvParser($csvParser);
+        
+        $service = $this->createServiceMock();
+        $service->expects($this->once())
+            ->method('fetchAll')
+            ->with($params)
+            ->will($this->returnValue($groups));
+        $this->listener->setService($service);
+        
+        $this->assertSame($groups, $this->listener->onFetchAll($resourceEvent));
+    }
+
+
+    public function testOnFetchAllWithTypeFilter()
+    {
+        $typeParam = 'foo,bar';
+        $typeParsed = array(
+            'foo',
+            'bar'
+        );
+        $groups = $this->getMock('InoPerunApi\Entity\Collection\GroupCollection');
+        
+        $params = $this->createParametersMock();
+        $params->expects($this->once())
+            ->method('set')
+            ->with('filter_type', $typeParsed);
+        $paramsFactory = $this->createParametersFactoryMock($params);
+        $this->listener->setParametersFactory($paramsFactory);
+        
+        $resourceEvent = $this->createResourceEventMock();
+        $resourceEvent->expects($this->at(0))
+            ->method('getQueryParam')
+            ->with('filter_type')
+            ->will($this->returnValue($typeParam));
+        
+        $csvParser = $this->createCsvParserMock();
+        $csvParser->expects($this->once())
+            ->method('parse')
+            ->with($typeParam)
+            ->will($this->returnValue($typeParsed));
         $this->listener->setCsvParser($csvParser);
         
         $service = $this->createServiceMock();

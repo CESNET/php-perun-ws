@@ -85,39 +85,10 @@ return array(
                         )
                     )
                 )
-            ),
-            
-            /*
-             * /systemgroups/{group_id}
-            */
-            'systemgroups' => array(
-                'type' => 'Segment',
-                'options' => array(
-                    'route' => '/systemgroups[/:group_id]',
-                    'defaults' => array(
-                        'controller' => 'PerunWs\SystemGroupController'
-                    )
-                ),
-                'may_terminate' => true,
-                
-                'child_routes' => array(
-            
-                    /*
-                     * /groups/{group_id}/users/{user_id}
-                     */
-                    'systemgroup-users' => array(
-                        'type' => 'Segment',
-                        'options' => array(
-                            'route' => '/users[/:user_id]',
-                            'defaults' => array(
-                                'controller' => 'PerunWs\SystemGroupUsersController'
-                            )
-                        )
-                    )
-                )
             )
         )
-    ),
+    )
+    ,
     
     'phlyrestfully' => array(
         
@@ -189,26 +160,6 @@ return array(
                 'route_name' => 'groups'
             ),
             
-            'PerunWs\SystemGroupController' => array(
-                'identifier_name' => 'group_id',
-                'listener' => 'PerunWs\SystemGroupsListener',
-                'resource_identifiers' => array(
-                    'SystemGroupsResource'
-                ),
-                'collection_http_options' => array(
-                    'get',
-                    'post'
-                ),
-                'collection_name' => 'groups',
-                'page_size' => 10,
-                'resource_http_options' => array(
-                    'get',
-                    'patch',
-                    'delete'
-                ),
-                'route_name' => 'systemgroups'
-            ),
-            
             'PerunWs\GroupUsersController' => array(
                 'identifier_name' => 'user_id',
                 'listener' => 'PerunWs\GroupUsersListener',
@@ -225,24 +176,6 @@ return array(
                     'delete'
                 ),
                 'route_name' => 'groups/group-users'
-            ),
-            
-            'PerunWs\SystemGroupUsersController' => array(
-                'identifier_name' => 'user_id',
-                'listener' => 'PerunWs\SystemGroupUsersListener',
-                'resource_identifiers' => array(
-                    'SystemGroupUsersResource'
-                ),
-                'collection_http_options' => array(
-                    'get'
-                ),
-                'collection_name' => 'users',
-                'page_size' => 10,
-                'resource_http_options' => array(
-                    'put',
-                    'delete'
-                ),
-                'route_name' => 'systemgroups/systemgroup-users'
             ),
             
             'PerunWs\GroupAdminsController' => array(
@@ -376,17 +309,20 @@ return array(
         ),
         
         'service_options' => array(
-            'group' => array(
-                'vo_id' => 12,
-                'base_group_id' => 34
-            ),
-            'systemgroup' => array(
-                'vo_id' => 56,
-                'base_group_id' => 78
-            ),
             'user' => array(
                 'vo_id' => 22,
                 'principal_names_attribute_name' => 'urn:perun:user:attribute-def:virt:eduPersonPrincipalNames'
+            )
+        ),
+        
+        'group_type_map' => array(
+            'user' => array(
+                'vo_id' => 12,
+                'group_id' => 34
+            ),
+            'system' => array(
+                'vo_id' => 56,
+                'group_id' => 78
             )
         ),
         

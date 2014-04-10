@@ -64,6 +64,12 @@ class Service extends AbstractService implements ServiceInterface
     protected $typeToParentGroupMap;
 
 
+    public function __construct(TypeToParentGroupMap $typeToParentGroupMap)
+    {
+        $this->setTypeToParentGroupMap($typeToParentGroupMap);
+    }
+
+
     /**
      * @return string
      */
@@ -187,11 +193,13 @@ class Service extends AbstractService implements ServiceInterface
      */
     public function fetchAll(Parameters $params)
     {
-        $parentGroupId = $this->getParentGroupIdByGroupType($params->get('filter_type'));
+        $groupTypes = $params->get('filter_type');
+        if (null === $groupTypes) {
+            $groupTypes = $this->getTypeToParentGroupMap()->getAllTypes();
+        }
         
-        $groups = $this->fetchChildGroups($parentGroupId);
+        $groups = $this->fetchAllGroupsByType($groupTypes);
         $groups = $this->filterGroups($groups, $params);
-        
         // FIXME - set "type" properties
         
         return $groups;
@@ -493,6 +501,30 @@ class Service extends AbstractService implements ServiceInterface
         if (! $this->isValidGroup($group)) {
             throw new Exception\InvalidGroupException(sprintf("Invalid group ID:%d", $group->getId()), 400);
         }
+    }
+
+
+    /**
+     * Fetches all groups of the provided group types.
+     * @param array $groupTypes
+     * @return GroupCollection|null
+     */
+    public function fetchAllGroupsByType(array $groupTypes)
+    {
+        $groups = null;
+        foreach ($groupTypes as $groupType) {
+            $parentGroupId = $this->getParentGroupIdByGroupType($groupType);
+            
+            $childGroups = $this->fetchChildGroups($parentGroupId);
+            if (null === $groups) {
+                $groups = $childGroups;
+                continue;
+            }
+            
+            $groups->appendCollection($childGroups);
+        }
+        
+        return $groups;
     }
 
 

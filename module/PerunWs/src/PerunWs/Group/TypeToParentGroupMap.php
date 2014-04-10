@@ -57,6 +57,17 @@ class TypeToParentGroupMap
 
 
     /**
+     * Returns all defined group types.
+     * 
+     * @return array
+     */
+    public function getAllTypes()
+    {
+        return array_keys($this->mapDef);
+    }
+
+
+    /**
      * Returns the corresponding parent group ID to the provided group type.
      * 
      * @param string $type

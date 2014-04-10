@@ -12,7 +12,7 @@ class CsvParserTest extends \PHPUnit_Framework_TestCase
     /**
      * @dataProvider inputs
      */
-    public function testParse($input, $output, $exceptionName)
+    public function testParseNumbers($input, $output, $exceptionName)
     {
         if ($exceptionName) {
             $this->setExpectedException($exceptionName);
@@ -20,7 +20,7 @@ class CsvParserTest extends \PHPUnit_Framework_TestCase
         
         $parser = new CsvParser();
         
-        $this->assertSame($output, $parser->parse($input));
+        $this->assertSame($output, $parser->parseNumbers($input));
     }
 
 

@@ -63,17 +63,20 @@ return array(
         ),
         
         'service_options' => array(
-            'group' => array(
-                'vo_id' => 12,
-                'base_group_id' => 34
-            ),
-            'systemgroup' => array(
-                'vo_id' => 56,
-                'base_group_id' => 78
-            ),
             'user' => array(
                 'vo_id' => 22,
                 'principal_names_attribute_name' => 'urn:perun:user:attribute-def:virt:eduPersonPrincipalNames'
+            )
+        ),
+        
+        'group_type_map' => array(
+            'user' => array(
+                'vo_id' => 12,
+                'group_id' => 34
+            ),
+            'system' => array(
+                'vo_id' => 56,
+                'group_id' => 78
             )
         ),
     

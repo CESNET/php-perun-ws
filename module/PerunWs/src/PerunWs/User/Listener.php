@@ -188,7 +188,7 @@ class Listener extends AbstractListenerAggregate
     protected function parseUserIdParam($userId)
     {
         try {
-            return $this->getCsvParser()->parse($userId);
+            return $this->getCsvParser()->parseNumbers($userId);
         } catch (\Exception $e) {
             throw new InvalidArgumentException($e->getMessage(), 400, $e);
         }

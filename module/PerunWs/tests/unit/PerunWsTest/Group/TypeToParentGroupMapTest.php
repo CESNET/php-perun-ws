@@ -180,4 +180,26 @@ class TypeToParentGroupMapTest extends \PHPUnit_Framework_TestCase
         
         $this->assertSame('foo', $map->getDefaultType());
     }
+
+
+    public function testGetAllTypes()
+    {
+        $mapDef = array(
+            'foo' => array(
+                'group_id' => 123
+            ),
+            'bar' => array(
+                'group_id' => 789
+            )
+        );
+        
+        $map = new TypeToParentGroupMap($mapDef);
+        
+        $expected = array(
+            'foo',
+            'bar'
+        );
+        
+        $this->assertSame($expected, $map->getAllTypes());
+    }
 }

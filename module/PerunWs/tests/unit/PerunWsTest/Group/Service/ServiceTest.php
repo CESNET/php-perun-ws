@@ -19,7 +19,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->service = new Service(new Parameters());
+        $this->service = new Service($this->createTypeMapMock());
     }
 
 
@@ -64,10 +64,13 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
 
     public function testFetchAll()
     {
-        $filterType = 'foo';
-        $parentGroupId = 123;
+        $filterTypes = array(
+            'foo',
+            'bar'
+        );
+        
         $params = new Parameters(array(
-            'filter_type' => $filterType
+            'filter_type' => $filterTypes
         ));
         
         $groups = $this->createGroupsCollectionMock();
@@ -75,27 +78,63 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         
         $service = $this->getMockBuilder('PerunWs\Group\Service\Service')
             ->setMethods(array(
-            'getParentGroupIdByGroupType',
-            'fetchChildGroups',
+            'fetchAllGroupsByType',
             'filterGroups'
         ))
             ->disableOriginalConstructor()
             ->getMock();
         
         $service->expects($this->once())
-            ->method('getParentGroupIdByGroupType')
-            ->with($filterType)
-            ->will($this->returnValue($parentGroupId));
-        
-        $service->expects($this->once())
-            ->method('fetchChildGroups')
-            ->with($parentGroupId)
+            ->method('fetchAllGroupsByType')
+            ->with($filterTypes)
             ->will($this->returnValue($groups));
         
         $service->expects($this->once())
             ->method('filterGroups')
             ->with($groups)
             ->will($this->returnValue($filteredGroups));
+        
+        $this->assertSame($filteredGroups, $service->fetchAll($params));
+    }
+
+
+    public function testFetchAllWithDefaultGroupTypes()
+    {
+        $filterTypes = array(
+            'foo',
+            'bar'
+        );
+        
+        $params = new Parameters(array(
+            'filter_type' => null
+        ));
+        
+        $groups = $this->createGroupsCollectionMock();
+        $filteredGroups = $this->createGroupsCollectionMock();
+        
+        $service = $this->getMockBuilder('PerunWs\Group\Service\Service')
+            ->setMethods(array(
+            'fetchAllGroupsByType',
+            'filterGroups'
+        ))
+            ->disableOriginalConstructor()
+            ->getMock();
+        
+        $service->expects($this->once())
+            ->method('fetchAllGroupsByType')
+            ->with($filterTypes)
+            ->will($this->returnValue($groups));
+        
+        $service->expects($this->once())
+            ->method('filterGroups')
+            ->with($groups)
+            ->will($this->returnValue($filteredGroups));
+        
+        $map = $this->createTypeMapMock();
+        $map->expects($this->once())
+            ->method('getAllTypes')
+            ->will($this->returnValue($filterTypes));
+        $service->setTypeToParentGroupMap($map);
         
         $this->assertSame($filteredGroups, $service->fetchAll($params));
     }
@@ -708,7 +747,9 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
      */
     protected function createTypeMapMock()
     {
-        $map = $this->getMock('PerunWs\Group\TypeToParentGroupMap');
+        $map = $this->getMockBuilder('PerunWs\Group\TypeToParentGroupMap')
+            ->disableOriginalConstructor()
+            ->getMock();
         
         return $map;
     }
