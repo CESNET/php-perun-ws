@@ -234,4 +234,61 @@ class TypeToParentGroupMapTest extends \PHPUnit_Framework_TestCase
             'test'
         )));
     }
+
+
+    public function testGetGroupVo()
+    {
+        $mapDef = array(
+            'foo' => array(
+                'group_id' => 123,
+                'vo_id' => 111
+            ),
+            'bar' => array(
+                'group_id' => 789,
+                'vo_id' => 222
+            ),
+            'test' => array(
+                'group_id' => 789,
+                'vo_id' => 222
+            )
+        );
+        
+        $map = new TypeToParentGroupMap($mapDef);
+        
+        $this->assertSame(111, $map->getGroupVo(123));
+        $this->assertSame(222, $map->getGroupVo(789));
+    }
+
+
+    public function testGetGroupVoWithUnknownGroup()
+    {
+        $this->setExpectedException('RuntimeException', 'Unknown group');
+        
+        $mapDef = array(
+            'foo' => array(
+                'group_id' => 123,
+                'vo_id' => 111
+            )
+        );
+        
+        $map = new TypeToParentGroupMap($mapDef);
+        
+        $map->getGroupVo(12345);
+    }
+
+
+    public function testGetGroupVoWithUndefinedVo()
+    {
+        $this->setExpectedException('RuntimeException', 'Undefined VO');
+        
+        $mapDef = array(
+            'foo' => array(
+                'group_id' => 123
+            )
+        );
+        
+        $map = new TypeToParentGroupMap($mapDef);
+        
+        $map->getGroupVo(123);
+    }
 }

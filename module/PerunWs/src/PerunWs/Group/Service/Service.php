@@ -193,17 +193,10 @@ class Service extends AbstractService implements ServiceInterface
      */
     public function fetchAll(Parameters $params)
     {
-        /*
-        $groupTypes = $params->get('filter_type');
-        if (null === $groupTypes) {
-            $groupTypes = $this->getTypeToParentGroupMap()->getAllTypes();
-        }
-        */
         $groupTypes = $this->extractGroupTypes($params);
         
         $groups = $this->fetchAllGroupsByType($groupTypes);
         $groups = $this->processGroups($groups, $params);
-        // FIXME - set "type" properties
         
         return $groups;
     }
@@ -267,9 +260,6 @@ class Service extends AbstractService implements ServiceInterface
      */
     public function patch($id, $data)
     {
-        /*
-         * check is valid group
-         */
         $group = $this->fetchGroup($id);
         
         if (! property_exists($data, 'name')) {
@@ -338,9 +328,7 @@ class Service extends AbstractService implements ServiceInterface
     public function addUserToGroup($userId, $groupId)
     {
         $group = $this->fetchGroup($groupId);
-        // FIXME
-        $voId = 421;
-        //$voId = $this->getTypeToParentGroupMap()->typeToVo($group->getType());
+        $voId = $this->getVoIdByParentGroupId($group->getParentGroupId());
         $member = $this->getMemberByUser($userId, $voId);
         $this->addMemberToGroup($member, $group);
         
@@ -355,8 +343,7 @@ class Service extends AbstractService implements ServiceInterface
     public function removeUserFromGroup($userId, $groupId)
     {
         $group = $this->fetchGroup($groupId);
-        // FIXME
-        $voId = 421;
+        $voId = $this->getVoIdByParentGroupId($group->getParentGroupId());
         $member = $this->getMemberByUser($userId, $voId);
         $this->removeMemberFromGroup($member, $group);
         
@@ -812,6 +799,25 @@ class Service extends AbstractService implements ServiceInterface
         }
         
         return $parentGroupId;
+    }
+
+
+    /**
+     * Returns the VO ID the provided group ID is in.
+     * 
+     * @param integer $groupId
+     * @throws Exception\GroupGenericException
+     * @return integer
+     */
+    public function getVoIdByParentGroupId($groupId)
+    {
+        try {
+            $voId = $this->getTypeToParentGroupMap()->getGroupVo($groupId);
+        } catch (\Exception $e) {
+            throw new Exception\GroupGenericException($e->getMessage(), 400);
+        }
+        
+        return $voId;
     }
 
 

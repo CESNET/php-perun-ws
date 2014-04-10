@@ -161,6 +161,29 @@ class TypeToParentGroupMap
 
 
     /**
+     * Returns the corresponding VO ID for the provided group ID.
+     * 
+     * @param integer $groupId
+     * @throws \RuntimeException
+     * @return integer
+     */
+    public function getGroupVo($groupId)
+    {
+        foreach ($this->mapDef as $type => $fields) {
+            if (isset($fields['group_id']) && $groupId === $fields['group_id']) {
+                if (! isset($fields['vo_id'])) {
+                    throw new \RuntimeException(sprintf("Undefined VO for group type '%s'", $type));
+                }
+                
+                return $fields['vo_id'];
+            }
+        }
+        
+        throw new \RuntimeException(sprintf("Unknown group ID:%d", $groupId));
+    }
+
+
+    /**
      * Returns the "reversed" map definition, mapping "group ID --> type".
      * 
      * @return array

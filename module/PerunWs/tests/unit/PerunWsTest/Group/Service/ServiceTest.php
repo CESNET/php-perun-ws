@@ -384,14 +384,24 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
     {
         $userId = 123;
         $groupId = 789;
+        $parentGroupId = 456;
+        $voId = 111;
         
-        $group = $this->createGroupMock();
+        $group = $this->getMockBuilder('InoPerunApi\Entity\Group')
+            ->setMethods(array(
+            'getParentGroupId'
+        ))
+            ->getMock();
+        $group->expects($this->once())
+            ->method('getParentGroupId')
+            ->will($this->returnValue($parentGroupId));
         
         $member = $this->createMemberMock();
         
         $service = $this->getMockBuilder('PerunWs\Group\Service\Service')
             ->setMethods(array(
             'fetchGroup',
+            'getVoIdByParentGroupId',
             'getMemberByUser',
             'addMemberToGroup'
         ))
@@ -404,8 +414,13 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue($group));
         
         $service->expects($this->once())
+            ->method('getVoIdByParentGroupId')
+            ->with($parentGroupId)
+            ->will($this->returnValue($voId));
+        
+        $service->expects($this->once())
             ->method('getMemberByUser')
-            ->with($userId)
+            ->with($userId, $voId)
             ->will($this->returnValue($member));
         
         $service->expects($this->once())
@@ -420,13 +435,24 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
     {
         $userId = 123;
         $groupId = 789;
+        $parentGroupId = 456;
+        $voId = 111;
         
-        $group = $this->createGroupMock();
+        $group = $this->getMockBuilder('InoPerunApi\Entity\Group')
+            ->setMethods(array(
+            'getParentGroupId'
+        ))
+            ->getMock();
+        $group->expects($this->once())
+            ->method('getParentGroupId')
+            ->will($this->returnValue($parentGroupId));
+        
         $member = $this->createMemberMock();
         
         $service = $this->getMockBuilder('PerunWs\Group\Service\Service')
             ->setMethods(array(
             'fetchGroup',
+            'getVoIdByParentGroupId',
             'getMemberByUser',
             'removeMemberFromGroup'
         ))
@@ -437,6 +463,11 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
             ->method('fetchGroup')
             ->with($groupId)
             ->will($this->returnValue($group));
+        
+        $service->expects($this->once())
+            ->method('getVoIdByParentGroupId')
+            ->with($parentGroupId)
+            ->will($this->returnValue($voId));
         
         $service->expects($this->once())
             ->method('getMemberByUser')
