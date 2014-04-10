@@ -2,13 +2,13 @@
 
 namespace PerunWsTest\Group\Service;
 
-use PerunWs\Group\Service\Exception\GroupRetrievalException;
 use Zend\Stdlib\Parameters;
-use PerunWs\Group\Service\Service;
-use InoPerunApi\Manager\Exception\PerunErrorException;
-use PerunWs\Group\Service\Exception\GroupCreationException;
 use InoPerunApi\Entity\Group;
 use InoPerunApi\Entity\Collection\GroupCollection;
+use InoPerunApi\Manager\Exception\PerunErrorException;
+use PerunWs\Group\Service\Exception\GroupRetrievalException;
+use PerunWs\Group\Service\Service;
+use PerunWs\Group\Service\Exception\GroupCreationException;
 
 
 class ServiceTest extends \PHPUnit_Framework_TestCase

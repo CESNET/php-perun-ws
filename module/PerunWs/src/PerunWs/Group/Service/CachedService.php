@@ -2,6 +2,8 @@
 
 namespace PerunWs\Group\Service;
 
+use Zend\Stdlib\Parameters;
+
 use PerunWs\Perun\Service\AbstractCachedService;
 
 
@@ -16,7 +18,7 @@ class CachedService extends AbstractCachedService implements ServiceInterface
      * {@inheritdoc}
      * @see \PerunWs\Group\Service\ServiceInterface::fetchAll()
      */
-    public function fetchAll(array $params = array())
+    public function fetchAll(Parameters $params)
     {
         return $this->cachedCall(__FUNCTION__, func_get_args());
     }
@@ -156,7 +158,7 @@ class CachedService extends AbstractCachedService implements ServiceInterface
      * {@inhertidoc}
      * @see \PerunWs\Group\Service\ServiceInterface::fetchGroupAdmins()
      */
-    public function fetchGroupAdmins($groupId)
+    public function fetchAdmins($groupId)
     {
         return $this->cachedCall(__FUNCTION__, func_get_args());
     }
@@ -166,7 +168,7 @@ class CachedService extends AbstractCachedService implements ServiceInterface
      * {@inhertidoc}
      * @see \PerunWs\Group\Service\ServiceInterface::addGroupAdmin()
      */
-    public function addGroupAdmin($groupId, $userId)
+    public function addAdmin($groupId, $userId)
     {
         /*
          * Invalidate:
@@ -184,7 +186,7 @@ class CachedService extends AbstractCachedService implements ServiceInterface
      * {@inhertidoc}
      * @see \PerunWs\Group\Service\ServiceInterface::removeGroupAdmin()
      */
-    public function removeGroupAdmin($groupId, $userId)
+    public function removeAdmin($groupId, $userId)
     {
         /*
          * Invalidate:
