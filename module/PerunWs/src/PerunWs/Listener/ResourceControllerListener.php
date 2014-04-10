@@ -13,9 +13,7 @@ class ResourceControllerListener extends AbstractSharedListenerAggregate
     protected $collectionControllers = array(
         'PerunWs\UserController',
         'PerunWs\GroupController',
-        'PerunWs\SystemGroupController',
         'PerunWs\GroupUsersController',
-        'PerunWs\SystemGroupUsersController',
         'PerunWs\UserGroupsController',
         'PerunWs\GroupAdminsController'
     );
@@ -92,7 +90,8 @@ class ResourceControllerListener extends AbstractSharedListenerAggregate
         
         $links->add($link);
     }
-    
+
+
     public function onGroupGetPost(EventInterface $e)
     {
         /* @var $resource \PhlyRestfully\HalResource */
@@ -102,7 +101,7 @@ class ResourceControllerListener extends AbstractSharedListenerAggregate
         $links = $resource->getLinks();
         
         $link = new Link('users');
-        $link->setRoute('groups/group-users');        
+        $link->setRoute('groups/group-users');
         $links->add($link);
         
         $link = new Link('admins');
