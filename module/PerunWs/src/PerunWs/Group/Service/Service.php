@@ -314,9 +314,11 @@ class Service extends AbstractService implements ServiceInterface
         $vos = $this->getTypeToParentGroupMap()->typesToVos($groupTypes);
         
         $groups = $this->fetchUserGroupsFromVos($userId, $vos);
-        $groups = $this->filterGroupCollectionByValidation($groups);
-        $this->fixGroupTypes($groups);
-        $groups = $this->filterGroupCollectionByType($groups, $groupTypes);
+        if (null !== $groups) {
+            $groups = $this->filterGroupCollectionByValidation($groups);
+            $this->fixGroupTypes($groups);
+            $groups = $this->filterGroupCollectionByType($groups, $groupTypes);
+        }
         
         return $groups;
     }
@@ -600,6 +602,10 @@ class Service extends AbstractService implements ServiceInterface
         foreach ($vos as $voId) {
             $member = $this->getMemberByUser($userId, $voId);
             $groups = $this->fetchMemberGroups($member);
+            
+            if (null === $groups) {
+                continue;
+            }
             
             if (null === $allGroups) {
                 $allGroups = $groups;
