@@ -246,7 +246,7 @@ class Service extends AbstractService implements ServiceInterface
             'parentGroupId' => $parentGroupId
         ));
         
-        return $this->createGroup($group, $data->type);
+        return $this->createGroup($group);
     }
 
 
@@ -609,18 +609,13 @@ class Service extends AbstractService implements ServiceInterface
     }
 
 
-    public function createGroup(Group $group, $groupType)
+    public function createGroup(Group $group)
     {
         try {
-            $targetVoId = $this->getTypeToParentGroupMap()->typeToVo($groupType);
-        } catch (\Exception $e) {
-            throw new Exception\GroupGenericException($e->getMessage(), 400, $e);
-        }
-        
-        try {
             $createdGroup = $this->getGroupsManager()->createGroup(array(
-                'vo' => $targetVoId,
-                'group' => $group
+                //'vo' => $targetVoId,
+                'group' => $group,
+                'parentGroup' => $group->getParentGroupId()
             ));
         } catch (PerunErrorException $e) {
             throw new Exception\GroupCreationException(sprintf("[%s] %s", $e->getErrorName(), $e->getErrorMessage()), 400, $e);
