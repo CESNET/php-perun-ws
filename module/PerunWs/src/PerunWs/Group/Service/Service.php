@@ -314,11 +314,9 @@ class Service extends AbstractService implements ServiceInterface
         $vos = $this->getTypeToParentGroupMap()->typesToVos($groupTypes);
         
         $groups = $this->fetchUserGroupsFromVos($userId, $vos);
-        if (null !== $groups) {
-            $groups = $this->filterGroupCollectionByValidation($groups);
-            $this->fixGroupTypes($groups);
-            $groups = $this->filterGroupCollectionByType($groups, $groupTypes);
-        }
+        $groups = $this->filterGroupCollectionByValidation($groups);
+        $this->fixGroupTypes($groups);
+        $groups = $this->filterGroupCollectionByType($groups, $groupTypes);
         
         return $groups;
     }
@@ -537,17 +535,14 @@ class Service extends AbstractService implements ServiceInterface
      */
     public function fetchAllGroupsByType(array $groupTypes)
     {
-        $groups = null;
+        $groups = new GroupCollection();
         foreach ($groupTypes as $groupType) {
             $parentGroupId = $this->getParentGroupIdByGroupType($groupType);
             
             $childGroups = $this->fetchChildGroups($parentGroupId);
-            if (null === $groups) {
-                $groups = $childGroups;
-                continue;
+            if (null !== $childGroups) {
+                $groups->appendCollection($childGroups);
             }
-            
-            $groups->appendCollection($childGroups);
         }
         
         return $groups;
@@ -598,17 +593,12 @@ class Service extends AbstractService implements ServiceInterface
 
     public function fetchUserGroupsFromVos($userId, array $vos)
     {
-        $allGroups = null;
+        $allGroups = new GroupCollection();
         foreach ($vos as $voId) {
             $member = $this->getMemberByUser($userId, $voId);
             $groups = $this->fetchMemberGroups($member);
             
             if (null === $groups) {
-                continue;
-            }
-            
-            if (null === $allGroups) {
-                $allGroups = $groups;
                 continue;
             }
             
