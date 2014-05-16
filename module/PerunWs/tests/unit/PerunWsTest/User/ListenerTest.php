@@ -101,25 +101,17 @@ class ListenerTest extends \PHPUnit_Framework_TestCase
     }
 
 
-    public function testOnFetchAllWithInvalidSearchString()
+    /**
+     * @dataProvider dataProviderSearchStrings
+     * @param unknown $searchString
+     * @param string $exceptionName
+     */
+    public function testOnfetchAlllWithSearchString($searchString, $exceptionName = null, $exceptionString = null, $exceptionCode = null)
     {
-        $this->setExpectedException('PhlyRestfully\Exception\InvalidArgumentException', 'Invalid search string', 400);
+        if (null !== $exceptionName) {
+            $this->setExpectedException($exceptionName, $exceptionString, $exceptionCode);
+        }
         
-        $searchString = 'some invalid search string 123 #$%';
-        
-        $resourceEvent = $this->getResourceEventMock();
-        $resourceEvent->expects($this->at(0))
-            ->method('getQueryParam')
-            ->with('search')
-            ->will($this->returnValue($searchString));
-        
-        $this->listener->onFetchAll($resourceEvent);
-    }
-
-
-    public function testOnfetchAlllWithSearchString()
-    {
-        $searchString = 'validstring';
         $userCollection = $this->getUserCollectionMock();
         
         $resourceEvent = $this->getResourceEventMock();
@@ -128,14 +120,16 @@ class ListenerTest extends \PHPUnit_Framework_TestCase
             ->with('search')
             ->will($this->returnValue($searchString));
         
-        $service = $this->getServiceMock();
-        $service->expects($this->once())
-            ->method('fetchAll')
-            ->with(array(
-            'searchString' => $searchString
-        ))
-            ->will($this->returnValue($userCollection));
-        $this->listener->setService($service);
+        if (null === $exceptionName) {
+            $service = $this->getServiceMock();
+            $service->expects($this->once())
+                ->method('fetchAll')
+                ->with(array(
+                'searchString' => $searchString
+            ))
+                ->will($this->returnValue($userCollection));
+            $this->listener->setService($service);
+        }
         
         $this->assertSame($userCollection, $this->listener->onFetchAll($resourceEvent));
     }
@@ -221,5 +215,30 @@ class ListenerTest extends \PHPUnit_Framework_TestCase
     {
         $userCollection = $this->getMock('InoPerunApi\Entity\Collection\UserCollection');
         return $userCollection;
+    }
+
+
+    public function dataProviderSearchStrings()
+    {
+        return array(
+            array(
+                'search' => 'validstring',
+                'exception' => null
+            ),
+            array(
+                'search' => 'Valid String',
+                'exception' => null
+            ),
+            array(
+                'search' => 'Another Valid String',
+                'exception' => null
+            ),
+            array(
+                'search' => 'Invalid string $#%',
+                'exceptionName' => 'PhlyRestfully\Exception\InvalidArgumentException',
+                'exceptionString' => 'Invalid search string',
+                'exceptionCode' => 400
+            )
+        );
     }
 }
