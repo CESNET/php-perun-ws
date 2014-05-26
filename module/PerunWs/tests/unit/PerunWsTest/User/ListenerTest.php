@@ -234,6 +234,18 @@ class ListenerTest extends \PHPUnit_Framework_TestCase
                 'exception' => null
             ),
             array(
+                'search' => 'some@email.com',
+                'exception' => null
+            ),
+            array(
+                'search' => 'another_email.108@some-example.com',
+                'exception' => null
+            ),
+            array(
+                'search' => 'příliš žluťoučký kůň úpěl ďábelské ódy',
+                'exception' => null
+            ),
+            array(
                 'search' => 'Invalid string $#%',
                 'exceptionName' => 'PhlyRestfully\Exception\InvalidArgumentException',
                 'exceptionString' => 'Invalid search string',

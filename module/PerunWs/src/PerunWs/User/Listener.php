@@ -40,7 +40,7 @@ class Listener extends AbstractListenerAggregate
      * Reg. expression to match the "search" GET parameter.
      * @var string
      */
-    protected $searchRegexp = '/^[\w ]+$/';
+    protected $searchRegexp = '/^[\w\.@_ -]+$/u';
 
 
     /**
