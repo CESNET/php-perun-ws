@@ -23,6 +23,19 @@ class Service extends AbstractService implements ServiceInterface
     protected $membersManagerName = 'membersManager';
 
     /**
+     * @var array
+     */
+    protected $userAttributeNames = array(
+        'organization',
+        'preferredMail',
+        'displayName',
+        'phone',
+        'preferredLanguage',
+        'eduPersonPrincipalNames',
+        'timezone'
+    );
+
+    /**
      * @var GenericManager
      */
     protected $usersManager;
@@ -120,6 +133,24 @@ class Service extends AbstractService implements ServiceInterface
 
 
     /**
+     * @return array
+     */
+    public function getUserAttributeNames()
+    {
+        return $this->userAttributeNames;
+    }
+
+
+    /**
+     * @param array  $userAttributeNames
+     */
+    public function setUserAttributeNames(array $userAttributeNames)
+    {
+        $this->userAttributeNames = $userAttributeNames;
+    }
+
+
+    /**
      * {@inheritdoc}
      * @see \PerunWs\User\Service\ServiceInterface::fetch()
      */
@@ -151,17 +182,22 @@ class Service extends AbstractService implements ServiceInterface
      */
     public function fetchAll(array $params = array())
     {
-        $params['vo'] = $this->getVoId();
+        $params += array(
+            'vo' => $this->getVoId(),
+            'attrsNames' => $this->userAttributeNames
+        );
         
         if (isset($params['filter_user_id']) && is_array($params['filter_user_id'])) {
             return $this->fetchByMultipleId($params['filter_user_id']);
         }
         
         if (isset($params['searchString'])) {
-            return $this->getMembersManager()->findRichMembersWithAttributesInVo($params);
+            return $this->getMembersManager()->findCompleteRichMembers($params);
+            // return $this->getMembersManager()->findRichMembersWithAttributesInVo($params);
         }
         
-        return $this->getMembersManager()->getRichMembersWithAttributes($params);
+        return $this->getMembersManager()->getCompleteRichMembers($params);
+        // return $this->getMembersManager()->getRichMembersWithAttributes($params);
     }
 
 

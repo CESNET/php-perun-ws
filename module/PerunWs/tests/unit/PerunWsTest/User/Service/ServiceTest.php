@@ -49,6 +49,18 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
     }
 
 
+    public function testSetGetUserAttributeNames()
+    {
+        $attrs = array(
+            'foo',
+            'bar'
+        );
+        
+        $this->service->setUserAttributeNames($attrs);
+        $this->assertSame($attrs, $this->service->getUserAttributeNames());
+    }
+
+
     public function testFetchWithMemberNotExistsException()
     {
         $id = 123;
@@ -154,16 +166,22 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $serviceParams = array(
             'vo_id' => $voId
         );
+        $userAttrs = array(
+            'foo',
+            'bar'
+        );
         $callParams = array(
-            'vo' => $voId
+            'vo' => $voId,
+            'attrsNames' => $userAttrs
         );
         $users = $this->getUserCollectionMock();
         
         $this->service->setParameters(new Parameters($serviceParams));
+        $this->service->setUserAttributeNames($userAttrs);
         
         $manager = $this->getManagerMock();
         $manager->expects($this->once())
-            ->method('getRichMembersWithAttributes')
+            ->method('getCompleteRichMembers')
             ->with($callParams)
             ->will($this->returnValue($users));
         $this->service->setMembersManager($manager);
@@ -179,18 +197,23 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $serviceParams = array(
             'vo_id' => $voId
         );
-        
+        $userAttrs = array(
+            'foo',
+            'bar'
+        );
         $callParams = array(
             'vo' => $voId,
-            'searchString' => $searchString
+            'searchString' => $searchString,
+            'attrsNames' => $userAttrs
         );
         $users = $this->getUserCollectionMock();
         
         $this->service->setParameters(new Parameters($serviceParams));
+        $this->service->setUserAttributeNames($userAttrs);
         
         $manager = $this->getManagerMock();
         $manager->expects($this->once())
-            ->method('findRichMembersWithAttributesInVo')
+            ->method('findCompleteRichMembers')
             ->with($callParams)
             ->will($this->returnValue($users));
         $this->service->setMembersManager($manager);
@@ -355,8 +378,8 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
             ->disableOriginalConstructor()
             ->setMethods(array(
             'getRichUserWithAttributes',
-            'getRichMembersWithAttributes',
-            'findRichMembersWithAttributesInVo',
+            'getCompleteRichMembers',
+            'findCompleteRichMembers',
             'getUsersByAttributeValue',
             'getMemberByUser',
             'getRichMemberWithAttributes'
