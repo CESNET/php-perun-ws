@@ -184,7 +184,7 @@ class Service extends AbstractService implements ServiceInterface
     {
         $params += array(
             'vo' => $this->getVoId(),
-            'attrsNames' => $this->userAttributeNames
+            'attrsNames' => $this->getUserAttributeNames()
         );
         
         if (isset($params['filter_user_id']) && is_array($params['filter_user_id'])) {
