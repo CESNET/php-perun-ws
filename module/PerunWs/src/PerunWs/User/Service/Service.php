@@ -26,13 +26,19 @@ class Service extends AbstractService implements ServiceInterface
      * @var array
      */
     protected $userAttributeNames = array(
-        'organization',
-        'preferredMail',
-        'displayName',
-        'phone',
-        'preferredLanguage',
-        'eduPersonPrincipalNames',
-        'timezone'
+        'urn:perun:user:attribute-def:def:organization',
+        'urn:perun:user:attribute-def:def:preferredMail',
+        'urn:perun:user:attribute-def:core:displayName',
+        'urn:perun:user:attribute-def:def:phone',
+        'urn:perun:user:attribute-def:def:preferredLanguage',
+        'urn:perun:user:attribute-def:virt:eduPersonPrincipalNames',
+        'urn:perun:user:attribute-def:def:timezone',
+
+        /*
+        'urn:perun:user:attribute-def:core:id',
+        'urn:perun:user:attribute-def:core:firstName',
+        'urn:perun:user:attribute-def:core:lastName'
+        */
     );
 
     /**
