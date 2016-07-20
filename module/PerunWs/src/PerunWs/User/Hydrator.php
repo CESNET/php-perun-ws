@@ -76,7 +76,7 @@ class Hydrator implements HydratorInterface
         
         /* @var $attributes \InoPerunApi\Entity\Collection\Collection */
         $attributes = $user->getUserAttributes();
-        
+
         if ($attributes instanceof Collection) {
             foreach ($attributes as $attribute) {
                 /* @var $attribute \InoPerunApi\Entity\Attribute */

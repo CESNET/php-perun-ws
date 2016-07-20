@@ -1,6 +1,6 @@
+.idea/
 .project
 .settings
 .buildpath
-composer.lock
 vendor
 data/clients.php
